@@ -1,4 +1,3 @@
-LeagueSharp
+ChatTranslator
 ===========
-
-Some stuff
+Translate the chat messages with google translate.
