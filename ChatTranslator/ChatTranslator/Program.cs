@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -49,7 +49,7 @@ namespace ChatTranslator
         }
         static void Game_OnGameProcessPacket(GamePacketEventArgs args)
         {
-            if (args.PacketData[0] == 0x68)
+            if (args.PacketData[0] == 0x68 && Config.Item("Enabled").GetValue<bool>())
             {
                 var p = new GamePacket(args);
                 string textFromChat = p.ReadString(54);
