@@ -1,19 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
-using SharpDX;
-using System.Drawing;
-using System.Windows;
 using System.Net;
-using System.IO;
-using mshtml;
 using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
-using System.Globalization;
 
 namespace ChatTranslator
 {
