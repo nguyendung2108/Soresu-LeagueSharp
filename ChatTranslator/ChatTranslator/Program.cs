@@ -1,11 +1,19 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
+using System.Drawing;
+using System.Windows;
 using System.Net;
+using System.IO;
+using mshtml;
 using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
+using System.Globalization;
 
 namespace ChatTranslator
 {
@@ -14,6 +22,7 @@ namespace ChatTranslator
         public static Menu Config;
         public static String[] fromArray = new String[] { "auto", "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "bg", "sr", "sk", "sl", "sv", "tr", "it" };
         public static String[] toArray = new String[] { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "bg", "sr", "sk", "sl", "sv", "tr", "it" };
+        public static String[] sendText = new String[] { "OFF", "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "bg", "sr", "sk", "sl", "sv", "tr", "it" };
         static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
@@ -24,31 +33,46 @@ namespace ChatTranslator
         private static void Game_OnGameLoad(EventArgs args)
         {
             Config = new Menu("ChatTranslator", "ChatTranslator", true);
-            Config.AddSubMenu(new Menu("Options", "Options"));
-            Config.SubMenu("Options").AddItem(new MenuItem("From", "From: ").SetValue(new StringList(fromArray)));
-            Config.SubMenu("Options").AddItem(new MenuItem("To", "To: ").SetValue(new StringList(toArray)));
+            Config.AddSubMenu(new Menu("IncomingText", "IncomingText"));
+            Config.AddSubMenu(new Menu("OutgoingText", "OutgoingText"));
+            Config.SubMenu("IncomingText").AddItem(new MenuItem("From", "From: ").SetValue(new StringList(fromArray)));
+            Config.SubMenu("IncomingText").AddItem(new MenuItem("To", "To: ").SetValue(new StringList(toArray)));
             Config.AddItem(new MenuItem("Enabled", "Enabled").SetValue(true));
+            //Config.AddItem(new MenuItem("TranslateEnemies", "TranslateEnemies").SetValue(false));
+            Config.SubMenu("OutgoingText").AddItem(new MenuItem("OutFrom", "From: ").SetValue(new StringList(sendText)));
+            Config.SubMenu("OutgoingText").AddItem(new MenuItem("OutTo", "To: ").SetValue(new StringList(toArray)));
             Config.AddToMainMenu();
+			Echo("aaaa");
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- ChatTranslator</font>");
-            //Game.OnGameInput += Game_GameInput;
+            Game.OnGameInput += Game_GameInput;
             Game.OnGameProcessPacket += Game_OnGameProcessPacket;
         }
 
         private static void Game_GameInput(GameInputEventArgs args)
         {
-
+            if (Config.Item("Enabled").GetValue<bool>() && !(sendText[Config.Item("OutFrom").GetValue<StringList>().SelectedIndex] == "OFF") && sendText[Config.Item("OutFrom").GetValue<StringList>().SelectedIndex]!=toArray[Config.Item("OutTo").GetValue<StringList>().SelectedIndex])
+            {
+			var message="";
+			message+=args.Input;
+                sendTranslated(message);
+				args.Process = false;
+                
+            }
 
         }
         static void Game_OnGameProcessPacket(GamePacketEventArgs args)
         {
             if (args.PacketData[0] == 0x68 && Config.Item("Enabled").GetValue<bool>())
             {
+			
                 var p = new GamePacket(args);
-                string textFromChat = p.ReadString(54);
-                Echo(textFromChat);
-                //System.IO.File.WriteAllText(@"C:\Users\Public\TestFolder\WriteText.txt", textFromChat);
+				string textFromChat = p.ReadString(54);
+				Echo(textFromChat);
+                //System.IO.File.AppendAllText(@"C:\Users\Public\TestFolder\WriteText.txt", textFromChat + "\n" + p.Dump() + "\n");
+                
+                
                 //Game.PrintChat(p.Dump());
-
+            
             }
         }
 
@@ -60,35 +84,58 @@ namespace ChatTranslator
             {
                 string from = fromArray[Config.Item("From").GetValue<StringList>().SelectedIndex];
                 string to = toArray[Config.Item("To").GetValue<StringList>().SelectedIndex];
-                string x = await TranslateGoogle(text, from, to);
+                string x = "";
+				byte[] bytes = Encoding.GetEncoding(1252).GetBytes(text);
+				text=Encoding.Default.GetString(bytes);
+                x += await TranslateGoogle(text, from, to, true);
                 Game.PrintChat(x);
+            }
 
+        }
+        private static async void sendTranslated(string text)
+        {
+		
+            if (text.Length > 1)
+            {
+                bool all = false;
+                if (text.Contains("/all") || text.Contains("/ All"))
+                {
+                    text=text.Replace("/all", "");
+                    all = true;
+                }
+                string from = sendText[Config.Item("OutFrom").GetValue<StringList>().SelectedIndex];
+                string to = toArray[Config.Item("OutTo").GetValue<StringList>().SelectedIndex];
+                string x = "";
+                x += await TranslateGoogle(text, from, to, false);
+                if(all==true){
+					
+
+                    Game.Say("/all " + x);
+                }
+                else
+                {
+
+                    Game.Say(x);
+                } 
             }
 
         }
 
-        private static async Task<string> TranslateGoogle(string text, string fromCulture, string toCulture)
+        private static async Task<string> TranslateGoogle(string text, string fromCulture, string toCulture, bool langs)
         {
-
-
+			
             string url = string.Format(@"http://translate.google.com/translate_a/t?client=j&text={0}&hl=en&sl={1}&tl={2}",
                                text.Replace(' ', '+'), fromCulture, toCulture);
-            //System.IO.File.WriteAllText(@"C:\Users\Public\TestFolder\WriteText.txt", url);
-
+			byte[] bytessss = Encoding.Default.GetBytes(url);
+            url = Encoding.UTF8.GetString(bytessss);
+			//System.IO.File.AppendAllText(@"C:\Users\Public\TestFolder\WriteText.txt", Encoding.UTF8.GetString(bytessss)  + "\n");
             string html;
+			
             try
             {
-                WebClient web = new WebClient();
-
-
-                web.Headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0");
-                web.Headers.Add(HttpRequestHeader.AcceptCharset, "UTF-8");
-
-
-                web.Encoding = Encoding.UTF8;
                 System.Uri uri = new System.Uri(url);
                 html = await DownloadStringAsync(uri);
-
+				//System.IO.File.AppendAllText(@"C:\Users\Public\TestFolder\WriteText.txt", html  + "\n");
             }
             catch (Exception ex)
             {
@@ -96,25 +143,35 @@ namespace ChatTranslator
                 return "Error: Can't connect to Google Translate services.";
             }
             JavaScriptSerializer ser = new JavaScriptSerializer();
-            if (toCulture.Equals(ser.Deserialize(Regex.Match(html, "src\":(\".*?\"),\"", RegexOptions.IgnoreCase).Groups[1].Value, typeof(string)) as string))
+            var source = ser.Deserialize(Regex.Match(html, "src\":(\".*?\"),\"", RegexOptions.IgnoreCase).Groups[1].Value, typeof(string)) as string;
+            
+			if (toCulture.Equals(source))
             {
                 return "";
             }
 
-            string result = "(" + ser.Deserialize(Regex.Match(html, "src\":(\".*?\"),\"", RegexOptions.IgnoreCase).Groups[1].Value, typeof(string)) as string + " => " + toCulture + ")";
-            result += ser.Deserialize(Regex.Match(html, "trans\":(\".*?\"),\"", RegexOptions.IgnoreCase).Groups[1].Value, typeof(string)) as string;
-
+            string result = "";
+            if(langs==true){
+            result += "(" + source + " => " + toCulture + ")";
+            }
+			var trans=ser.Deserialize(Regex.Match(html, "trans\":(\".*?\"),\"", RegexOptions.IgnoreCase).Groups[1].Value, typeof(string)) as string;
+            byte[] bytes = Encoding.UTF8.GetBytes(trans);
+			trans = Encoding.Default.GetString(bytes);
+            result += trans;
+			
             if (string.IsNullOrEmpty(result))
             {
-
                 return "Error: Can't translate the message.";
             }
-
-
+			if (trans=="aaaa" || trans=="AAAA")
+            {
+                return "";
+            }
             return result;
         }
         public static Task<string> DownloadStringAsync(Uri url)
         {
+			
             var tcs = new TaskCompletionSource<string>();
             var wc = new WebClient();
             wc.Headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0");
