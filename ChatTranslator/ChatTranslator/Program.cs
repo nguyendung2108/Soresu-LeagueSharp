@@ -13,7 +13,7 @@ namespace ChatTranslator
     {
         public static Menu Config;
         public static String[] fromArray = new String[] { "auto", "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "bg", "sr", "sk", "sl", "sv", "tr", "it" };
-        public static String[] toArray = new String[] { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "bg", "sr", "sk", "sl", "sv", "tr", "it" };
+        public static String[] toArray = new String[] { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "pt", "fi", "sk", "sl", "sv", "tr", "it" };
         public static String[] sendText = new String[] { "OFF", "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "bg", "sr", "sk", "sl", "sv", "tr", "it" };
         static void Main(string[] args)
         {
