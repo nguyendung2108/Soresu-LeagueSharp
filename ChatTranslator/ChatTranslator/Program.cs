@@ -13,8 +13,8 @@ namespace ChatTranslator
     {
         public static Menu Config;
         public static String[] fromArray = new String[] { "auto", "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "bg", "sr", "sk", "sl", "sv", "tr", "ms", "it" };
-        public static String[] toArray = new String[] { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "pt", "fi", "sk", "sl", "sv", "tr", "ms", "it" };
-        public static String[] sendText = new String[] { "OFF", "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "bg", "sr", "sk", "sl", "sv", "tr", "ms", "it" };
+        public static String[] toArray = new String[] { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "pt", "fi", "sk", "sl", "sv", "tr", "ms", "zh-CN", "bg", "ru", "ko", "it" };
+        public static String[] sendText = new String[] { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "bg", "sr", "sk", "sl", "sv", "tr", "ms", "zh-CN", "bg", "ru", "ko", "it" };
         static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
@@ -27,12 +27,13 @@ namespace ChatTranslator
             Config = new Menu("ChatTranslator", "ChatTranslator", true);
             Config.AddSubMenu(new Menu("IncomingText", "IncomingText"));
             Config.AddSubMenu(new Menu("OutgoingText", "OutgoingText"));
+            Config.AddItem(new MenuItem("Phonetical", "Use special characters").SetValue(false));
             Config.SubMenu("IncomingText").AddItem(new MenuItem("From", "From: ").SetValue(new StringList(fromArray)));
             Config.SubMenu("IncomingText").AddItem(new MenuItem("To", "To: ").SetValue(new StringList(toArray)));
-            Config.AddItem(new MenuItem("Enabled", "Enabled").SetValue(true));
-            //Config.AddItem(new MenuItem("TranslateEnemies", "TranslateEnemies").SetValue(false));
+            Config.SubMenu("IncomingText").AddItem(new MenuItem("Enabled", "Enabled").SetValue(true));
             Config.SubMenu("OutgoingText").AddItem(new MenuItem("OutFrom", "From: ").SetValue(new StringList(sendText)));
             Config.SubMenu("OutgoingText").AddItem(new MenuItem("OutTo", "To: ").SetValue(new StringList(toArray)));
+            Config.SubMenu("OutgoingText").AddItem(new MenuItem("EnabledOut", "Enabled").SetValue(false));
             Config.AddToMainMenu();
 			Echo("aaaa");
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- ChatTranslator</font>");
@@ -42,7 +43,7 @@ namespace ChatTranslator
 
         private static void Game_GameInput(GameInputEventArgs args)
         {
-            if (Config.Item("Enabled").GetValue<bool>() && !(sendText[Config.Item("OutFrom").GetValue<StringList>().SelectedIndex] == "OFF") && sendText[Config.Item("OutFrom").GetValue<StringList>().SelectedIndex]!=toArray[Config.Item("OutTo").GetValue<StringList>().SelectedIndex])
+            if (Config.SubMenu("OutgoingText").Item("EnabledOut").GetValue<bool>() && sendText[Config.Item("OutFrom").GetValue<StringList>().SelectedIndex] != toArray[Config.Item("OutTo").GetValue<StringList>().SelectedIndex])
             {
 			var message="";
 			message+=args.Input;
@@ -54,7 +55,7 @@ namespace ChatTranslator
         }
         static void Game_OnGameProcessPacket(GamePacketEventArgs args)
         {
-            if (args.PacketData[0] == 0x68 && Config.Item("Enabled").GetValue<bool>())
+            if (args.PacketData[0] == 0x68 && Config.SubMenu("IncomingText").Item("Enabled").GetValue<bool>())
             {
 			
                 var p = new GamePacket(args);
@@ -66,7 +67,7 @@ namespace ChatTranslator
                 //Game.PrintChat(p.Dump());
             
             }
-        }
+        } 
 
 
         private static async void Echo(string text)
@@ -77,7 +78,7 @@ namespace ChatTranslator
                 string from = fromArray[Config.Item("From").GetValue<StringList>().SelectedIndex];
                 string to = toArray[Config.Item("To").GetValue<StringList>().SelectedIndex];
                 string x = "";
-				byte[] bytes = Encoding.GetEncoding(1252).GetBytes(text);
+				byte[] bytes = Encoding.UTF8.GetBytes(text);
 				text=Encoding.Default.GetString(bytes);
                 x += await TranslateGoogle(text, from, to, true);
                 Game.PrintChat(x);
@@ -118,6 +119,7 @@ namespace ChatTranslator
 			
             string url = string.Format(@"http://translate.google.com/translate_a/t?client=j&text={0}&hl=en&sl={1}&tl={2}",
                                text.Replace(' ', '+'), fromCulture, toCulture);
+            
 			byte[] bytessss = Encoding.Default.GetBytes(url);
             url = Encoding.UTF8.GetString(bytessss);
 			//System.IO.File.AppendAllText(@"C:\Users\Public\TestFolder\WriteText.txt", Encoding.UTF8.GetString(bytessss)  + "\n");
@@ -146,9 +148,25 @@ namespace ChatTranslator
             if(langs==true){
             result += "(" + source + " => " + toCulture + ")";
             }
-			var trans=ser.Deserialize(Regex.Match(html, "trans\":(\".*?\"),\"", RegexOptions.IgnoreCase).Groups[1].Value, typeof(string)) as string;
+            string trans = "";
+            if (Config.Item("Phonetical").GetValue<bool>()==true)
+            {
+			trans = ser.Deserialize(Regex.Match(html, "trans\":(\".*?\"),\"", RegexOptions.IgnoreCase).Groups[1].Value, typeof(string)) as string;
+            }else{
+
+                trans = ser.Deserialize(Regex.Match(html, "translit\":(\".*?\"),\"", RegexOptions.IgnoreCase).Groups[1].Value, typeof(string)) as string;
+                //Game.PrintChat(trans);
+                if (string.IsNullOrEmpty(trans))
+                {
+                    trans = ser.Deserialize(Regex.Match(html, "trans\":(\".*?\"),\"", RegexOptions.IgnoreCase).Groups[1].Value, typeof(string)) as string;
+                }
+            }
             byte[] bytes = Encoding.UTF8.GetBytes(trans);
 			trans = Encoding.Default.GetString(bytes);
+            if (trans == text || trans == text.ToLower())
+            {
+                return "";
+            }
             result += trans;
 			
             if (string.IsNullOrEmpty(result))
