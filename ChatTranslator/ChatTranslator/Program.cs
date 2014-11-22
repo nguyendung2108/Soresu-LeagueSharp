@@ -12,9 +12,9 @@ namespace ChatTranslator
     class Program
     {
         public static Menu Config;
-        public static String[] fromArray = new String[] { "auto", "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "bg", "sr", "sk", "sl", "sv", "tr", "ms", "it" };
-        public static String[] toArray = new String[] { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "pt", "fi", "sk", "sl", "sv", "tr", "ms", "zh-CN", "bg", "ru", "ko", "it" };
-        public static String[] sendText = new String[] { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "ro", "da", "bg", "sr", "sk", "sl", "sv", "tr", "ms", "zh-CN", "bg", "ru", "ko", "it" };
+        public static String[] fromArray = new String[] { "auto", "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "sk", "sl", "sv", "tr", "ms", "zh-CN", "bg", "ru", "ko", "it" };
+        public static String[] toArray = new String[] { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "sk", "sl", "sv", "tr", "ms", "zh-CN", "bg", "ru", "ko", "it" };
+        public static String[] sendText = new String[] { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "sk", "sl", "sv", "tr", "ms", "zh-CN", "bg", "ru", "ko", "it" };
         static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
@@ -59,7 +59,11 @@ namespace ChatTranslator
             {
 			
                 var p = new GamePacket(args);
-				string textFromChat = p.ReadString(54);
+                string dump = p.Dump();
+                string removethejunk = dump.Substring(162);
+                string removethenull = removethejunk.Replace("00", "");
+                byte[] bytethedata = FromHex(removethenull);
+                string textFromChat = Encoding.UTF8.GetString(bytethedata);
 				Echo(textFromChat);
                 //System.IO.File.AppendAllText(@"C:\Users\Public\TestFolder\WriteText.txt", textFromChat + "\n" + p.Dump() + "\n");
                 
@@ -81,7 +85,10 @@ namespace ChatTranslator
 				byte[] bytes = Encoding.UTF8.GetBytes(text);
 				text=Encoding.Default.GetString(bytes);
                 x += await TranslateGoogle(text, from, to, true);
-                Game.PrintChat(x);
+                if(!CheckJunk(x)){
+                    Game.PrintChat(x);
+                }
+                
             }
 
         }
@@ -163,7 +170,7 @@ namespace ChatTranslator
             }
             byte[] bytes = Encoding.UTF8.GetBytes(trans);
 			trans = Encoding.Default.GetString(bytes);
-            if (trans == text || trans == text.ToLower())
+            if (trans == text || trans.ToLower().Equals(text.ToLower()))
             {
                 return "";
             }
@@ -177,6 +184,30 @@ namespace ChatTranslator
             {
                 return "";
             }
+            return result;
+        }
+        public static byte[] FromHex(string hex)
+        {
+            hex = hex.Replace(" ", "");
+            byte[] raw = new byte[hex.Length / 2];
+            for (int i = 0; i < raw.Length; i++)
+            {
+                raw[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
+            }
+            return raw;
+        }
+        public static bool CheckJunk(string text)
+        {
+            bool result = false;
+
+
+            int num = text.Length - text.Replace("@", "").Length;
+            if (num > 1 || text.Contains("½"))
+            {
+                result = true;
+            }
+
+
             return result;
         }
         public static Task<string> DownloadStringAsync(Uri url)
