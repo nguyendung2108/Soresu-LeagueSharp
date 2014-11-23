@@ -175,12 +175,17 @@ namespace ChatTranslator
                 return "";
             }
             result += trans;
-			
-            if (string.IsNullOrEmpty(result))
+
+            if (string.IsNullOrEmpty(trans))
             {
                 return "Error: Can't translate the message.";
             }
 			if (trans=="aaaa" || trans=="AAAA")
+            {
+                return "";
+            }
+            //System.IO.File.AppendAllText(@"C:\Users\Public\TestFolder\WriteText.txt", trans + "\n");
+            if (CheckJunk(trans))
             {
                 return "";
             }
@@ -202,7 +207,7 @@ namespace ChatTranslator
 
 
             int num = text.Length - text.Replace("@", "").Length;
-            if (num > 1 || text.Contains("½"))
+            if (num > 0 || text.Contains("½") || text.Contains("ĂŻÂ"))
             {
                 result = true;
             }
