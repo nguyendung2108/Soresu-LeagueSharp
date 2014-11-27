@@ -12,9 +12,9 @@ namespace ChatTranslator
     class Program
     {
         public static Menu Config;
-        public static String[] fromArray = new String[] { "auto", "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "sk", "sl", "sv", "tr", "ms", "zh-CN", "bg", "ru", "ko", "it" };
-        public static String[] toArray = new String[] { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "sk", "sl", "sv", "tr", "ms", "zh-CN", "bg", "ru", "ko", "it" };
-        public static String[] sendText = new String[] { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "sk", "sl", "sv", "tr", "ms", "zh-CN", "bg", "ru", "ko", "it" };
+        public static String[] fromArray = new String[] { "auto", "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "lv", "sk", "sl", "sv", "tr", "ms", "zh-CN", "bg", "ru", "ko", "it", "be", "vi", "uk" };
+        public static String[] toArray  = new String[] { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "lv", "sk", "sl", "sv", "tr", "ms", "zh-CN", "bg", "ru", "ko", "it", "be", "vi", "uk" };
+        public static String[] sendText = new String[] { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "lv", "sk", "sl", "sv", "tr", "ms", "zh-CN", "bg", "ru", "ko", "it", "be", "vi", "uk" };
         static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
@@ -141,7 +141,7 @@ namespace ChatTranslator
             catch (Exception ex)
             {
 
-                return "Error: Can't connect to Google Translate services.";
+                return "";
             }
             JavaScriptSerializer ser = new JavaScriptSerializer();
             var source = ser.Deserialize(Regex.Match(html, "src\":(\".*?\"),\"", RegexOptions.IgnoreCase).Groups[1].Value, typeof(string)) as string;
@@ -170,7 +170,8 @@ namespace ChatTranslator
             }
             byte[] bytes = Encoding.UTF8.GetBytes(trans);
 			trans = Encoding.Default.GetString(bytes);
-            if (trans == text || trans.ToLower().Equals(text.ToLower()))
+
+            if (trans == text || trans.ToLower().Equals(text.ToLower()) || StringCompare(text.Replace(" ", ""), trans.Replace(" ", ""))>85)
             {
                 return "";
             }
@@ -178,7 +179,7 @@ namespace ChatTranslator
 
             if (string.IsNullOrEmpty(trans))
             {
-                return "Error: Can't translate the message.";
+                return "";
             }
 			if (trans=="aaaa" || trans=="AAAA")
             {
@@ -231,6 +232,26 @@ namespace ChatTranslator
             };
             wc.DownloadStringAsync(url);
             return tcs.Task;
+        }
+        static double StringCompare(string a, string b)
+        {
+            if (a == b)
+                return 100;
+            if ((a.Length == 0) || (b.Length == 0)) 
+            {
+                return 0;
+            }
+            double maxLen = a.Length > b.Length ? a.Length : b.Length;
+            int minLen = a.Length < b.Length ? a.Length : b.Length;
+            int sameCharAtIndex = 0;
+            for (int i = 0; i < minLen; i++) 
+            {
+                if (a[i] == b[i])
+                {
+                    sameCharAtIndex++;
+                }
+            }
+            return sameCharAtIndex / maxLen * 100;
         }
     }
 }
