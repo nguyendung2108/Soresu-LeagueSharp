@@ -1,5 +1,4 @@
-ChatTranslator
-===========
+<img src="http://www.niratisnordkyn.com/DontDeleteThis/Ctranslator.jpg"></img>
 Translate the chat messages with google translate.
 
 SRS-Shen
