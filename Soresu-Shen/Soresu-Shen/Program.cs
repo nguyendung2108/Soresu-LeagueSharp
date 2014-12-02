@@ -132,7 +132,7 @@ namespace Executed
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly))
             {
                 if (hero.SkinName!= me.SkinName)
-                sulti.AddItem(new MenuItem("ult" + hero.SkinName, hero.SkinName)).SetValue(true);
+                sulti.AddItem(new MenuItem("ult" + hero.SkinName, hero.SkinName)).SetValue(false);
             }
             config.AddSubMenu(sulti);
             
