@@ -14,7 +14,7 @@ ru, ko, it,  be , vi, uk
 
 
 
-<img src="http://www.niratisnordkyn.com/DontDeleteThis/Shen.jpg"></img>
+<img src="http://www.niratisnordkyn.com/DontDeleteThis/Shen.png"></img>
 - Auto Ult with target selector
 
 - Lasthit with Q
