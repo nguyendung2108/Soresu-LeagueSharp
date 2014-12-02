@@ -6,7 +6,7 @@ This assembly translates all the messages in the in-game, LOL chat window -with 
 Recommended language is English, due to Google translator was optimized for this language.
 Write me if you want me to add your language to this assembly, it is probably missing from the list.
 
-**Supported languages:**
+**\*Supported languages:**
 en, de, es, fr, pl, hu, sq, sv, cs, ro, da, bg, pt, sr, fi,  lv , sk, sl, sv, tr, ms, zh-CN, bg, 
 ru, ko, it,  be , vi, uk 
 
