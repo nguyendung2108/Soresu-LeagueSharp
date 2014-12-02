@@ -246,8 +246,8 @@ namespace Executed
             
                 foreach (var allyObj in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsAlly && !i.IsMe && !i.IsDead && i.CountEnemysInRange(750) >= 1 && (i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value))
                 {
-                    if (config.Item("ult" + allyObj.SkinName).GetValue<bool>()) return;
-                    if (config.Item("user").GetValue<bool>() && R.IsReady() && me.CountEnemysInRange((int)Q.Range) < 1 && !config.Item("ult" + allyObj.SkinName).GetValue<bool>())
+                    
+                    if (config.Item("user").GetValue<bool>() && R.IsReady() && me.CountEnemysInRange((int)Q.Range) < 1 && !config.Item("ult"+allyObj.SkinName).GetValue<bool>())
                     {
                         R.Cast(allyObj);
                         return;
