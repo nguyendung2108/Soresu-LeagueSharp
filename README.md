@@ -8,8 +8,11 @@ SRS-Shen
 
 -Lasthit with Q
 
--Combo damage
+-Interrupt with E
 
+-Use items in combo mode
+
+-Combo damage
 
 <hr>
 
