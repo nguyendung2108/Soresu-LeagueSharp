@@ -42,8 +42,8 @@ namespace Executed
             Drawing.OnDraw += Game_OnDraw;
             Obj_AI_Base.OnCreate += OnCreate;
             //Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
-            //AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            //Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+            AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
+            Interrupter.OnPossibleToInterrupt += OnPossibleToInterrupt;
 
 
         }
@@ -120,6 +120,9 @@ namespace Executed
             menuU.AddItem(new MenuItem("autow", "Try to block non-skillshot spells")).SetValue(true);
             menuU.AddItem(new MenuItem("wabove", "Min damage in shield %")).SetValue(new Slider(50, 0, 100));
             menuU.AddItem(new MenuItem("autowwithe", "Keep energy for E")).SetValue(true);
+            menuU.AddItem(new MenuItem("csep51", "---E Settings---"));
+            menuU.AddItem(new MenuItem("useeagc", "Use E to anti gap closer")).SetValue(false);
+            menuU.AddItem(new MenuItem("useeint", "Use E to interrupt")).SetValue(true);
             menuU.AddItem(new MenuItem("csep6", "---Ult Settings---"));
             menuU.AddItem(new MenuItem("user", "Use R")).SetValue(true);
             menuU.AddItem(new MenuItem("atpercent", "Friend under")).SetValue(new Slider(20, 0, 100));
@@ -127,6 +130,7 @@ namespace Executed
             var sulti = new Menu("Don't ult on ", "dontult");
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly))
             {
+                if (hero.SkinName!= me.SkinName)
                 sulti.AddItem(new MenuItem("ult" + hero.SkinName, hero.SkinName)).SetValue(true);
             }
             config.AddSubMenu(sulti);
@@ -211,8 +215,16 @@ namespace Executed
                     break;
             }
         }
-
-
+        private static void OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        {
+            if (!config.Item("useeagc").GetValue<bool>()) return;
+            if (gapcloser.Sender.IsValidTarget(E.Range) && E.IsReady() && me.Distance(gapcloser.Sender) < 400) E.Cast(gapcloser.Sender.Position + Vector3.Normalize(gapcloser.Sender.Position - me.Position) * 200, config.Item("packets").GetValue<bool>());
+        }
+        private static void OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
+        {
+            if (!config.Item("useeint").GetValue<bool>()) return;
+            if (unit.IsValidTarget(E.Range) && E.IsReady()) E.Cast(unit.Position + Vector3.Normalize(unit.Position - me.Position) * 200, config.Item("packets").GetValue<bool>());
+        }
 
         private static void Clear()
         {
@@ -230,11 +242,11 @@ namespace Executed
         {
 
             if (!R.IsReady() || PingCasted) return;
-            Obj_AI_Hero enemy = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-                foreach (var allyObj in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsAlly && !i.IsMe && !i.IsDead && i.CountEnemysInRange(800) >= 1 && (i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value))
+            
+                foreach (var allyObj in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsAlly && !i.IsMe && !i.IsDead && i.CountEnemysInRange(750) >= 1 && (i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value))
                 {
                     if (config.Item("ult" + allyObj.SkinName).GetValue<bool>()) return;
-                    if (config.Item("user").GetValue<bool>() && R.IsReady() && me.Distance(enemy)>450)
+                    if (config.Item("user").GetValue<bool>() && R.IsReady() && me.CountEnemysInRange((int)Q.Range) < 1)
                     {
                         R.Cast(allyObj);
                         return;
@@ -301,6 +313,7 @@ namespace Executed
         private static void Combo()
         {
             var minHit = config.Item("useemin").GetValue<Slider>().Value;
+
             Obj_AI_Hero target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             if (W.IsReady() && config.Item("usew").GetValue<bool>() && currEnergy - me.Spellbook.GetManaCost(SpellSlot.W) >= eEnergy)
             {
@@ -326,7 +339,6 @@ namespace Executed
         private static float ComboDamage(Obj_AI_Hero hero)
         {
             float damage = 0;
-            damage += (float)me.GetAutoAttackDamage(hero);
             if (Q.IsReady())
                 damage += (float)Damage.GetSpellDamage(me, hero, SpellSlot.Q);
             if (E.IsReady())
@@ -366,6 +378,7 @@ namespace Executed
             }
             return damage;
         }
+
         private static void UseItems(Obj_AI_Hero target)
         {
             if (me.Distance(target) < 400)
@@ -397,11 +410,13 @@ namespace Executed
 
             }
         }
+
         private static void DrawCircle(string menuItem, float spellRange)
         {
             Circle circle = config.Item(menuItem).GetValue<Circle>();
             if (circle.Active) Utility.DrawCircle(me.Position, spellRange, circle.Color);
         }
+
         public static List<Obj_AI_Base> CheckingCollision(Obj_AI_Base From, Obj_AI_Base Target, Spell Skill, bool Mid = true, bool OnlyHero = false)
         {
             var ListCol = new List<Obj_AI_Base>();
@@ -412,6 +427,7 @@ namespace Executed
             }
             return ListCol.Distinct().ToList();
         }
+
         public static bool IsValid(Obj_AI_Base Target, float Range = float.MaxValue, bool EnemyOnly = true, Vector3 From = default(Vector3))
         {
             if (Target == null || !Target.IsValid || Target.IsDead || !Target.IsVisible || (EnemyOnly && !Target.IsTargetable) || (EnemyOnly && Target.IsInvulnerable) || Target.IsMe) return false;
@@ -419,6 +435,7 @@ namespace Executed
             if ((From != default(Vector3) ? From : me.Position).Distance(Target.Position) > Range) return false;
             return true;
         }
+
         private static void OnCreate(GameObject sender, EventArgs args)
         {
             if (config.Item("autowwithe").GetValue<bool>() && !(currEnergy - me.Spellbook.GetManaCost(SpellSlot.Q) > eEnergy)) return;
