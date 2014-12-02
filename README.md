@@ -12,6 +12,5 @@ SRS-Shen
 
 
 <hr>
-Other
-===========
+
 By downloading these scripts you accept that you will use it at your own risk and responsibility.
