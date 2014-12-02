@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SRS_Shen")]
+[assembly: AssemblyTitle("Soresu-Shen")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SRS_Shen")]
+[assembly: AssemblyProduct("Soresu-Shen")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("236db222-0f2e-47e5-ace2-179d066cb8d1")]
+[assembly: Guid("ce39f340-bf9c-45fe-898a-6340423aa144")]
 
 // Version information for an assembly consists of the following four values:
 //
