@@ -70,7 +70,7 @@ namespace Executed
          }
         private static void InitMenu()
         {
-            config = new Menu("SRS_Shen", "SRS_Shen", true);
+            config = new Menu("Soresu-Shen", "SRS_Shen", true);
             // Target Selector
             Menu menuTS = new Menu("Selector", "tselect");
             SimpleTs.AddToMenu(menuTS);
