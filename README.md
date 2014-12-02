@@ -10,8 +10,10 @@ Write me if you want your language too, it probably missing from the list.
 en, de, es, fr, pl, hu, sq, sv, cs, ro, da, bg, pt, sr, fi,  lv , sk, sl, sv, tr, ms, zh-CN, bg, 
 ru, ko, it,  be , vi, uk 
 
-* Incoming massages can be auto detected.
-* 
+*Incoming massages can be auto detected.
+
+
+
 SRS-Shen
 ===========
 - Auto Ult with target selector
