@@ -14,8 +14,7 @@ ru, ko, it,  be , vi, uk
 
 
 
-SRS-Shen
-===========
+<img src="http://www.niratisnordkyn.com/DontDeleteThis/Shen.jpg"></img>
 - Auto Ult with target selector
 
 - Lasthit with Q
