@@ -17,13 +17,9 @@ It detects the language of all the incoming chat-messages and translates them to
 
 <img src="http://www.niratisnordkyn.com/DontDeleteThis/bigShen.png"></img>
 - Auto Ult with target selector
-
 - Lasthit with Q
-
 - Interrupt with E
-
 - Use items in combo mode
-
 - Combo damage
 
 <hr>
