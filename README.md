@@ -3,7 +3,7 @@ Translate the chat messages with google translate.
 
 SRS-Shen
 ===========
--Auto Ult with target selector
+- Auto Ult with target selector
 
 - Lasthit with Q
 
@@ -11,7 +11,7 @@ SRS-Shen
 
 - Use items in combo mode
 
--Combo damage
+- Combo damage
 
 <hr>
 
