@@ -15,7 +15,7 @@ It detects the language of all the incoming chat-messages and translates them to
 
 
 
-<img src="http://www.niratisnordkyn.com/DontDeleteThis/Shen.png"></img>
+<img src="http://www.niratisnordkyn.com/DontDeleteThis/bigShen.png"></img>
 - Auto Ult with target selector
 
 - Lasthit with Q
