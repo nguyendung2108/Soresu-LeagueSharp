@@ -5,11 +5,11 @@ SRS-Shen
 ===========
 -Auto Ult with target selector
 
--Lasthit with Q
+- Lasthit with Q
 
--Interrupt with E
+- Interrupt with E
 
--Use items in combo mode
+- Use items in combo mode
 
 -Combo damage
 
