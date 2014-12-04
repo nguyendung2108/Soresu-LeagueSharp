@@ -62,11 +62,6 @@ namespace Executed
         }
          private static void OnProcessSpell(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs Spell)
         {
-
-            if (Spell.SData.Name.ToLower().Contains("ki"))
-            {
-                Game.PrintChat(Spell.SData.Name.ToString());
-            }
          }
         private static void InitMenu()
         {
@@ -165,21 +160,12 @@ namespace Executed
         }
         static void Game_OnGameProcessPacket(GamePacketEventArgs args)
         {
-            if (args.PacketData[0].ToHexString().Equals("1F"))
-            {
-                if (args.PacketData[6].ToHexString().Equals("FF"))
-                {
-                    haspassive = false;
-                }else{
-                    haspassive = true;
-                }
-            }
+
         }
         private static void Game_OnGameUpdate(EventArgs args)
         {
+            GetPassive();
             currEnergy = me.Mana;
-            
-
             //Game.PrintChat(P.IsReady().ToString());
              bool minionBlock = false;
             foreach (Obj_AI_Minion minion in MinionManager.GetMinions(me.Position, me.AttackRange, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None))
@@ -215,6 +201,24 @@ namespace Executed
                     }
                     break;
             }
+        }
+
+        private static void GetPassive()
+        {
+            var has=false;
+            foreach (BuffInstance buff in me.Buffs)
+            {
+                if (buff.Name == "shenwayoftheninjaaura")
+                {
+                    has = true;
+                }
+            }
+            if(has){
+                  haspassive = true;
+            }else{
+                  haspassive = false;
+            }
+                   
         }
         private static void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
