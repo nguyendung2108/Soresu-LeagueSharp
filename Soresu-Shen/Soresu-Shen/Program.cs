@@ -146,6 +146,8 @@ namespace Executed
             DrawCircle("drawee", E.Range);
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
             Utility.HpBarDamageIndicator.Enabled = config.Item("drawcombo").GetValue<bool>();
+
+            
         }
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -344,14 +346,10 @@ namespace Executed
         private static float ComboDamage(Obj_AI_Hero hero)
         {
             float damage = 0;
-            if (Q.IsReady())
+            if (Q.IsReady() && me.Spellbook.GetManaCost(SpellSlot.Q)<me.Mana)
                 damage += (float)Damage.GetSpellDamage(me, hero, SpellSlot.Q);
-            if (E.IsReady())
+            if (E.IsReady() && me.Spellbook.GetManaCost(SpellSlot.E)<me.Mana)
                 damage += (float)Damage.GetSpellDamage(me, hero, SpellSlot.E);
-            if (me.SummonerSpellbook.CanUseSpell(me.GetSpellSlot("summonerdot")) == SpellState.Ready)
-            {
-                damage += (float)me.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);
-            }
             if (Items.HasItem(3077) && Items.CanUseItem(3077))
             {
                 damage += (float)me.GetItemDamage(hero, Damage.DamageItems.Tiamat);
@@ -380,6 +378,10 @@ namespace Executed
             {
                 var passive = me.MaxHealth / 10 + 4+me.Level * 4;
                 damage += (float)me.CalcDamage(hero, Damage.DamageType.Magical, passive);
+            }
+            if (me.SummonerSpellbook.CanUseSpell(me.GetSpellSlot("summonerdot")) == SpellState.Ready && hero.Health - damage < (float)me.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite))
+            {
+                damage += (float)me.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);
             }
             return damage;
         }
