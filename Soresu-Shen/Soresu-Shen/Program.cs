@@ -445,7 +445,7 @@ namespace Executed
 
         private static void OnCreate(GameObject sender, EventArgs args)
         {
-            if (config.Item("autowwithe").GetValue<bool>() && !(currEnergy - me.Spellbook.GetManaCost(SpellSlot.Q) > eEnergy)) return;
+            if (config.Item("autowwithe").GetValue<bool>() && !(currEnergy - me.Spellbook.GetManaCost(SpellSlot.W) > eEnergy)) return;
             if (sender is Obj_SpellMissile && sender.IsValid && config.Item("autow").GetValue<bool>() && W.IsReady())
             {
                 var missle = (Obj_SpellMissile)sender;
