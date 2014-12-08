@@ -21,7 +21,7 @@ It detects the language of all the incoming chat-messages and translates them to
 - Interrupt with E
 - Use items in combo mode
 - Combo damage
-- Flash + E(Recommended to select a target by clicking on him)
+- Flash + E (Recommended to select a target by clicking on him)
 
 <hr>
 
