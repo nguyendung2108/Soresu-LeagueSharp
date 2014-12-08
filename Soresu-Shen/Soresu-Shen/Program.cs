@@ -24,6 +24,11 @@ namespace Executed
         public static Items.Item botrk = new Items.Item(3153, 450);
         public static Items.Item bilgewater = new Items.Item(3144, 450);
         public static Items.Item hexgun = new Items.Item(3146, 700);
+        private const int XOffset = 36;
+        private const int YOffset = 10;
+        private const int Width = 103;
+        private const int Height = 8;
+        private static readonly Render.Text Text = new Render.Text(0, 0, "", 11, new ColorBGRA(255, 0, 0, 255), "monospace");
         static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
@@ -91,18 +96,15 @@ namespace Executed
             menuD.AddItem(new MenuItem("drawaa", "Draw AA range")).SetValue(new Circle(true, Color.FromArgb(80, 150, 62, 172)));
             menuD.AddItem(new MenuItem("drawqq", "Draw Q range")).SetValue(new Circle(true, Color.FromArgb(80, 150, 62, 172)));
             menuD.AddItem(new MenuItem("drawee", "Draw E range")).SetValue(new Circle(true, Color.FromArgb(80, 150, 62, 172)));
+            menuD.AddItem(new MenuItem("draweeflash", "Draw E+flash range")).SetValue(new Circle(true, Color.FromArgb(50, 250, 248, 110)));
+            //menuD.AddItem(new MenuItem("drawincdmg", "Draw incoming damage")).SetValue(true);
             menuD.AddItem(new MenuItem("drawcombo", "Draw combo damage")).SetValue(true);
             config.AddSubMenu(menuD);
 
             // Combo Settings
             Menu menuC = new Menu("Combo ", "csettings");
-            menuC.AddItem(new MenuItem("csep1", "---Q Settings---"));
             menuC.AddItem(new MenuItem("useq", "Use Q")).SetValue(true);
-
-            menuC.AddItem(new MenuItem("csep2", "---W Settings---"));
             menuC.AddItem(new MenuItem("usew", "Use W")).SetValue(true);
-
-            menuC.AddItem(new MenuItem("csep3", "---E Settings---"));
             menuC.AddItem(new MenuItem("usee", "Use E")).SetValue(true);
             menuC.AddItem(new MenuItem("useemin", "Try to use E min")).SetValue(new Slider(1, 1, 5));
             menuC.AddItem(new MenuItem("packets", "Use Packets")).SetValue(false);
@@ -148,12 +150,53 @@ namespace Executed
             DrawCircle("drawaa", me.AttackRange);
             DrawCircle("drawqq", Q.Range);
             DrawCircle("drawee", E.Range);
+            DrawCircle("draweeflash", EFlash.Range);
+            //if (config.Item("drawincdmg").GetValue<bool>()) getIncDmg();
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
-            Utility.HpBarDamageIndicator.Enabled = config.Item("drawcombo").GetValue<bool>();
-
-            
+            Utility.HpBarDamageIndicator.Enabled = config.Item("drawcombo").GetValue<bool>();          
         }
 
+        private static void getIncDmg()
+        {
+            double result = 0;
+            var color = Color.Cyan;
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.Distance(me) < 750 && i.IsEnemy && !i.IsAlly &&!i.IsDead && !i.IsMinion && !i.IsMe))
+            {
+             var spells = enemy.Spellbook.Spells;
+             foreach (var spell in spells)
+             {
+                 if (spell.State != SpellState.NotLearned && enemy.Mana >= spell.ManaCost && spell.State != SpellState.Cooldown)
+                 {
+
+                     Game.PrintChat(spell.Name);
+                     result += Damage.GetSpellDamage(enemy, me, spell.Slot);
+                 }
+             }
+            if (enemy.SummonerSpellbook.CanUseSpell(me.GetSpellSlot("summonerdot")) == SpellState.Ready)
+            {
+                result +=enemy.GetSummonerSpellDamage(me, Damage.SummonerSpell.Ignite);
+            }
+            }
+            var barPos = me.HPBarPosition;
+            var damage = (float)result;
+            //if (damage == 0) return;
+            if (me.Health - damage < me.MaxHealth * 0.6) color = Color.Orange;
+            if (me.Health - damage < me.MaxHealth * 0.4) color = Color.Red;
+
+
+            var percentHealthAfterDamage = Math.Max(0, me.Health - damage) / me.MaxHealth;
+            var xPos = barPos.X + XOffset + Width * percentHealthAfterDamage;
+
+            if (damage > me.Health)
+            {
+                Text.X = (int)barPos.X + XOffset;
+                Text.Y = (int)barPos.Y + YOffset - 13;
+                Text.text = ((int)(me.Health - damage)).ToString();
+                Text.OnEndScene();
+            }
+
+            Drawing.DrawLine(xPos, barPos.Y + YOffset, xPos, barPos.Y + YOffset + Height, 2, color);
+        }
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             
@@ -172,8 +215,7 @@ namespace Executed
         {
             GetPassive();
             currEnergy = me.Mana;
-            //Game.PrintChat(P.IsReady().ToString());
-             bool minionBlock = false;
+            bool minionBlock = false;
             foreach (Obj_AI_Minion minion in MinionManager.GetMinions(me.Position, me.AttackRange, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None))
             {
                 if (HealthPrediction.GetHealthPrediction(minion, 3000) <= Damage.GetAutoAttackDamage(me, minion, false))
@@ -258,7 +300,7 @@ namespace Executed
 
             if (!R.IsReady() || PingCasted || me.IsDead) return;
             
-                foreach (var allyObj in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsAlly && !i.IsMe && !i.IsDead && ((i.CountEnemysInRange(750) >= 1 && ((i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value)) || ((i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value && i.HasBuff("summonerdot") && i.Health<60 && i.CountEnemysInRange(600)<1))))
+                foreach (var allyObj in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsAlly && !i.IsMe && !i.IsDead && ((Checkinrange(i) && ((i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value)) || ((i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value && i.HasBuff("summonerdot") && i.Health<60 && i.CountEnemysInRange(600)<1))))
                 {
                     
                     if (config.Item("user").GetValue<bool>() && R.IsReady() && me.CountEnemysInRange((int)E.Range) < 1 && !config.Item("ult"+allyObj.SkinName).GetValue<bool>())
@@ -278,6 +320,15 @@ namespace Executed
                     Utility.DelayAction.Add(5000, () => PingCasted = false);
                 }
             
+        }
+
+        private static bool Checkinrange(Obj_AI_Hero i)
+        {
+            if (i.CountEnemysInRange(750) >= 1 && i.CountEnemysInRange(750) < 3)
+            {
+                return true;
+            }
+            else return false;
         }
 
 
