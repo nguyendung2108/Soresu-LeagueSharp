@@ -1,1 +1,1 @@
-D:\LeagueSharp\projects\teszt\Soresu-Shen\Soresu-Shen\bin\Debug\Soresu-Shen.exe.config
+C:\Users\Hunter\Documents\GitHub\LeagueSharp\Soresu-Shen\Soresu-Shen\bin\Release\Soresu-Shen.exe.config
