@@ -16,7 +16,7 @@ namespace Executed
         public static Menu config;
         private static Orbwalking.Orbwalker orbwalker;
         private static readonly Obj_AI_Hero me = ObjectManager.Player;
-        public static Spell Q, W, E, R, P;
+        public static Spell Q, W, E, EFlash, R, P;
         public static float currEnergy;
         public static bool haspassive = true;
         public static bool PingCasted = false;
@@ -52,13 +52,16 @@ namespace Executed
         private static void InitShen()
         {
             Q = new Spell(SpellSlot.Q, 475);
+			Q.SetTargetted(0.5f, 1500f);
             W = new Spell(SpellSlot.W);
             E = new Spell(SpellSlot.E, 600);
-            E.SetSkillshot(E.Instance.SData.SpellCastTime, E.Instance.SData.LineWidth, E.Instance.SData.MissileSpeed, false, SkillshotType.SkillshotLine);
+			E.SetSkillshot(0f, 50f, 1600f, false, SkillshotType.SkillshotLine);
+            EFlash = new Spell(SpellSlot.E, 990);
+            EFlash.SetSkillshot(E.Instance.SData.SpellCastTime, E.Instance.SData.LineWidth, E.Speed, false, SkillshotType.SkillshotLine);
             R = new Spell(SpellSlot.R, float.MaxValue);
             P = new Spell(me.GetSpellSlot("ShenKiAttack", false));//Doesn't Work
-            Q.SetTargetted(0.5f, 1500f);
-            E.SetSkillshot(0.25f, 100f, 1750f, false, SkillshotType.SkillshotLine);
+            
+            
         }
          private static void OnProcessSpell(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs Spell)
         {
@@ -119,6 +122,7 @@ namespace Executed
             menuU.AddItem(new MenuItem("csep51", "---E Settings---"));
             menuU.AddItem(new MenuItem("useeagc", "Use E to anti gap closer")).SetValue(false);
             menuU.AddItem(new MenuItem("useeint", "Use E to interrupt")).SetValue(true);
+			menuU.AddItem(new MenuItem("useeflash", "Flash+E")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press));
             menuU.AddItem(new MenuItem("csep6", "---Ult Settings---"));
             menuU.AddItem(new MenuItem("user", "Use R")).SetValue(true);
             menuU.AddItem(new MenuItem("atpercent", "Friend under")).SetValue(new Slider(20, 0, 100));
@@ -175,11 +179,15 @@ namespace Executed
                 if (HealthPrediction.GetHealthPrediction(minion, 3000) <= Damage.GetAutoAttackDamage(me, minion, false))
                     minionBlock = true;
             }
+			            if (config.Item("useeflash").GetValue<KeyBind>().Active && me.SummonerSpellbook.CanUseSpell(me.GetSpellSlot("SummonerFlash")) == SpellState.Ready)
+            {
+                //Game.PrintChat("flashCombo");
+                FlashCombo();
+            }
             switch (orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
                     Combo();
-                    
                     break;
                 case Orbwalking.OrbwalkingMode.Mixed:
                     if (!minionBlock) Harass();
@@ -248,12 +256,12 @@ namespace Executed
         private static void Ulti()
         {
 
-            if (!R.IsReady() || PingCasted) return;
+            if (!R.IsReady() || PingCasted || me.IsDead) return;
             
-                foreach (var allyObj in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsAlly && !i.IsMe && !i.IsDead && i.CountEnemysInRange(750) >= 1 && (i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value))
+                foreach (var allyObj in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsAlly && !i.IsMe && !i.IsDead && ((i.CountEnemysInRange(750) >= 1 && ((i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value)) || ((i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value && i.HasBuff("summonerdot") && i.Health<60 && i.CountEnemysInRange(600)<1))))
                 {
                     
-                    if (config.Item("user").GetValue<bool>() && R.IsReady() && me.CountEnemysInRange((int)Q.Range) < 1 && !config.Item("ult"+allyObj.SkinName).GetValue<bool>())
+                    if (config.Item("user").GetValue<bool>() && R.IsReady() && me.CountEnemysInRange((int)E.Range) < 1 && !config.Item("ult"+allyObj.SkinName).GetValue<bool>())
                     {
                         R.Cast(allyObj);
                         return;
@@ -319,22 +327,20 @@ namespace Executed
         }
         private static void Combo()
         {
+           
             var minHit = config.Item("useemin").GetValue<Slider>().Value;
-
-            Obj_AI_Hero target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            if (W.IsReady() && config.Item("usew").GetValue<bool>() && currEnergy - me.Spellbook.GetManaCost(SpellSlot.W) >= eEnergy)
-            {
-            W.Cast();
-            currEnergy -= me.Spellbook.GetManaCost(SpellSlot.W);
-            }
+            Obj_AI_Hero target = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
             if (config.Item("usee").GetValue<bool>() && E.IsReady() && E.InRange(target.Position))
+            {
+                if (minHit > 1)
                 {
-                    if (minHit>1)
-                    {
-                        E.Cast(target.Position + Vector3.Normalize(target.Position - me.Position) * ((CheckingCollision(me, target, E, false, true).Count >= minHit) ? E.Range : 200), config.Item("packets").GetValue<bool>());
-                    }
-                    else E.Cast(target.Position + Vector3.Normalize(target.Position - me.Position) * 200, config.Item("packets").GetValue<bool>());
+                    E.Cast(target.Position + Vector3.Normalize(target.Position - me.Position) * ((CheckingCollision(me, target, E, false, true).Count >= minHit) ? E.Range : 200), config.Item("packets").GetValue<bool>());
                 }
+                else if (E.GetPrediction(target).Hitchance >= HitChance.Low)
+                {
+                    E.Cast(target, config.Item("packets").GetValue<bool>());
+                }
+            }
             if (Q.IsReady() && config.Item("useq").GetValue<bool>() && currEnergy - me.Spellbook.GetManaCost(SpellSlot.E) >= eEnergy)
             {
                 Q.CastOnUnit(target, config.Item("packets").GetValue<bool>());
@@ -342,6 +348,31 @@ namespace Executed
             }
             UseItems(target);
  
+        }
+        private static void FlashCombo()
+        {
+            Obj_AI_Hero target = SimpleTs.GetTarget(EFlash.Range, SimpleTs.DamageType.Magical);
+            //System.IO.File.AppendAllText(@"C:\Users\Public\TestFolder\PacketLog.txt", "Target: " + target.Position.ToString() + "\n" + "Me: " + me.Position.ToString() + "\n" + "Best: " + getPosToEflash(target.Position).ToString() + "\n");
+            if (config.Item("usee").GetValue<bool>() && E.IsReady() && me.Distance(target.Position) < EFlash.Range && me.Distance(target.Position) > 480 && !((getPosToEflash(target.Position)).IsWall()))
+            {
+                //Game.PrintChat("ok");
+                //Packet.S2C.Ping.Encoded(new Packet.S2C.Ping.Struct(target.Position.X, target.Position.Y, me.NetworkId, 0, Packet.PingType.Fallback)).Process();
+                me.SummonerSpellbook.CastSpell(me.GetSpellSlot("SummonerFlash"), getPosToEflash(target.Position));
+                
+                E.Cast(target.Position, config.Item("packets").GetValue<bool>());
+                
+            }
+            if (Q.IsReady() && config.Item("useq").GetValue<bool>() && currEnergy - me.Spellbook.GetManaCost(SpellSlot.E) >= eEnergy)
+            {
+                Q.CastOnUnit(target, config.Item("packets").GetValue<bool>());
+                currEnergy -= me.Spellbook.GetManaCost(SpellSlot.Q);
+            }
+            UseItems(target);
+
+        }
+		public static Vector3 getPosToEflash(Vector3 target)
+        {
+            return target + (me.Position - target)/2;
         }
         private static float ComboDamage(Obj_AI_Hero hero)
         {
