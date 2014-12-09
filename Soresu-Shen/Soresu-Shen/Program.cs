@@ -28,12 +28,12 @@ namespace Executed
         private const int YOffset = 10;
         private const int Width = 103;
         private const int Height = 8;
+        //TODO: Class with damages
+        private static List<string> dots = new List<string>(new string[] { "summonerdot", "cassiopeiamiasmapoison", "cassiopeianoxiousblastpoison", "bantamtraptarget", "explosiveshotdebuff", "karthusfallenonecastsound", "swainbeamdamage", "SwainTorment", "AlZaharMaleficVisions", "CaitlynAceintheHole" });
         private static readonly Render.Text Text = new Render.Text(0, 0, "", 11, new ColorBGRA(255, 0, 0, 255), "monospace");
         static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
-
-
         }
 
         private static void Game_OnGameLoad(EventArgs args)
@@ -53,7 +53,6 @@ namespace Executed
 
 
         }
-
         private static void InitShen()
         {
             Q = new Spell(SpellSlot.Q, 475);
@@ -68,9 +67,6 @@ namespace Executed
             
             
         }
-         private static void OnProcessSpell(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs Spell)
-        {
-         }
         private static void InitMenu()
         {
             config = new Menu("Soresu-Shen", "SRS_Shen", true);
@@ -97,6 +93,7 @@ namespace Executed
             menuD.AddItem(new MenuItem("drawqq", "Draw Q range")).SetValue(new Circle(true, Color.FromArgb(80, 150, 62, 172)));
             menuD.AddItem(new MenuItem("drawee", "Draw E range")).SetValue(new Circle(true, Color.FromArgb(80, 150, 62, 172)));
             menuD.AddItem(new MenuItem("draweeflash", "Draw E+flash range")).SetValue(new Circle(true, Color.FromArgb(50, 250, 248, 110)));
+            menuD.AddItem(new MenuItem("drawallyhp", "Draw teammates' HP")).SetValue(true);
             //menuD.AddItem(new MenuItem("drawincdmg", "Draw incoming damage")).SetValue(true);
             menuD.AddItem(new MenuItem("drawcombo", "Draw combo damage")).SetValue(true);
             config.AddSubMenu(menuD);
@@ -139,23 +136,41 @@ namespace Executed
             
             config.AddToMainMenu();
         }
-
         private static void Interrupter_OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
         {
             
         }
-
         private static void Game_OnDraw(EventArgs args)
         {
             DrawCircle("drawaa", me.AttackRange);
             DrawCircle("drawqq", Q.Range);
             DrawCircle("drawee", E.Range);
             DrawCircle("draweeflash", EFlash.Range);
+            if (config.Item("drawallyhp").GetValue<bool>()) DrawHealths();
             //if (config.Item("drawincdmg").GetValue<bool>()) getIncDmg();
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
             Utility.HpBarDamageIndicator.Enabled = config.Item("drawcombo").GetValue<bool>();          
         }
-
+        private static void DrawHealths()
+        {
+            float i = 0;
+            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly && !hero.IsMe))
+            {
+                var percent = (int)(hero.Health / hero.MaxHealth * 100);
+                var color = Color.Red;
+                if (percent > 25) color = Color.Orange;
+                if (percent > 50) color = Color.Yellow;
+                if (percent > 75) color = Color.Green;
+                Drawing.DrawText(Drawing.Width * 0.8f, Drawing.Height * 0.1f + i, color, hero.Name + "(" + hero.SkinName + ")");
+                Drawing.DrawText(Drawing.Width * 0.9f, Drawing.Height * 0.1f + i, color, ((int)hero.Health).ToString() + " (" + percent.ToString() + "%)");
+                i += 20f;
+            }
+        }
+        private static void DrawCircle(string menuItem, float spellRange)
+        {
+            Circle circle = config.Item(menuItem).GetValue<Circle>();
+            if (circle.Active) Utility.DrawCircle(me.Position, spellRange, circle.Color);
+        }
         private static void getIncDmg()
         {
             double result = 0;
@@ -201,7 +216,6 @@ namespace Executed
         {
             
         }
-
         private static void Game_GameInput(GameInputEventArgs args)
         {
 
@@ -254,7 +268,6 @@ namespace Executed
                     break;
             }
         }
-
         private static void GetPassive()
         {
             var has=false;
@@ -272,6 +285,9 @@ namespace Executed
             }
                    
         }
+        private static void OnProcessSpell(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs Spell)
+        {
+        }
         private static void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             if (!config.Item("useeagc").GetValue<bool>()) return;
@@ -282,7 +298,6 @@ namespace Executed
             if (!config.Item("useeint").GetValue<bool>()) return;
             if (unit.IsValidTarget(E.Range) && E.IsReady()) E.Cast(unit.Position + Vector3.Normalize(unit.Position - me.Position) * 200, config.Item("packets").GetValue<bool>());
         }
-
         private static void Clear()
         {
             var minions = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget(400)).ToList();
@@ -294,17 +309,16 @@ namespace Executed
                 Items.UseItem(3074);
                 }
         }
-
         private static void Ulti()
         {
 
             if (!R.IsReady() || PingCasted || me.IsDead) return;
             
-                foreach (var allyObj in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsAlly && !i.IsMe && !i.IsDead && ((Checkinrange(i) && ((i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value)) || ((i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value && i.HasBuff("summonerdot") && i.Health<60 && i.CountEnemysInRange(600)<1))))
+                foreach (var allyObj in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsAlly && !i.IsMe && !i.IsDead && ((Checkinrange(i) && ((i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value)) || (i.Health<60 && CheckCriticalBuffs(i) && i.CountEnemysInRange(600)<1))))
                 {
-                    
-                    if (config.Item("user").GetValue<bool>() && R.IsReady() && me.CountEnemysInRange((int)E.Range) < 1 && !config.Item("ult"+allyObj.SkinName).GetValue<bool>())
+                    if (config.Item("user").GetValue<bool>() && R.IsReady() && me.CountEnemysInRange((int)E.Range) < 1 && !config.Item("ult" + allyObj.SkinName).GetValue<bool>())
                     {
+                        
                         R.Cast(allyObj);
                         return;
                     }
@@ -321,7 +335,17 @@ namespace Executed
                 }
             
         }
-
+        private static bool CheckCriticalBuffs(Obj_AI_Hero i)
+        {
+            foreach (BuffInstance buff in i.Buffs)
+            {
+                if (dots.Contains(buff.Name))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         private static bool Checkinrange(Obj_AI_Hero i)
         {
             if (i.CountEnemysInRange(750) >= 1 && i.CountEnemysInRange(750) < 3)
@@ -330,8 +354,6 @@ namespace Executed
             }
             else return false;
         }
-
-
         private static void AutoQ()
         {
             if (!Q.IsReady() || me.HasBuff("Recall")) return;
@@ -402,6 +424,7 @@ namespace Executed
         }
         private static void FlashCombo()
         {
+           
             Obj_AI_Hero target = SimpleTs.GetTarget(EFlash.Range, SimpleTs.DamageType.Magical);
             //System.IO.File.AppendAllText(@"C:\Users\Public\TestFolder\PacketLog.txt", "Target: " + target.Position.ToString() + "\n" + "Me: " + me.Position.ToString() + "\n" + "Best: " + getPosToEflash(target.Position).ToString() + "\n");
             if (config.Item("usee").GetValue<bool>() && E.IsReady() && me.Distance(target.Position) < EFlash.Range && me.Distance(target.Position) > 480 && !((getPosToEflash(target.Position)).IsWall()))
@@ -467,7 +490,6 @@ namespace Executed
             }
             return damage;
         }
-
         private static void UseItems(Obj_AI_Hero target)
         {
             if (me.Distance(target) < 400)
@@ -499,13 +521,6 @@ namespace Executed
 
             }
         }
-
-        private static void DrawCircle(string menuItem, float spellRange)
-        {
-            Circle circle = config.Item(menuItem).GetValue<Circle>();
-            if (circle.Active) Utility.DrawCircle(me.Position, spellRange, circle.Color);
-        }
-
         public static List<Obj_AI_Base> CheckingCollision(Obj_AI_Base From, Obj_AI_Base Target, Spell Skill, bool Mid = true, bool OnlyHero = false)
         {
             var ListCol = new List<Obj_AI_Base>();
@@ -516,7 +531,6 @@ namespace Executed
             }
             return ListCol.Distinct().ToList();
         }
-
         public static bool IsValid(Obj_AI_Base Target, float Range = float.MaxValue, bool EnemyOnly = true, Vector3 From = default(Vector3))
         {
             if (Target == null || !Target.IsValid || Target.IsDead || !Target.IsVisible || (EnemyOnly && !Target.IsTargetable) || (EnemyOnly && Target.IsInvulnerable) || Target.IsMe) return false;
@@ -524,7 +538,6 @@ namespace Executed
             if ((From != default(Vector3) ? From : me.Position).Distance(Target.Position) > Range) return false;
             return true;
         }
-
         private static void OnCreate(GameObject sender, EventArgs args)
         {
             if (config.Item("autowwithe").GetValue<bool>() && !(currEnergy - me.Spellbook.GetManaCost(SpellSlot.W) > eEnergy)) return;
