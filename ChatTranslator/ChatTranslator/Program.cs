@@ -28,7 +28,7 @@ namespace ChatTranslator
             Config.AddSubMenu(new Menu("IncomingText", "IncomingText"));
             Config.AddSubMenu(new Menu("OutgoingText", "OutgoingText"));
             Config.AddItem(new MenuItem("Phonetical", "Use special characters").SetValue(false));
-            Config.AddItem(new MenuItem("ChineseServer", "Use chinese trans. servers").SetValue(true));
+            Config.AddItem(new MenuItem("ChineseServer", "Use chinese trans. servers").SetValue(false));
             Config.SubMenu("IncomingText").AddItem(new MenuItem("From", "From: ").SetValue(new StringList(fromArray)));
             Config.SubMenu("IncomingText").AddItem(new MenuItem("To", "To: ").SetValue(new StringList(toArray)));
             Config.SubMenu("IncomingText").AddItem(new MenuItem("Enabled", "Enabled").SetValue(true));
