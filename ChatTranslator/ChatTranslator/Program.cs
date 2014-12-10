@@ -124,7 +124,7 @@ namespace ChatTranslator
         private static async Task<string> TranslateGoogle(string text, string fromCulture, string toCulture, bool langs)
         {
 			
-            string url = string.Format(@"http://translate.google.com/translate_a/t?client=j&text={0}&hl=en&sl={1}&tl={2}",
+            string url = string.Format(@"http://translate.google.cn/translate_a/t?client=j&text={0}&hl=en&sl={1}&tl={2}",
                                text.Replace(' ', '+'), fromCulture, toCulture);
             
 			byte[] bytessss = Encoding.Default.GetBytes(url);
