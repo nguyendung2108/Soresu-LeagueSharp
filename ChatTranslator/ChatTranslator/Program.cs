@@ -28,6 +28,7 @@ namespace ChatTranslator
             Config.AddSubMenu(new Menu("IncomingText", "IncomingText"));
             Config.AddSubMenu(new Menu("OutgoingText", "OutgoingText"));
             Config.AddItem(new MenuItem("Phonetical", "Use special characters").SetValue(false));
+            Config.AddItem(new MenuItem("ChineseServer", "Use chinese trans. servers").SetValue(true));
             Config.SubMenu("IncomingText").AddItem(new MenuItem("From", "From: ").SetValue(new StringList(fromArray)));
             Config.SubMenu("IncomingText").AddItem(new MenuItem("To", "To: ").SetValue(new StringList(toArray)));
             Config.SubMenu("IncomingText").AddItem(new MenuItem("Enabled", "Enabled").SetValue(true));
@@ -123,8 +124,15 @@ namespace ChatTranslator
 
         private static async Task<string> TranslateGoogle(string text, string fromCulture, string toCulture, bool langs)
         {
-			
-            string url = string.Format(@"http://translate.google.cn/translate_a/t?client=j&text={0}&hl=en&sl={1}&tl={2}",
+            string url;
+            string strServerURL;
+
+            if (Config.Item("ChineseServer").GetValue<bool>() == true) //International Google is blocked in China, therefore use the google.cn alternative
+                strServerURL = "http://translate.google.cn/translate_a/t?client=j&text={0}&hl=en&sl={1}&tl={2}";
+            else
+                strServerURL = "http://translate.google.com/translate_a/t?client=j&text={0}&hl=en&sl={1}&tl={2}";
+
+            url = string.Format(strServerURL,
                                text.Replace(' ', '+'), fromCulture, toCulture);
             
 			byte[] bytessss = Encoding.Default.GetBytes(url);
