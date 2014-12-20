@@ -25,7 +25,7 @@ It detects the language of all the incoming chat-messages and translates them to
 
 <img src="http://www.niratisnordkyn.com/DontDeleteThis/lsc.png"></img>
 
-It will check for you the actual status of the L# and if it's up to date it will alert you 
+It will check the actual status of the L# for you, and if it's up to date it will alert you 
 with sound and popup message.
 
 
