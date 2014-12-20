@@ -28,8 +28,9 @@ namespace Executed
         private const int YOffset = 10;
         private const int Width = 103;
         private const int Height = 8;
-        //TODO: Class with damages
-        private static List<string> dots = new List<string>(new string[] { "summonerdot", "cassiopeiamiasmapoison", "cassiopeianoxiousblastpoison", "bantamtraptarget", "explosiveshotdebuff", "karthusfallenonecastsound", "swainbeamdamage", "SwainTorment", "AlZaharMaleficVisions", "CaitlynAceintheHole" });
+        private static List<string> dotsHighDmg = new List<string>(new string[] { "karthusfallenonecastsound", "CaitlynAceintheHole" });
+        private static List<string> dotsMedDmg = new List<string>(new string[] { "summonerdot", "cassiopeiamiasmapoison", "cassiopeianoxiousblastpoison", "bantamtraptarget", "explosiveshotdebuff", "swainbeamdamage", "SwainTorment", "AlZaharMaleficVisions"});
+        private static List<string> dotsSmallDmg = new List<string>(new string[] { "deadlyvenom", "toxicshotparticle" });
         private static readonly Render.Text Text = new Render.Text(0, 0, "", 11, new ColorBGRA(255, 0, 0, 255), "monospace");
         static void Main(string[] args)
         {
@@ -314,7 +315,7 @@ namespace Executed
 
             if (!R.IsReady() || PingCasted || me.IsDead) return;
             
-                foreach (var allyObj in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsAlly && !i.IsMe && !i.IsDead && ((Checkinrange(i) && ((i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value)) || (i.Health<60 && CheckCriticalBuffs(i) && i.CountEnemysInRange(600)<1))))
+                foreach (var allyObj in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsAlly && !i.IsMe && !i.IsDead && ((Checkinrange(i) && ((i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value)) || (CheckCriticalBuffs(i) && i.CountEnemysInRange(600)<1))))
                 {
                     if (config.Item("user").GetValue<bool>() && R.IsReady() && me.CountEnemysInRange((int)E.Range) < 1 && !config.Item("ult" + allyObj.SkinName).GetValue<bool>())
                     {
@@ -339,7 +340,15 @@ namespace Executed
         {
             foreach (BuffInstance buff in i.Buffs)
             {
-                if (dots.Contains(buff.Name))
+                if (i.Health <= 30 && dotsSmallDmg.Contains(buff.Name))
+                {
+                    return true;
+                }
+                if (i.Health <= 60 && dotsMedDmg.Contains(buff.Name))
+                {
+                    return true;
+                }
+                if (i.Health <= 200 && dotsHighDmg.Contains(buff.Name))
                 {
                     return true;
                 }
