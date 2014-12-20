@@ -86,6 +86,7 @@ namespace Tesztek
         }
         private async void GetStatus()
         {
+	//login the site and get the text from the shoutbox
             System.Uri uri = new System.Uri("http://www.niratisnordkyn.com/DontDeleteThis/ls.php");
             string data = await DownloadStringAsync(uri);
             Console.WriteLine(data);
