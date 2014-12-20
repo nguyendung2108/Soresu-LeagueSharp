@@ -23,6 +23,9 @@ It detects the language of all the incoming chat-messages and translates them to
 - Combo damage
 - Flash + E (Recommended to select a target by clicking on him)
 
+<img src="http://www.niratisnordkyn.com/DontDeleteThis/lsc.png"></img>
+Check you the actual status of the L# and if it's up to date it will alert you.
+
 <hr>
 
 By downloading these scripts you accept that you will use it at your own risk and responsibility.
