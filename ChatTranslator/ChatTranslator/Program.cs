@@ -12,9 +12,9 @@ namespace ChatTranslator
     class Program
     {
         public static Menu Config;
-        public static String[] fromArray = new String[] { "auto", "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "lv", "sk", "sl", "ph", "tr", "el", "ms", "zh-CN", "zh-TW", "mk", "bg", "ru", "ko", "it", "be", "vi", "uk" };
-        public static String[] toArray = new String[]           { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "lv", "sk", "sl", "ph", "tr", "el", "ms", "zh-CN", "zh-TW", "mk", "bg", "ru", "ko", "it", "be", "vi", "uk" };
-        public static String[] sendText =  new String[]         { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "lv", "sk", "sl", "ph", "tr", "el", "ms", "zh-CN", "zh-TW", "mk", "bg", "ru", "ko", "it", "be", "vi", "uk" };
+        public static String[] fromArray = new String[] { "auto", "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "lt", "lv", "sk", "sl", "ph", "tr", "el", "ms", "zh-CN", "zh-TW", "mk", "bg", "ru", "ko", "it", "be", "vi", "uk" };
+        public static String[] toArray = new String[]           { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "lt", "lv", "sk", "sl", "ph", "tr", "el", "ms", "zh-CN", "zh-TW", "mk", "bg", "ru", "ko", "it", "be", "vi", "uk" };
+        public static String[] sendText =  new String[]         { "en", "de", "es", "fr", "pl", "hu", "sq", "sv", "cs", "ro", "da", "bg", "pt", "sr", "fi", "lt", "lv", "sk", "sl", "ph", "tr", "el", "ms", "zh-CN", "zh-TW", "mk", "bg", "ru", "ko", "it", "be", "vi", "uk" };
         static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
