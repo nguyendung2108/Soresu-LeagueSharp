@@ -417,7 +417,7 @@ namespace Executed
                 }
                 else if (E.GetPrediction(target).Hitchance >= HitChance.Low)
                 {
-                    E.Cast(target, config.Item("packets").GetValue<bool>());
+                    E.Cast(target.Position + Vector3.Normalize(target.Position - me.Position), config.Item("packets").GetValue<bool>());
                 }
             }
             if (Q.IsReady() && config.Item("useq").GetValue<bool>() && currEnergy - me.Spellbook.GetSpell(SpellSlot.Q).ManaCost >= eEnergy)
