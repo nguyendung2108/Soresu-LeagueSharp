@@ -90,9 +90,9 @@ namespace Executed
             // Draw settings
             Menu menuD = new Menu("Drawings ", "dsettings");
             menuD.AddItem(new MenuItem("dsep1", "---Drawing Settings---"));
-            menuD.AddItem(new MenuItem("drawaa", "Draw AA range")).SetValue(new Circle(true, Color.FromArgb(80, 150, 62, 172)));
-            menuD.AddItem(new MenuItem("drawqq", "Draw Q range")).SetValue(new Circle(true, Color.FromArgb(80, 150, 62, 172)));
-            menuD.AddItem(new MenuItem("drawee", "Draw E range")).SetValue(new Circle(true, Color.FromArgb(80, 150, 62, 172)));
+            menuD.AddItem(new MenuItem("drawaa", "Draw AA range")).SetValue(new Circle(true, Color.FromArgb(20, 150, 62, 172)));
+            menuD.AddItem(new MenuItem("drawqq", "Draw Q range")).SetValue(new Circle(true, Color.FromArgb(20, 150, 62, 172)));
+            menuD.AddItem(new MenuItem("drawee", "Draw E range")).SetValue(new Circle(true, Color.FromArgb(20, 150, 62, 172)));
             menuD.AddItem(new MenuItem("draweeflash", "Draw E+flash range")).SetValue(new Circle(true, Color.FromArgb(50, 250, 248, 110)));
             menuD.AddItem(new MenuItem("drawallyhp", "Draw teammates' HP")).SetValue(true);
             //menuD.AddItem(new MenuItem("drawincdmg", "Draw incoming damage")).SetValue(true);
