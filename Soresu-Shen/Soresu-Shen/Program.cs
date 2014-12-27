@@ -73,7 +73,7 @@ namespace Executed
             config = new Menu("Soresu-Shen", "SRS_Shen", true);
             // Target Selector
             Menu menuTS = new Menu("Selector", "tselect");
-            SimpleTs.AddToMenu(menuTS);
+            TargetSelector.AddToMenu(menuTS);
             config.AddSubMenu(menuTS);
 
             // Orbwalker
@@ -176,7 +176,7 @@ namespace Executed
         {
             double result = 0;
             var color = Color.Cyan;
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.Distance(me) < 750 && i.IsEnemy && !i.IsAlly &&!i.IsDead && !i.IsMinion && !i.IsMe))
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.Distance(me.Position) < 750 && i.IsEnemy && !i.IsAlly &&!i.IsDead && !i.IsMinion && !i.IsMe))
             {
              var spells = enemy.Spellbook.Spells;
              foreach (var spell in spells)
@@ -188,7 +188,7 @@ namespace Executed
                      result += Damage.GetSpellDamage(enemy, me, spell.Slot);
                  }
              }
-            if (enemy.SummonerSpellbook.CanUseSpell(me.GetSpellSlot("summonerdot")) == SpellState.Ready)
+             if (enemy.Spellbook.CanUseSpell(me.GetSpellSlot("summonerdot")) == SpellState.Ready)
             {
                 result +=enemy.GetSummonerSpellDamage(me, Damage.SummonerSpell.Ignite);
             }
@@ -236,7 +236,7 @@ namespace Executed
                 if (HealthPrediction.GetHealthPrediction(minion, 3000) <= Damage.GetAutoAttackDamage(me, minion, false))
                     minionBlock = true;
             }
-			            if (config.Item("useeflash").GetValue<KeyBind>().Active && me.SummonerSpellbook.CanUseSpell(me.GetSpellSlot("SummonerFlash")) == SpellState.Ready)
+			            if (config.Item("useeflash").GetValue<KeyBind>().Active && me.Spellbook.CanUseSpell(me.GetSpellSlot("SummonerFlash")) == SpellState.Ready)
             {
                 //Game.PrintChat("flashCombo");
                 FlashCombo();
@@ -292,7 +292,7 @@ namespace Executed
         private static void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             if (!config.Item("useeagc").GetValue<bool>()) return;
-            if (gapcloser.Sender.IsValidTarget(E.Range) && E.IsReady() && me.Distance(gapcloser.Sender) < 400) E.Cast(gapcloser.Sender.Position + Vector3.Normalize(gapcloser.Sender.Position - me.Position) * 200, config.Item("packets").GetValue<bool>());
+            if (gapcloser.Sender.IsValidTarget(E.Range) && E.IsReady() && me.Distance(gapcloser.Sender.Position) < 400) E.Cast(gapcloser.Sender.Position + Vector3.Normalize(gapcloser.Sender.Position - me.Position) * 200, config.Item("packets").GetValue<bool>());
         }
         private static void OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
         {
@@ -326,10 +326,7 @@ namespace Executed
                     else
                     {
                         Game.PrintChat("<font color='#ff0000'> Use Ultimate (R) to help: {0}</font>", allyObj.ChampionName);
-                        for (Int32 i = 0; i < 2; i++)
-                        {
-                            Packet.S2C.Ping.Encoded(new Packet.S2C.Ping.Struct(allyObj.Position.X, allyObj.Position.Y, allyObj.NetworkId, 0, Packet.PingType.Fallback)).Process();
-                        }
+                           // Packet.S2C.Ping.Encoded(new Packet.S2C.Ping.Struct(allyObj.Position.X, allyObj.Position.Y, allyObj.NetworkId, 0, Packet.PingType.Fallback)).Process();
                     }
                     PingCasted = true;
                     Utility.DelayAction.Add(5000, () => PingCasted = false);
@@ -366,20 +363,20 @@ namespace Executed
         private static void AutoQ()
         {
             if (!Q.IsReady() || me.HasBuff("Recall")) return;
-            if (config.Item("autoqwithe").GetValue<bool>() || config.Item("autoqwithe").GetValue<bool>() && (currEnergy - me.Spellbook.GetManaCost(SpellSlot.Q) < eEnergy)) return;
-            Obj_AI_Hero target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            if (target.Distance(me) < Q.Range)
+            if (config.Item("autoqwithe").GetValue<bool>() || config.Item("autoqwithe").GetValue<bool>() && (currEnergy - me.Spellbook.GetSpell(SpellSlot.Q).ManaCost < eEnergy)) return;
+            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            if (target.Distance(me.Position) < Q.Range)
             {
                 if (target.IsValidTarget(Q.Range))
 
                     Q.CastOnUnit(target, config.Item("packets").GetValue<bool>());
-                    currEnergy -= me.Spellbook.GetManaCost(SpellSlot.Q);
+                    currEnergy -= me.Spellbook.GetSpell(SpellSlot.Q).ManaCost;
             }
 
         }
         private static void LasthitQ()
         {
-            if (config.Item("autoqwithe").GetValue<bool>() && !(currEnergy - me.Spellbook.GetManaCost(SpellSlot.Q) > eEnergy)) return;
+            if (config.Item("autoqwithe").GetValue<bool>() && !(currEnergy - me.Spellbook.GetSpell(SpellSlot.Q).ManaCost > eEnergy)) return;
             var allMinions = MinionManager.GetMinions(me.ServerPosition, Q.Range);
             if (config.Item("autoqls").GetValue<bool>() && Q.IsReady())
             {
@@ -387,23 +384,23 @@ namespace Executed
                 {
                     if (minion.IsValidTarget() &&
                     HealthPrediction.GetHealthPrediction(minion,
-                    (int)(me.Distance(minion) * 1000 / 1400)) <
+                    (int)(me.Distance(minion.Position) * 1000 / 1400)) <
                     me.GetSpellDamage(minion, SpellSlot.Q))
                     {
                         Q.CastOnUnit(minion);
-                        currEnergy -= me.Spellbook.GetManaCost(SpellSlot.Q);
+                        currEnergy -= me.Spellbook.GetSpell(SpellSlot.Q).ManaCost;
                         return;
                     }
                 }
             }
         }
         private static void Harass(){
-            if (config.Item("harassqwithe").GetValue<bool>() && !(currEnergy - me.Spellbook.GetManaCost(SpellSlot.Q) > eEnergy)) return;
-            Obj_AI_Hero target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            if (config.Item("harassqwithe").GetValue<bool>() && !(currEnergy - me.Spellbook.GetSpell(SpellSlot.Q).ManaCost > eEnergy)) return;
+            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (Q.IsReady() && config.Item("harassq").GetValue<bool>())
             {
                 Q.CastOnUnit(target, config.Item("packets").GetValue<bool>());
-                currEnergy -= me.Spellbook.GetManaCost(SpellSlot.Q);
+                currEnergy -= me.Spellbook.GetSpell(SpellSlot.Q).ManaCost;
             }
 
         }
@@ -411,7 +408,7 @@ namespace Executed
         {
            
             var minHit = config.Item("useemin").GetValue<Slider>().Value;
-            Obj_AI_Hero target = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
             if (config.Item("usee").GetValue<bool>() && E.IsReady() && E.InRange(target.Position))
             {
                 if (minHit > 1)
@@ -423,10 +420,10 @@ namespace Executed
                     E.Cast(target, config.Item("packets").GetValue<bool>());
                 }
             }
-            if (Q.IsReady() && config.Item("useq").GetValue<bool>() && currEnergy - me.Spellbook.GetManaCost(SpellSlot.E) >= eEnergy)
+            if (Q.IsReady() && config.Item("useq").GetValue<bool>() && currEnergy - me.Spellbook.GetSpell(SpellSlot.Q).ManaCost >= eEnergy)
             {
                 Q.CastOnUnit(target, config.Item("packets").GetValue<bool>());
-                currEnergy -= me.Spellbook.GetManaCost(SpellSlot.Q);
+                currEnergy -= me.Spellbook.GetSpell(SpellSlot.Q).ManaCost;
             }
             UseItems(target);
  
@@ -434,21 +431,21 @@ namespace Executed
         private static void FlashCombo()
         {
            
-            Obj_AI_Hero target = SimpleTs.GetTarget(EFlash.Range, SimpleTs.DamageType.Magical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(EFlash.Range, TargetSelector.DamageType.Magical);
             //System.IO.File.AppendAllText(@"C:\Users\Public\TestFolder\PacketLog.txt", "Target: " + target.Position.ToString() + "\n" + "Me: " + me.Position.ToString() + "\n" + "Best: " + getPosToEflash(target.Position).ToString() + "\n");
             if (config.Item("usee").GetValue<bool>() && E.IsReady() && me.Distance(target.Position) < EFlash.Range && me.Distance(target.Position) > 480 && !((getPosToEflash(target.Position)).IsWall()))
             {
                 //Game.PrintChat("ok");
                 //Packet.S2C.Ping.Encoded(new Packet.S2C.Ping.Struct(target.Position.X, target.Position.Y, me.NetworkId, 0, Packet.PingType.Fallback)).Process();
-                me.SummonerSpellbook.CastSpell(me.GetSpellSlot("SummonerFlash"), getPosToEflash(target.Position));
+                me.Spellbook.CastSpell(me.GetSpellSlot("SummonerFlash"), getPosToEflash(target.Position));
                 
                 E.Cast(target.Position, config.Item("packets").GetValue<bool>());
                 
             }
-            if (Q.IsReady() && config.Item("useq").GetValue<bool>() && currEnergy - me.Spellbook.GetManaCost(SpellSlot.E) >= eEnergy)
+            if (Q.IsReady() && config.Item("useq").GetValue<bool>() && currEnergy - me.Spellbook.GetSpell(SpellSlot.E).ManaCost >= eEnergy)
             {
                 Q.CastOnUnit(target, config.Item("packets").GetValue<bool>());
-                currEnergy -= me.Spellbook.GetManaCost(SpellSlot.Q);
+                currEnergy -= me.Spellbook.GetSpell(SpellSlot.Q).ManaCost;
             }
             UseItems(target);
 
@@ -460,9 +457,9 @@ namespace Executed
         private static float ComboDamage(Obj_AI_Hero hero)
         {
             float damage = 0;
-            if (Q.IsReady() && me.Spellbook.GetManaCost(SpellSlot.Q)<me.Mana)
+            if (Q.IsReady() && me.Spellbook.GetSpell(SpellSlot.Q).ManaCost < me.Mana)
                 damage += (float)Damage.GetSpellDamage(me, hero, SpellSlot.Q);
-            if (E.IsReady() && me.Spellbook.GetManaCost(SpellSlot.E)<me.Mana)
+            if (E.IsReady() && me.Spellbook.GetSpell(SpellSlot.E).ManaCost < me.Mana)
                 damage += (float)Damage.GetSpellDamage(me, hero, SpellSlot.E);
             if (Items.HasItem(3077) && Items.CanUseItem(3077))
             {
@@ -493,7 +490,7 @@ namespace Executed
                 var passive = me.MaxHealth / 10 + 4+me.Level * 4;
                 damage += (float)me.CalcDamage(hero, Damage.DamageType.Magical, passive);
             }
-            if (me.SummonerSpellbook.CanUseSpell(me.GetSpellSlot("summonerdot")) == SpellState.Ready && hero.Health - damage < (float)me.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite))
+            if (me.Spellbook.CanUseSpell(me.GetSpellSlot("summonerdot")) == SpellState.Ready && hero.Health - damage < (float)me.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite))
             {
                 damage += (float)me.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);
             }
@@ -501,7 +498,7 @@ namespace Executed
         }
         private static void UseItems(Obj_AI_Hero target)
         {
-            if (me.Distance(target) < 400)
+            if (me.Distance(target.Position) < 400)
             {
                 if (Items.HasItem(3077) && Items.CanUseItem(3077))
                     Items.UseItem(3077);
@@ -520,11 +517,11 @@ namespace Executed
             {
                 hexgun.Cast(target);
             }
-            if (me.SummonerSpellbook.CanUseSpell(me.GetSpellSlot("summonerdot")) == SpellState.Ready)
+            if (me.Spellbook.CanUseSpell(me.GetSpellSlot("summonerdot")) == SpellState.Ready)
             {
-                if (me.Distance(target) < 650 && ComboDamage(target) >= target.Health && (float)me.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite) >= target.Health)
+                if (me.Distance(target.Position) < 650 && ComboDamage(target) >= target.Health && (float)me.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite) >= target.Health)
                 {
-                    me.SummonerSpellbook.CastSpell(me.GetSpellSlot("SummonerDot"), target);
+                    me.Spellbook.CastSpell(me.GetSpellSlot("SummonerDot"), target);
                 }
 
 
@@ -549,7 +546,7 @@ namespace Executed
         }
         private static void OnCreate(GameObject sender, EventArgs args)
         {
-            if (config.Item("autowwithe").GetValue<bool>() && !(currEnergy - me.Spellbook.GetManaCost(SpellSlot.W) > eEnergy)) return;
+            if (config.Item("autowwithe").GetValue<bool>() && !(currEnergy - me.Spellbook.GetSpell(SpellSlot.W).ManaCost > eEnergy)) return;
             if (sender is Obj_SpellMissile && sender.IsValid && config.Item("autow").GetValue<bool>() && W.IsReady())
             {
                 var missle = (Obj_SpellMissile)sender;
@@ -562,7 +559,7 @@ namespace Executed
                         if (missle.Target.IsMe && ShieldBuff / 100 * config.Item("wabove").GetValue<Slider>().Value < caster.GetAutoAttackDamage(me, true))
                         {
                             W.Cast();
-                            currEnergy -= me.Spellbook.GetManaCost(SpellSlot.W);
+                            currEnergy -= me.Spellbook.GetSpell(SpellSlot.W).ManaCost;
                         }
                     }
                     else if (missle.Target.IsMe || missle.EndPosition.Distance(me.Position) <= 130)
@@ -572,13 +569,13 @@ namespace Executed
                             if (me.Health <= (caster as Obj_AI_Hero).GetSummonerSpellDamage(me, Damage.SummonerSpell.Ignite) && ShieldBuff < (caster as Obj_AI_Hero).GetSummonerSpellDamage(me, Damage.SummonerSpell.Ignite))
                             {
                                 W.Cast();
-                                currEnergy -= me.Spellbook.GetManaCost(SpellSlot.W);
+                                currEnergy -= me.Spellbook.GetSpell(SpellSlot.W).ManaCost;
                             }
                         }
                         else if (ShieldBuff / 100 * config.Item("wabove").GetValue<Slider>().Value < (caster as Obj_AI_Hero).GetSpellDamage(me, (caster as Obj_AI_Hero).GetSpellSlot(missle.SData.Name, false), 1))
                         {
                             W.Cast();
-                            currEnergy -= me.Spellbook.GetManaCost(SpellSlot.W);
+                            currEnergy -= me.Spellbook.GetSpell(SpellSlot.W).ManaCost;
                         }
                     }
                 }
