@@ -28,9 +28,9 @@ namespace Executed
         private const int YOffset = 10;
         private const int Width = 103;
         private const int Height = 8;
-        private static List<string> dotsHighDmg = new List<string>(new string[] { "karthusfallenonecastsound", "CaitlynAceintheHole" });
-        private static List<string> dotsMedDmg = new List<string>(new string[] { "summonerdot", "cassiopeiamiasmapoison", "cassiopeianoxiousblastpoison", "bantamtraptarget", "explosiveshotdebuff", "swainbeamdamage", "SwainTorment", "AlZaharMaleficVisions"});
-        private static List<string> dotsSmallDmg = new List<string>(new string[] { "deadlyvenom", "toxicshotparticle" });
+        private static List<string> dotsHighDmg = new List<string>(new string[] { "karthusfallenonecastsound", "CaitlynAceintheHole", "zedulttargetmark", "timebombenemybuff", "VladimirHemoplague" });
+        private static List<string> dotsMedDmg = new List<string>(new string[] { "summonerdot", "cassiopeiamiasmapoison", "cassiopeianoxiousblastpoison", "bantamtraptarget", "explosiveshotdebuff", "swainbeamdamage", "SwainTorment", "AlZaharMaleficVisions", "fizzmarinerdoombomb" });
+        private static List<string> dotsSmallDmg = new List<string>(new string[] { "deadlyvenom", "toxicshotparticle", "MordekaiserChildrenOfTheGrave", "DariusNoxianTacticsONH" });
         private static readonly Render.Text Text = new Render.Text(0, 0, "", 11, new ColorBGRA(255, 0, 0, 255), "monospace");
         static void Main(string[] args)
         {
@@ -155,8 +155,9 @@ namespace Executed
         private static void DrawHealths()
         {
             float i = 0;
-            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly && !hero.IsMe))
+            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly && !hero.IsMe && !hero.IsDead))
             {
+                
                 var percent = (int)(hero.Health / hero.MaxHealth * 100);
                 var color = Color.Red;
                 if (percent > 25) color = Color.Orange;
@@ -345,7 +346,7 @@ namespace Executed
                 {
                     return true;
                 }
-                if (i.Health <= 200 && dotsHighDmg.Contains(buff.Name))
+                if (i.Health <= 150 && dotsHighDmg.Contains(buff.Name))
                 {
                     return true;
                 }
@@ -415,9 +416,10 @@ namespace Executed
                 {
                     E.Cast(target.Position + Vector3.Normalize(target.Position - me.Position) * ((CheckingCollision(me, target, E, false, true).Count >= minHit) ? E.Range : 200), config.Item("packets").GetValue<bool>());
                 }
-                else if (E.GetPrediction(target).Hitchance >= HitChance.Low)
+                else if (me.Distance(target.Position) > 100 && E.GetPrediction(target).Hitchance >= HitChance.Low)
                 {
-                    E.Cast(target.Position + Vector3.Normalize(target.Position - me.Position), config.Item("packets").GetValue<bool>());
+                    E.Cast(target, config.Item("packets").GetValue<bool>());
+                    
                 }
             }
             if (Q.IsReady() && config.Item("useq").GetValue<bool>() && currEnergy - me.Spellbook.GetSpell(SpellSlot.Q).ManaCost >= eEnergy)
