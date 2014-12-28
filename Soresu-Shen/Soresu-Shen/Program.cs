@@ -25,7 +25,7 @@ namespace Executed
         public static Items.Item bilgewater = new Items.Item(3144, 450);
         public static Items.Item hexgun = new Items.Item(3146, 700);
         private const int XOffset = 36;
-        private const int YOffset = 10;
+        private const int YOffset = 9;
         private const int Width = 103;
         private const int Height = 8;
         private static List<string> dotsHighDmg = new List<string>(new string[] { "karthusfallenonecastsound", "CaitlynAceintheHole", "zedulttargetmark", "timebombenemybuff", "VladimirHemoplague" });
@@ -89,13 +89,12 @@ namespace Executed
 
             // Draw settings
             Menu menuD = new Menu("Drawings ", "dsettings");
-            menuD.AddItem(new MenuItem("dsep1", "---Drawing Settings---"));
-            menuD.AddItem(new MenuItem("drawaa", "Draw AA range")).SetValue(new Circle(true, Color.FromArgb(20, 150, 62, 172)));
-            menuD.AddItem(new MenuItem("drawqq", "Draw Q range")).SetValue(new Circle(true, Color.FromArgb(20, 150, 62, 172)));
-            menuD.AddItem(new MenuItem("drawee", "Draw E range")).SetValue(new Circle(true, Color.FromArgb(20, 150, 62, 172)));
+            menuD.AddItem(new MenuItem("drawaa", "Draw AA range")).SetValue(new Circle(false, Color.FromArgb(20, 150, 62, 172)));
+            menuD.AddItem(new MenuItem("drawqq", "Draw Q range")).SetValue(new Circle(false, Color.FromArgb(20, 150, 62, 172)));
+            menuD.AddItem(new MenuItem("drawee", "Draw E range")).SetValue(new Circle(false, Color.FromArgb(20, 150, 62, 172)));
             menuD.AddItem(new MenuItem("draweeflash", "Draw E+flash range")).SetValue(new Circle(true, Color.FromArgb(50, 250, 248, 110)));
             menuD.AddItem(new MenuItem("drawallyhp", "Draw teammates' HP")).SetValue(true);
-            //menuD.AddItem(new MenuItem("drawincdmg", "Draw incoming damage")).SetValue(true);
+            menuD.AddItem(new MenuItem("drawincdmg", "Draw incoming damage")).SetValue(true);
             menuD.AddItem(new MenuItem("drawcombo", "Draw combo damage")).SetValue(true);
             config.AddSubMenu(menuD);
 
@@ -110,20 +109,16 @@ namespace Executed
 
             // Misc Settings
             Menu menuU = new Menu("Misc ", "usettings");
-            menuU.AddItem(new MenuItem("csep4", "---Q Settings---"));
             menuU.AddItem(new MenuItem("harassq", "Harass with Q")).SetValue(true);
             menuU.AddItem(new MenuItem("harassqwithe", "Keep energy for E")).SetValue(true);
             menuU.AddItem(new MenuItem("autoqls", "Lasthit with Q")).SetValue(true);
             menuU.AddItem(new MenuItem("autoqwithe", "Keep energy for E")).SetValue(true);
-            menuU.AddItem(new MenuItem("csep5", "---W Settings---"));
             menuU.AddItem(new MenuItem("autow", "Try to block non-skillshot spells")).SetValue(true);
             menuU.AddItem(new MenuItem("wabove", "Min damage in shield %")).SetValue(new Slider(50, 0, 100));
             menuU.AddItem(new MenuItem("autowwithe", "Keep energy for E")).SetValue(true);
-            menuU.AddItem(new MenuItem("csep51", "---E Settings---"));
             menuU.AddItem(new MenuItem("useeagc", "Use E to anti gap closer")).SetValue(false);
             menuU.AddItem(new MenuItem("useeint", "Use E to interrupt")).SetValue(true);
 			menuU.AddItem(new MenuItem("useeflash", "Flash+E")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press));
-            menuU.AddItem(new MenuItem("csep6", "---Ult Settings---"));
             menuU.AddItem(new MenuItem("user", "Use R")).SetValue(true);
             menuU.AddItem(new MenuItem("atpercent", "Friend under")).SetValue(new Slider(20, 0, 100));
             config.AddSubMenu(menuU);
@@ -148,7 +143,7 @@ namespace Executed
             DrawCircle("drawee", E.Range);
             DrawCircle("draweeflash", EFlash.Range);
             if (config.Item("drawallyhp").GetValue<bool>()) DrawHealths();
-            //if (config.Item("drawincdmg").GetValue<bool>()) getIncDmg();
+            if (config.Item("drawincdmg").GetValue<bool>()) getIncDmg();
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
             Utility.HpBarDamageIndicator.Enabled = config.Item("drawcombo").GetValue<bool>();          
         }
@@ -157,13 +152,16 @@ namespace Executed
             float i = 0;
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly && !hero.IsMe && !hero.IsDead))
             {
-                
+                var playername = hero.Name;
+                if (playername.Length > 13) playername=playername.Remove(9) + "...";
+                var champion = hero.SkinName;
+                if (champion.Length > 12) champion = champion.Remove(7) + "...";
                 var percent = (int)(hero.Health / hero.MaxHealth * 100);
                 var color = Color.Red;
                 if (percent > 25) color = Color.Orange;
                 if (percent > 50) color = Color.Yellow;
                 if (percent > 75) color = Color.Green;
-                Drawing.DrawText(Drawing.Width * 0.8f, Drawing.Height * 0.1f + i, color, hero.Name + "(" + hero.SkinName + ")");
+                Drawing.DrawText(Drawing.Width * 0.8f, Drawing.Height * 0.1f + i, color, playername + "(" + champion + ")");
                 Drawing.DrawText(Drawing.Width * 0.9f, Drawing.Height * 0.1f + i, color, ((int)hero.Health).ToString() + " (" + percent.ToString() + "%)");
                 i += 20f;
             }
@@ -182,10 +180,9 @@ namespace Executed
              var spells = enemy.Spellbook.Spells;
              foreach (var spell in spells)
              {
-                 if (spell.State != SpellState.NotLearned && enemy.Mana >= spell.ManaCost && spell.State != SpellState.Cooldown)
+                 var t = spell.CooldownExpires - Game.Time;
+                 if (t<0.5)
                  {
-
-                     Game.PrintChat(spell.Name);
                      result += Damage.GetSpellDamage(enemy, me, spell.Slot);
                  }
              }
@@ -193,12 +190,16 @@ namespace Executed
             {
                 result +=enemy.GetSummonerSpellDamage(me, Damage.SummonerSpell.Ignite);
             }
+             foreach (var minions in ObjectManager.Get<Obj_AI_Minion>().Where(i => i.Distance(me.Position) < 750 && i.IsMinion && !i.IsAlly && !i.IsDead))
+             {
+                 result +=minions.GetAutoAttackDamage(me,false);
+             }
             }
             var barPos = me.HPBarPosition;
             var damage = (float)result;
             //if (damage == 0) return;
             if (me.Health - damage < me.MaxHealth * 0.6) color = Color.Orange;
-            if (me.Health - damage < me.MaxHealth * 0.4) color = Color.Red;
+            if (me.Health - damage < me.MaxHealth * 0.4) color = Color.Crimson;
 
 
             var percentHealthAfterDamage = Math.Max(0, me.Health - damage) / me.MaxHealth;
@@ -212,7 +213,7 @@ namespace Executed
                 Text.OnEndScene();
             }
 
-            Drawing.DrawLine(xPos, barPos.Y + YOffset, xPos, barPos.Y + YOffset + Height, 2, color);
+            Drawing.DrawLine(xPos, barPos.Y + YOffset, xPos, barPos.Y + YOffset + Height, 3, color);
         }
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
@@ -327,7 +328,7 @@ namespace Executed
                     else
                     {
                         Game.PrintChat("<font color='#ff0000'> Use Ultimate (R) to help: {0}</font>", allyObj.ChampionName);
-                           // Packet.S2C.Ping.Encoded(new Packet.S2C.Ping.Struct(allyObj.Position.X, allyObj.Position.Y, allyObj.NetworkId, 0, Packet.PingType.Fallback)).Process();
+                           Packet.S2C.Ping.Encoded(new Packet.S2C.Ping.Struct(allyObj.Position.X, allyObj.Position.Y, allyObj.NetworkId, 0, Packet.PingType.Fallback)).Process();
                     }
                     PingCasted = true;
                     Utility.DelayAction.Add(5000, () => PingCasted = false);
