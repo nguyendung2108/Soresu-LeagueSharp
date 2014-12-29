@@ -15,7 +15,7 @@ namespace TeamStats
         public static Menu Config;
         public static readonly Obj_AI_Hero player = ObjectManager.Player;
         public static Teams teams;
-        public static int range = 2800;
+        public static int range = 2500;
         private static Render.Sprite frame;
         public static int myTeamHpX = (int)(Drawing.Width*0.68);
         public static int myTeamHpY = (int)(Drawing.Height * 0.97);
@@ -36,6 +36,7 @@ namespace TeamStats
             Config.AddItem(new MenuItem("X-pos", "X-pos").SetValue(new Slider(0, -1500, 400)));
             Config.AddItem(new MenuItem("Y-pos", "Y-pos").SetValue(new Slider(0, 200, -1080)));
             Config.AddItem(new MenuItem("Default", "Default").SetValue(false));
+            Config.AddItem(new MenuItem("Chart", "Chart").SetValue(true));
             Config.AddItem(new MenuItem("Enabled", "Enabled").SetValue(true));
             Config.AddItem(new MenuItem("draw", "Draw range")).SetValue(new Circle(false, Color.LightBlue));
             Config.AddToMainMenu();
@@ -72,20 +73,22 @@ namespace TeamStats
                 int highest2 = Math.Max(myteamdmgBar, enemyteamdmgBar);
                 int highest = Math.Max(highest1, highest2);
                 float scale = 300f / highest;
+               if (Config.Item("Chart").GetValue<bool>())
+                {
+                    Drawing.DrawLine(myTeamHpX + OffsetX, myTeamHpY+14 + OffsetY, enemyTeamDmgX + OffsetX, enemyTeamDmgY + OffsetY, 300, Color.SlateGray);
+                    Drawing.DrawText(myTeamHpX + OffsetX, myTeamHpY + OffsetY - 2, Color.White, "Allies Health(" + myteamhpBar + ")");
+                    Drawing.DrawLine(myTeamHpX + OffsetX, myTeamHpY + OffsetY, myTeamHpX + OffsetX, myTeamHpY + OffsetY + 14, (int)(myteamhpBar * scale * -1), Color.ForestGreen);
 
-                Drawing.DrawLine(myTeamHpX + OffsetX, myTeamHpY+14 + OffsetY, enemyTeamDmgX + OffsetX, enemyTeamDmgY + OffsetY, 300, Color.SlateGray);
-                Drawing.DrawText(myTeamHpX + OffsetX, myTeamHpY + OffsetY - 2, Color.White, "Allies Health(" + myteamhpBar + ")");
-                Drawing.DrawLine(myTeamHpX + OffsetX, myTeamHpY + OffsetY, myTeamHpX + OffsetX, myTeamHpY + OffsetY + 14, (int)(myteamhpBar * scale * -1), Color.ForestGreen);
+                    Drawing.DrawText(enemyTeamHpX + OffsetX, enemyTeamHpY + OffsetY - 2, Color.White, "Enemies Healt(" + enemyteamhpBar + ")");
+                    Drawing.DrawLine(enemyTeamHpX + OffsetX, enemyTeamHpY + OffsetY, enemyTeamHpX + OffsetX, enemyTeamHpY + OffsetY + 14, (int)(-enemyteamhpBar * scale), Color.ForestGreen);
 
-                Drawing.DrawText(enemyTeamHpX + OffsetX, enemyTeamHpY + OffsetY - 2, Color.White, "Enemies Healt(" + enemyteamhpBar + ")");
-                Drawing.DrawLine(enemyTeamHpX + OffsetX, enemyTeamHpY + OffsetY, enemyTeamHpX + OffsetX, enemyTeamHpY + OffsetY + 14, (int)(-enemyteamhpBar * scale), Color.ForestGreen);
+                    Drawing.DrawText(myTeamDmgX + OffsetX, myTeamDmgY + OffsetY - 2, Color.White, "Allies Damage(" + myteamdmgBar+")");
+                    Drawing.DrawLine(myTeamDmgX + OffsetX, myTeamDmgY + OffsetY, myTeamDmgX + OffsetX, myTeamDmgY + OffsetY + 14, (int)(-myteamdmgBar * scale), Color.Firebrick);
 
-                Drawing.DrawText(myTeamDmgX + OffsetX, myTeamDmgY + OffsetY - 2, Color.White, "Allies Damage(" + myteamdmgBar+")");
-                Drawing.DrawLine(myTeamDmgX + OffsetX, myTeamDmgY + OffsetY, myTeamDmgX + OffsetX, myTeamDmgY + OffsetY + 14, (int)(-myteamdmgBar * scale), Color.Firebrick);
-
-                Drawing.DrawText(enemyTeamDmgX + OffsetX, enemyTeamDmgY + OffsetY - 2, Color.White, "Enemies Damage(" + enemyteamdmgBar + ")");
-                Drawing.DrawLine(enemyTeamDmgX + OffsetX, enemyTeamDmgY + OffsetY, enemyTeamDmgX + OffsetX, enemyTeamDmgY + OffsetY + 14, (int)(-enemyteamdmgBar * scale), Color.Firebrick);
-                if (myteamhpBar-enemyteamdmgBar<enemyteamhpBar-myteamdmgBar)
+                    Drawing.DrawText(enemyTeamDmgX + OffsetX, enemyTeamDmgY + OffsetY - 2, Color.White, "Enemies Damage(" + enemyteamdmgBar + ")");
+                    Drawing.DrawLine(enemyTeamDmgX + OffsetX, enemyTeamDmgY + OffsetY, enemyTeamDmgX + OffsetX, enemyTeamDmgY + OffsetY + 14, (int)(-enemyteamdmgBar * scale), Color.Firebrick);
+                }
+                   if (myteamhpBar-enemyteamdmgBar<enemyteamhpBar-myteamdmgBar)
                 {
                     Drawing.DrawText(myTeamHpX+ 60 + OffsetX, myTeamHpY + OffsetY +14, Color.Red, "Enemy team is stronger");
                 }

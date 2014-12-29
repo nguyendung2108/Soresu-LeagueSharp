@@ -73,11 +73,13 @@ namespace TeamStats
             {
                 if (src.Crit>0)
                 {
-                    basicDmg += (src.BaseAttackDamage + src.FlatPhysicalDamageMod)*(1 + src.Crit);
+                    basicDmg += (float)src.GetAutoAttackDamage(dsc) * (1 + src.Crit/attacks);
+                    //basicDmg += (src.BaseAttackDamage + src.FlatPhysicalDamageMod)*(1 + src.Crit);
                 }
                 else
                 {
-                    basicDmg += src.BaseAttackDamage + src.FlatPhysicalDamageMod;
+                   // basicDmg += src.BaseAttackDamage + src.FlatPhysicalDamageMod;
+                    basicDmg += (float)src.GetAutoAttackDamage(dsc);
                 }  
             };
             float damage = basicDmg;
@@ -85,11 +87,9 @@ namespace TeamStats
             foreach (var spell in spells)
             {
                 var t = spell.CooldownExpires - Game.Time;
-                
                 if (t < 0.5 && spell.Level > 0 && spell.SData.SpellCastTime < 2f)
                 {
-                            damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot); 
-                    
+                            damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);          
                 }
             }
             if (src.Spellbook.CanUseSpell(src.GetSpellSlot("summonerdot")) == SpellState.Ready)
