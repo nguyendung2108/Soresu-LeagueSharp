@@ -15,7 +15,7 @@ namespace TeamStats
         public static Menu Config;
         public static readonly Obj_AI_Hero player = ObjectManager.Player;
         public static Teams teams;
-        public static int range = 2400;
+        public static int range = 2800;
         private static Render.Sprite frame;
         public static int myTeamHpX = (int)(Drawing.Width*0.68);
         public static int myTeamHpY = (int)(Drawing.Height * 0.97);
@@ -37,6 +37,7 @@ namespace TeamStats
             Config.AddItem(new MenuItem("Y-pos", "Y-pos").SetValue(new Slider(0, 200, -1080)));
             Config.AddItem(new MenuItem("Default", "Default").SetValue(false));
             Config.AddItem(new MenuItem("Enabled", "Enabled").SetValue(true));
+            Config.AddItem(new MenuItem("draw", "Draw range")).SetValue(new Circle(false, Color.LightBlue));
             Config.AddToMainMenu();
             //frame = loadFrame();
             Drawing.OnDraw += Drawing_OnDraw;
@@ -60,7 +61,7 @@ namespace TeamStats
         {
             if (Config.Item("Enabled").GetValue<bool>() && player.CountEnemysInRange(range) > 0)
             {
-
+                
                 var OffsetX = Config.Item("X-pos").GetValue<Slider>().Value;
                 var OffsetY = Config.Item("Y-pos").GetValue<Slider>().Value;
                 int myteamhpBar = teams.myTeamHP;
@@ -92,6 +93,7 @@ namespace TeamStats
                 {
                     Drawing.DrawText(myTeamHpX + 55 + OffsetX, myTeamHpY + OffsetY +14, Color.ForestGreen, "Your team is stronger");
                 }
+                DrawCircle("draw", range);
             }
         }
         private static Render.Sprite loadFrame()
@@ -105,6 +107,11 @@ namespace TeamStats
                 load.Show();
                 load.Add(0);
                 return load;
+        }
+        private static void DrawCircle(string menuItem, float range)
+        {
+            Circle circle = Config.Item(menuItem).GetValue<Circle>();
+            if (circle.Active) Utility.DrawCircle(player.Position, range, circle.Color);
         }
     }
 }

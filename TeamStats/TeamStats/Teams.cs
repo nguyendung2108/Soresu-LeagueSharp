@@ -61,7 +61,7 @@ namespace TeamStats
                 }
                 myTeamDmg += (int)ComboDamage(teammate, EnemyTeam[t]);
                 tHP -= (int)teammate.GetComboDamage(EnemyTeam[t], new[] { SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R });
-                myTeamHP += (int)((teammate.Health * ((1 + (1 - (100 / (teammate.Armor + 100))))) + teammate.Health * (0.3 + 1)) / 2);
+                myTeamHP += (int)((teammate.Health * ((1 + (1 - (100 / (teammate.Armor + 100))))) + teammate.Health * ((1 + (1 - (100 / (teammate.SpellBlock + 100)))))) / 2);
             }
         }
         private static float ComboDamage(Obj_AI_Hero src, Obj_AI_Hero dsc)
@@ -88,15 +88,7 @@ namespace TeamStats
                 
                 if (t < 0.5 && spell.Level > 0 && spell.SData.SpellCastTime < 2f)
                 {
-                    if (spell.Cooldown < 2.5f && spell.Cooldown>0)
-                    {
-                        int count = (int)Math.Floor(5/spell.Cooldown);
-                        for (int i = 0; i < count; i++)
-                        {
                             damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot); 
-                        }
-                        
-                    }
                     
                 }
             }
