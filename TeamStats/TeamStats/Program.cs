@@ -15,7 +15,7 @@ namespace TeamStats
         public static Menu Config;
         public static readonly Obj_AI_Hero player = ObjectManager.Player;
         public static Teams teams;
-        public static int range = 22000;
+        public static int range = 2400;
         private static Render.Sprite frame;
         public static int myTeamHpX = (int)(Drawing.Width*0.68);
         public static int myTeamHpY = (int)(Drawing.Height * 0.97);
