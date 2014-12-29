@@ -25,7 +25,7 @@ namespace TeamStats
         }
         public void SetNums()
         {
-            foreach (var player in ObjectManager.Get<Obj_AI_Hero>().Where(i => !i.IsDead && !i.IsMinion && Program.player.Distance(i) < 2200))
+            foreach (var player in ObjectManager.Get<Obj_AI_Hero>().Where(i => !i.IsDead && !i.IsMinion && Program.player.Distance(i) < Program.range))
             {
                 //list
                 if (player.IsEnemy) EnemyTeam.Add(player);
