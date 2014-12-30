@@ -66,32 +66,35 @@ namespace TeamStats
         }
         private static float ComboDamage(Obj_AI_Hero src, Obj_AI_Hero dsc)
         {
-            Random rnd = new Random();
+            
             float basicDmg = 0;
             int attacks = (int)Math.Floor(src.AttackSpeedMod*5);
             for (int i = 0; i < attacks; i++)
             {
+                
                 if (src.Crit>0)
                 {
+                    
                     basicDmg += (float)src.GetAutoAttackDamage(dsc) * (1 + src.Crit/attacks);
-                    //basicDmg += (src.BaseAttackDamage + src.FlatPhysicalDamageMod)*(1 + src.Crit);
                 }
                 else
                 {
-                   // basicDmg += src.BaseAttackDamage + src.FlatPhysicalDamageMod;
+
                     basicDmg += (float)src.GetAutoAttackDamage(dsc);
-                }  
+                }
+  
             };
             float damage = basicDmg;
             var spells = src.Spellbook.Spells;
+
             foreach (var spell in spells)
             {
                 var t = spell.CooldownExpires - Game.Time;
-                if (t < 0.5 && spell.Level > 0 && spell.SData.SpellCastTime < 2f && spell.IsReady())
+                if (spell.Level > 0 && t < 0.5 && Damage.GetSpellDamage(src, dsc, spell.Slot) > 0)
                 {
-                    
                     switch (src.SkinName)
                     {
+                            
                                 case "Fiddlesticks":
                                     if (spell.Slot == SpellSlot.W || spell.Slot == SpellSlot.E)
                                     {
@@ -124,6 +127,13 @@ namespace TeamStats
                                     if (spell.Slot != SpellSlot.R || spell.Slot != SpellSlot.Q)
                                     {
                                         damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    }
+                                    break;
+                                case "Vladimir":
+                                    if (spell.Slot == SpellSlot.E)
+                                    {
+                                        damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot)*2;
+                                        
                                     }
                                     break;
                                 default:
