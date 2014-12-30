@@ -87,7 +87,7 @@ namespace TeamStats
             foreach (var spell in spells)
             {
                 var t = spell.CooldownExpires - Game.Time;
-                if (t < 0.5 && spell.Level > 0 && spell.SData.SpellCastTime < 2f)
+                if (t < 0.5 && spell.Level > 0 && spell.SData.SpellCastTime < 2f )
                 {
                     
                     switch (src.SkinName)
@@ -121,7 +121,7 @@ namespace TeamStats
                                     }
                                     break;
                                 case "Nunu":
-                                    if (spell.Slot != SpellSlot.R)
+                                    if (spell.Slot != SpellSlot.R || spell.Slot != SpellSlot.Q)
                                     {
                                         damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
                                     }

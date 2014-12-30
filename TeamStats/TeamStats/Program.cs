@@ -77,7 +77,7 @@ namespace TeamStats
                 float scale = 300f / highest;
                if (Config.Item("Chart").GetValue<bool>())
                 {
-                    Drawing.DrawLine(myTeamHpX + OffsetX, myTeamHpY+14 + OffsetY, enemyTeamDmgX + OffsetX, enemyTeamDmgY + OffsetY, 300, Color.SlateGray);
+                    Drawing.DrawLine(myTeamHpX + OffsetX, myTeamHpY+28 + OffsetY, enemyTeamDmgX + OffsetX, enemyTeamDmgY + OffsetY, 300, Color.Peru);
                     Drawing.DrawText(myTeamHpX + OffsetX, myTeamHpY + OffsetY - 2, Color.White, "Allies Health(" + myteamhpBar + ")");
                     Drawing.DrawLine(myTeamHpX + OffsetX, myTeamHpY + OffsetY, myTeamHpX + OffsetX, myTeamHpY + OffsetY + 14, (int)(myteamhpBar * scale * -1), Color.ForestGreen);
 
