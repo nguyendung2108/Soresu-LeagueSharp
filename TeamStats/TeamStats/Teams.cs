@@ -87,7 +87,7 @@ namespace TeamStats
             foreach (var spell in spells)
             {
                 var t = spell.CooldownExpires - Game.Time;
-                if (t < 0.5 && spell.Level > 0 && spell.SData.SpellCastTime < 2f )
+                if (t < 0.5 && spell.Level > 0 && spell.SData.SpellCastTime < 2f && spell.IsReady())
                 {
                     
                     switch (src.SkinName)
