@@ -98,8 +98,9 @@ namespace TeamStats
                 {
                     Drawing.DrawText(myTeamHpX + 55 + OffsetX, myTeamHpY + OffsetY +14, Color.ForestGreen, "Your team is stronger");
                 }
-                DrawCircle("draw", range);
-            }
+
+            } 
+            DrawCircle("draw", range);
         }
         private static Render.Sprite loadFrame()
         {
