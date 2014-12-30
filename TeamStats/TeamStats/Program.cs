@@ -33,8 +33,9 @@ namespace TeamStats
         private static void Game_OnGameLoad(EventArgs args)
         {
             Config = new Menu("TeamStats", "TeamStats", true);
-            Config.AddItem(new MenuItem("X-pos", "X-pos").SetValue(new Slider(0, -1500, 400)));
-            Config.AddItem(new MenuItem("Y-pos", "Y-pos").SetValue(new Slider(0, 200, -1080)));
+            Config.AddItem(new MenuItem("X-pos", "X offset").SetValue(new Slider(0, -1500, 400)));
+            Config.AddItem(new MenuItem("Y-pos", "Y offset").SetValue(new Slider(0, 200, -1080)));
+            Config.AddItem(new MenuItem("Range", "Range").SetValue(new Slider(2200, 0, 3000)));
             Config.AddItem(new MenuItem("Default", "Default").SetValue(false));
             Config.AddItem(new MenuItem("Chart", "Chart").SetValue(true));
             Config.AddItem(new MenuItem("Enabled", "Enabled").SetValue(true));
@@ -55,6 +56,7 @@ namespace TeamStats
                 Config.Item("X-pos").SetValue(new Slider(0, -1500, 400));
                 Config.Item("Default").SetValue(false);
             }
+            range = Config.Item("Range").GetValue<Slider>().Value;
             
         }
 

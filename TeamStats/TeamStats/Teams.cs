@@ -89,8 +89,50 @@ namespace TeamStats
                 var t = spell.CooldownExpires - Game.Time;
                 if (t < 0.5 && spell.Level > 0 && spell.SData.SpellCastTime < 2f)
                 {
-                            damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);          
+                    
+                    switch (src.SkinName)
+                    {
+                                case "Fiddlesticks":
+                                    if (spell.Slot == SpellSlot.W || spell.Slot == SpellSlot.E)
+                                    {
+                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot)*5); 
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    break;
+                                case "Cassiopeia":
+                                    if (spell.Slot == SpellSlot.Q || spell.Slot == SpellSlot.E)
+                                    {
+                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot) * 2);
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    
+                                    break;
+                                case "Karthus":
+                                    if (spell.Slot == SpellSlot.Q)
+                                    {
+                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot) * 4);
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    break;
+                                case "Pantheon":
+                                    if (spell.Slot != SpellSlot.R)
+                                    {
+                                        damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    }
+                                    break;
+                                case "Nunu":
+                                    if (spell.Slot != SpellSlot.R)
+                                    {
+                                        damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    }
+                                    break;
+                                default:
+                                damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot); 
+                                break;
+                    }
+                                     
                 }
+                
             }
             if (src.Spellbook.CanUseSpell(src.GetSpellSlot("summonerdot")) == SpellState.Ready)
             {

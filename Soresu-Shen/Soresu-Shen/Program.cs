@@ -70,7 +70,7 @@ namespace Executed
         }
         private static void InitMenu()
         {
-            config = new Menu("Soresu-Shen", "SRS_Shen", true);
+            config = new Menu("Soresu-Shen", "Shen", true);
             // Target Selector
             Menu menuTS = new Menu("Selector", "tselect");
             TargetSelector.AddToMenu(menuTS);
@@ -80,12 +80,6 @@ namespace Executed
             Menu menuOrb = new Menu("Orbwalker", "orbwalker");
             orbwalker = new Orbwalking.Orbwalker(menuOrb);
             config.AddSubMenu(menuOrb);
-
-            Menu menuK = new Menu("Keybinds", "demkeys");
-            menuK.AddItem(new MenuItem("combokey", "Combo Key")).SetValue(new KeyBind(32, KeyBindType.Press));
-            menuK.AddItem(new MenuItem("harasskey", "Harass Key")).SetValue(new KeyBind(67, KeyBindType.Press));
-            menuK.AddItem(new MenuItem("clearkey", "Clear Key")).SetValue(new KeyBind(86, KeyBindType.Press));
-            config.AddSubMenu(menuK);
 
             // Draw settings
             Menu menuD = new Menu("Drawings ", "dsettings");
