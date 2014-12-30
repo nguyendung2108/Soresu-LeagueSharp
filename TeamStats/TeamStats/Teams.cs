@@ -43,10 +43,10 @@ namespace TeamStats
                 if (eHP < 0)
                 {
                     e++;
-                    eHP = myTeam[e].Health;
+                    eHP = myTeam[e].Health + eHP;
                 }
                 enemyTeamDmg += (int)ComboDamage(enemy, myTeam[e]);
-                eHP -=(int)enemy.GetComboDamage(myTeam[e], new[] {SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R});
+                eHP -= (int)ComboDamage(enemy, myTeam[e]);
                 enemyTeamHP += (int)((enemy.Health * ((1 + (1 - (100 / (enemy.Armor + 100))))) + enemy.Health * (0.3 + 1)) / 2);
 
             }
@@ -57,10 +57,10 @@ namespace TeamStats
                 if (tHP < 0)
                 {
                     t++;
-                    tHP = EnemyTeam[t].Health;
+                    tHP = EnemyTeam[t].Health + tHP;
                 }
                 myTeamDmg += (int)ComboDamage(teammate, EnemyTeam[t]);
-                tHP -= (int)teammate.GetComboDamage(EnemyTeam[t], new[] { SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R });
+                tHP -= (int)ComboDamage(teammate, EnemyTeam[t]);
                 myTeamHP += (int)((teammate.Health * ((1 + (1 - (100 / (teammate.Armor + 100))))) + teammate.Health * ((1 + (1 - (100 / (teammate.SpellBlock + 100)))))) / 2);
             }
         }
