@@ -28,6 +28,7 @@ namespace TeamStats
         static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
+            
         }
 
         private static void Game_OnGameLoad(EventArgs args)
@@ -35,7 +36,7 @@ namespace TeamStats
             Config = new Menu("TeamStats", "TeamStats", true);
             Config.AddItem(new MenuItem("X-pos", "X offset").SetValue(new Slider(0, -1500, 400)));
             Config.AddItem(new MenuItem("Y-pos", "Y offset").SetValue(new Slider(0, 200, -1080)));
-            Config.AddItem(new MenuItem("Range", "Range").SetValue(new Slider(2200, 0, 3000)));
+            Config.AddItem(new MenuItem("Range", "Range").SetValue(new Slider(2200, 0, 20000)));
             Config.AddItem(new MenuItem("Default", "Default").SetValue(false));
             Config.AddItem(new MenuItem("Chart", "Chart").SetValue(true));
             Config.AddItem(new MenuItem("Enabled", "Enabled").SetValue(true));
@@ -49,11 +50,12 @@ namespace TeamStats
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (Config.Item("Enabled").GetValue<bool>() && player.CountEnemysInRange(range) > 0) teams = new Teams();
+            if (Config.Item("Enabled").GetValue<bool>() && player.CountEnemysInRange(range) > 0 && countAllies(range) > 0) teams = new Teams();
             if (Config.Item("Default").GetValue<bool>())
             {
                 Config.Item("Y-pos").SetValue(new Slider(0, 200, -1080));
                 Config.Item("X-pos").SetValue(new Slider(0, -1500, 400));
+                Config.Item("Range").SetValue(new Slider(2200, 0, 20000));
                 Config.Item("Default").SetValue(false);
             }
             range = Config.Item("Range").GetValue<Slider>().Value;
@@ -62,7 +64,7 @@ namespace TeamStats
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (Config.Item("Enabled").GetValue<bool>() && player.CountEnemysInRange(range) > 0)
+            if (Config.Item("Enabled").GetValue<bool>() && player.CountEnemysInRange(range) > 0 && countAllies(range)>0)
             {
                 
                 var OffsetX = Config.Item("X-pos").GetValue<Slider>().Value;
@@ -102,6 +104,11 @@ namespace TeamStats
             } 
             DrawCircle("draw", range);
         }
+
+        private static int countAllies(int range)
+        {
+            return ObjectManager.Get<Obj_AI_Hero>().Count(i => player.Distance(i) < range && !i.IsDead && !i.IsMinion && (i.IsAlly || i.IsMe) && !i.IsEnemy && i.IsValid);
+        }
         private static Render.Sprite loadFrame()
         {
 
@@ -119,5 +126,6 @@ namespace TeamStats
             Circle circle = Config.Item(menuItem).GetValue<Circle>();
             if (circle.Active) Utility.DrawCircle(player.Position, range, circle.Color);
         }
+
     }
 }

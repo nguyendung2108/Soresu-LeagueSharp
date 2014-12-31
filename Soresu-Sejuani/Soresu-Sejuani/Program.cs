@@ -20,6 +20,8 @@ namespace Soresu_Sejuani
         public static Items.Item botrk = new Items.Item(3153, 450);
         public static Items.Item bilgewater = new Items.Item(3144, 450);
         public static Items.Item hexgun = new Items.Item(3146, 700);
+        public static Items.Item Dfg = new Items.Item(3128, 750);
+        public static Items.Item Bft = new Items.Item(3188, 750);
         static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
@@ -258,10 +260,12 @@ namespace Soresu_Sejuani
         }
         private static void Combo()
         {
+            
             Ulti();
             float perc = (float)config.Item("minmana").GetValue<Slider>().Value / 100f;
             var minHit = config.Item("useemin").GetValue<Slider>().Value;
             Obj_AI_Hero target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
+            UseItems(target);
             if (W.IsReady() && config.Item("usew").GetValue<bool>()&& me.CountEnemysInRange((int)W.Range)>0 && me.Spellbook.GetSpell(SpellSlot.W).ManaCost<=me.Mana)
             {
                 W.Cast();
@@ -277,7 +281,7 @@ namespace Soresu_Sejuani
             {
                 Q.Cast(target, config.Item("packets").GetValue<bool>());
             }
-            UseItems(target);
+            
 
            
         }
@@ -309,11 +313,26 @@ namespace Soresu_Sejuani
         private static float ComboDamage(Obj_AI_Hero hero)
         {
             float damage = 0;
-            if (Q.IsReady())
-                damage += (float)Damage.GetSpellDamage(me, hero, SpellSlot.Q);
-            if (E.IsReady() )
-                damage += (float)Damage.GetSpellDamage(me, hero, SpellSlot.E);
-            if (me.Spellbook.CanUseSpell(me.GetSpellSlot("summonerdot")) == SpellState.Ready)
+            if (Q.IsReady())damage += (float)Damage.GetSpellDamage(me, hero, SpellSlot.Q);
+            if (E.IsReady()) damage += (float)Damage.GetSpellDamage(me, hero, SpellSlot.E);
+            if (W.IsReady()) {
+                double wdot = new double[] { 40, 70, 100, 130, 160 }[W.Level] + (new double[] { 4, 6, 8, 10, 12 }[W.Level] / 100) * me.MaxHealth;
+                damage += (float)me.CalcDamage(hero, Damage.DamageType.Magical, wdot);
+                damage += (float)Damage.GetSpellDamage(me, hero, SpellSlot.W);
+            }
+            if (R.IsReady())damage += (float)Damage.GetSpellDamage(me, hero, SpellSlot.R);
+            if ((Items.HasItem(Bft.Id) && Items.CanUseItem(Bft.Id)) ||
+                (Items.HasItem(Dfg.Id) && Items.CanUseItem(Dfg.Id)))
+                damage = (float)(damage*1.2);
+            if (Items.HasItem(Bft.Id) && Items.CanUseItem(Bft.Id))
+            {
+                damage += (float)me.GetItemDamage(hero, Damage.DamageItems.Dfg);
+            }
+            if (Items.HasItem(Dfg.Id) && Items.CanUseItem(Dfg.Id))
+            {
+                damage += (float)me.GetItemDamage(hero, Damage.DamageItems.Dfg);
+            }
+            if (me.Spellbook.CanUseSpell(me.GetSpellSlot("summonerdot")) == SpellState.Ready && hero.Health < damage + me.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite))
             {
                 damage += (float)me.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);
             }
@@ -364,6 +383,14 @@ namespace Soresu_Sejuani
             if (Items.HasItem(3146) && Items.CanUseItem(3146))
             {
                 hexgun.Cast(target);
+            }
+            if (Items.HasItem(Dfg.Id) && Items.CanUseItem(Dfg.Id))
+            {
+                Dfg.Cast(target);
+            }
+            if (Items.HasItem(Bft.Id) && Items.CanUseItem(Bft.Id))
+            {
+                Bft.Cast(target);
             }
             if (me.Spellbook.CanUseSpell(me.GetSpellSlot("summonerdot")) == SpellState.Ready)
             {

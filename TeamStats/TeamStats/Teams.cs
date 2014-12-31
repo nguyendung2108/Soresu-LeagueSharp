@@ -47,7 +47,7 @@ namespace TeamStats
                 }
                 enemyTeamDmg += (int)ComboDamage(enemy, myTeam[e]);
                 eHP -= (int)ComboDamage(enemy, myTeam[e]);
-                enemyTeamHP += (int)((enemy.Health * ((1 + (1 - (100 / (enemy.Armor + 100))))) + enemy.Health * (0.3 + 1)) / 2);
+                enemyTeamHP += (int)(enemy.Health);
 
             }
             var t = 0;
@@ -61,12 +61,12 @@ namespace TeamStats
                 }
                 myTeamDmg += (int)ComboDamage(teammate, EnemyTeam[t]);
                 tHP -= (int)ComboDamage(teammate, EnemyTeam[t]);
-                myTeamHP += (int)((teammate.Health * ((1 + (1 - (100 / (teammate.Armor + 100))))) + teammate.Health * ((1 + (1 - (100 / (teammate.SpellBlock + 100)))))) / 2);
+                myTeamHP += (int)(teammate.Health);
             }
         }
         private static float ComboDamage(Obj_AI_Hero src, Obj_AI_Hero dsc)
         {
-            
+            if (!src.IsValid || !dsc.IsValid) return 0f;
             float basicDmg = 0;
             int attacks = (int)Math.Floor(src.AttackSpeedMod*5);
             for (int i = 0; i < attacks; i++)
@@ -86,15 +86,15 @@ namespace TeamStats
             };
             float damage = basicDmg;
             var spells = src.Spellbook.Spells;
-
+            
             foreach (var spell in spells)
             {
                 var t = spell.CooldownExpires - Game.Time;
                 if (spell.Level > 0 && t < 0.5 && Damage.GetSpellDamage(src, dsc, spell.Slot) > 0)
                 {
+                    
                     switch (src.SkinName)
                     {
-                            
                                 case "Fiddlesticks":
                                     if (spell.Slot == SpellSlot.W || spell.Slot == SpellSlot.E)
                                     {
@@ -122,19 +122,29 @@ namespace TeamStats
                                     {
                                         damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
                                     }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
                                     break;
                                 case "Nunu":
-                                    if (spell.Slot != SpellSlot.R || spell.Slot != SpellSlot.Q)
+                                    if (spell.Slot != SpellSlot.R && spell.Slot != SpellSlot.Q)
                                     {
                                         damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
                                     }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
                                     break;
                                 case "Vladimir":
                                     if (spell.Slot == SpellSlot.E)
                                     {
                                         damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot)*2;
-                                        
+
                                     }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    break;
+                                case "Riven":
+                                    if (spell.Slot == SpellSlot.Q)
+                                    {
+                                        damage += RivenDamageQ(spell, src, dsc);
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
                                     break;
                                 default:
                                 damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot); 
@@ -142,13 +152,25 @@ namespace TeamStats
                     }
                                      
                 }
-                
             }
+            
             if (src.Spellbook.CanUseSpell(src.GetSpellSlot("summonerdot")) == SpellState.Ready)
             {
                 damage += (float)src.GetSummonerSpellDamage(dsc, Damage.SummonerSpell.Ignite);
             }
             return damage;
         }
-     }
+
+        private static float RivenDamageQ(SpellDataInst spell,Obj_AI_Hero src, Obj_AI_Hero dsc)
+        {
+            double dmg = 0;
+            if (spell.IsReady())
+            {
+                dmg += src.CalcDamage(dsc, Damage.DamageType.Physical,
+                (-10 + (spell.Level * 20) +
+                (0.35 + (spell.Level * 0.05)) * (src.FlatPhysicalDamageMod + src.BaseAttackDamage))*3);
+            }
+            return (float)dmg;
+        }
+    }
  }
