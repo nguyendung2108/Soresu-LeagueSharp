@@ -186,8 +186,10 @@ namespace Soresu_Sejuani
 
         private static void Clear()
         {
+           
             float perc = (float)config.Item("minmana").GetValue<Slider>().Value/100f;
             if (me.Mana < me.MaxMana * perc) return;
+            Q.SetSkillshot(Q.Instance.SData.SpellCastTime, Q.Instance.SData.LineWidth, Q.Instance.SData.MissileSpeed, false, SkillshotType.SkillshotLine);
             var minions = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget(400)).ToList();
             if (minions.Count() > 2)
             {
@@ -200,17 +202,18 @@ namespace Soresu_Sejuani
 
             if (W.IsReady() && minionsSpells.Count() > 1 && config.Item("usewC").GetValue<bool>() && me.Spellbook.GetSpell(SpellSlot.W).ManaCost <= me.Mana) W.Cast();
             var minHit = config.Item("useeCmin").GetValue<Slider>().Value;
-            if (E.IsReady() && CountBuffMini(E.Range) >= minHit || !(Q.IsReady() && me.Mana - me.Spellbook.GetSpell(SpellSlot.Q).ManaCost < me.MaxMana * perc) || !(W.IsReady() && me.Mana - me.Spellbook.GetSpell(SpellSlot.W).ManaCost < me.MaxMana * perc))
+            if (E.IsReady() && me.Spellbook.GetSpell(SpellSlot.Q).ManaCost <= me.Mana && CountBuffMini(E.Range) >= minHit && (!(!Q.IsReady() && me.Mana - me.Spellbook.GetSpell(SpellSlot.Q).ManaCost < me.MaxMana * perc) || !(!W.IsReady() && me.Mana - me.Spellbook.GetSpell(SpellSlot.W).ManaCost < me.MaxMana * perc)))
             {
                 E.Cast();
             }
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Minion>().Where(i => !i.IsDead && i.IsEnemy && me.Distance(i) < Q.Range).OrderByDescending(l => countMinionsInrange(l, Q.Range)))
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Minion>().Where(i => !i.IsDead && i.IsEnemy && me.Distance(i) < Q.Range && countMinionsInrange(i, 250f)>1).OrderByDescending(l => countMinionsInrange(l, 250f)))
             {
                 if (Q.IsReady() && me.Spellbook.GetSpell(SpellSlot.Q).ManaCost <= me.Mana)
                 {
                     Q.Cast(enemy.Position, config.Item("packets").GetValue<bool>());
                 }
             }
+            Q.SetSkillshot(Q.Instance.SData.SpellCastTime, Q.Instance.SData.LineWidth, Q.Instance.SData.MissileSpeed, true, SkillshotType.SkillshotLine);
         }
 
         private static int countMinionsInrange(Obj_AI_Minion l, float p)
