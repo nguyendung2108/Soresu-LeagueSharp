@@ -18,7 +18,6 @@ namespace TeamStats
         public int enemyTeamDmg;
         public int myTeamHP { get; set; }
         public int enemyTeamHP { get; set; }
-
         public Teams()
         {
             SetNums();
