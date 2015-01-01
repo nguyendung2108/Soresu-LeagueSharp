@@ -70,7 +70,7 @@ namespace Executed
         }
         private static void InitMenu()
         {
-            config = new Menu("Soresu-Shen", "Shen", true);
+            config = new Menu("Soresu-Shen", "SRS_Shen", true);
             // Target Selector
             Menu menuTS = new Menu("Selector", "tselect");
             TargetSelector.AddToMenu(menuTS);
@@ -81,6 +81,12 @@ namespace Executed
             orbwalker = new Orbwalking.Orbwalker(menuOrb);
             config.AddSubMenu(menuOrb);
 
+            Menu menuK = new Menu("Keybinds", "demkeys");
+            menuK.AddItem(new MenuItem("combokey", "Combo Key")).SetValue(new KeyBind(32, KeyBindType.Press));
+            menuK.AddItem(new MenuItem("harasskey", "Harass Key")).SetValue(new KeyBind(67, KeyBindType.Press));
+            menuK.AddItem(new MenuItem("clearkey", "Clear Key")).SetValue(new KeyBind(86, KeyBindType.Press));
+            config.AddSubMenu(menuK);
+
             // Draw settings
             Menu menuD = new Menu("Drawings ", "dsettings");
             menuD.AddItem(new MenuItem("drawaa", "Draw AA range")).SetValue(new Circle(false, Color.FromArgb(20, 150, 62, 172)));
@@ -88,7 +94,7 @@ namespace Executed
             menuD.AddItem(new MenuItem("drawee", "Draw E range")).SetValue(new Circle(false, Color.FromArgb(20, 150, 62, 172)));
             menuD.AddItem(new MenuItem("draweeflash", "Draw E+flash range")).SetValue(new Circle(true, Color.FromArgb(50, 250, 248, 110)));
             menuD.AddItem(new MenuItem("drawallyhp", "Draw teammates' HP")).SetValue(true);
-            menuD.AddItem(new MenuItem("drawincdmg", "Draw incoming damage")).SetValue(true);
+            //menuD.AddItem(new MenuItem("drawincdmg", "Draw incoming damage")).SetValue(true);
             menuD.AddItem(new MenuItem("drawcombo", "Draw combo damage")).SetValue(true);
             config.AddSubMenu(menuD);
 
@@ -137,7 +143,7 @@ namespace Executed
             DrawCircle("drawee", E.Range);
             DrawCircle("draweeflash", EFlash.Range);
             if (config.Item("drawallyhp").GetValue<bool>()) DrawHealths();
-            if (config.Item("drawincdmg").GetValue<bool>()) getIncDmg();
+            //if (config.Item("drawincdmg").GetValue<bool>()) getIncDmg();
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
             Utility.HpBarDamageIndicator.Enabled = config.Item("drawcombo").GetValue<bool>();          
         }
@@ -404,14 +410,14 @@ namespace Executed
         {
            
             var minHit = config.Item("useemin").GetValue<Slider>().Value;
-            Obj_AI_Hero target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
-            if (config.Item("usee").GetValue<bool>() && E.IsReady() && E.InRange(target.Position))
+            Obj_AI_Hero target = TargetSelector.GetTarget(E.Range+400, TargetSelector.DamageType.Magical);
+            if (config.Item("usee").GetValue<bool>() && E.IsReady() && me.Distance(target.Position)<E.Range)
             {
                 if (minHit > 1)
                 {
                     E.Cast(target.Position + Vector3.Normalize(target.Position - me.Position) * ((CheckingCollision(me, target, E, false, true).Count >= minHit) ? E.Range : 200), config.Item("packets").GetValue<bool>());
                 }
-                else if (me.Distance(target.Position) > 100 && E.GetPrediction(target).Hitchance >= HitChance.Low)
+                else if (me.Distance(target.Position) > me.AttackRange && E.GetPrediction(target).Hitchance >= HitChance.Low)
                 {
                     E.Cast(target, config.Item("packets").GetValue<bool>());
                     
