@@ -94,7 +94,7 @@ namespace Executed
             menuD.AddItem(new MenuItem("drawee", "Draw E range")).SetValue(new Circle(false, Color.FromArgb(20, 150, 62, 172)));
             menuD.AddItem(new MenuItem("draweeflash", "Draw E+flash range")).SetValue(new Circle(true, Color.FromArgb(50, 250, 248, 110)));
             menuD.AddItem(new MenuItem("drawallyhp", "Draw teammates' HP")).SetValue(true);
-            //menuD.AddItem(new MenuItem("drawincdmg", "Draw incoming damage")).SetValue(true);
+            menuD.AddItem(new MenuItem("drawincdmg", "Draw incoming damage")).SetValue(true);
             menuD.AddItem(new MenuItem("drawcombo", "Draw combo damage")).SetValue(true);
             config.AddSubMenu(menuD);
 
@@ -143,7 +143,7 @@ namespace Executed
             DrawCircle("drawee", E.Range);
             DrawCircle("draweeflash", EFlash.Range);
             if (config.Item("drawallyhp").GetValue<bool>()) DrawHealths();
-            //if (config.Item("drawincdmg").GetValue<bool>()) getIncDmg();
+            if (config.Item("drawincdmg").GetValue<bool>()) getIncDmg();
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
             Utility.HpBarDamageIndicator.Enabled = config.Item("drawcombo").GetValue<bool>();          
         }
@@ -174,16 +174,92 @@ namespace Executed
         private static void getIncDmg()
         {
             double result = 0;
-            var color = Color.Cyan;
+            var color = Color.Red;
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.Distance(me.Position) < 750 && i.IsEnemy && !i.IsAlly &&!i.IsDead && !i.IsMinion && !i.IsMe))
             {
+
+                float basicDmg = 0;
+                int attacks = (int)Math.Floor(enemy.AttackSpeedMod * 5);
+                for (int i = 0; i < attacks; i++)
+                {
+
+                    if (enemy.Crit > 0)
+                    {
+
+                        basicDmg += (float)enemy.GetAutoAttackDamage(me) * (1 + enemy.Crit / attacks);
+                    }
+                    else
+                    {
+
+                        basicDmg += (float)enemy.GetAutoAttackDamage(me);
+                    }
+
+                };
+                result += basicDmg;
+
              var spells = enemy.Spellbook.Spells;
              foreach (var spell in spells)
              {
                  var t = spell.CooldownExpires - Game.Time;
                  if (t<0.5)
                  {
-                     result += Damage.GetSpellDamage(enemy, me, spell.Slot);
+                     switch (enemy.SkinName)
+                     {
+                         case "Fiddlesticks":
+                             if (spell.Slot == SpellSlot.W || spell.Slot == SpellSlot.E)
+                             {
+                                 result += (float)(Damage.GetSpellDamage(enemy, me, spell.Slot) * 5);
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         case "Cassiopeia":
+                             if (spell.Slot == SpellSlot.Q || spell.Slot == SpellSlot.E)
+                             {
+                                 result += (float)(Damage.GetSpellDamage(enemy, me, spell.Slot) * 2);
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+
+                             break;
+                         case "Karthus":
+                             if (spell.Slot == SpellSlot.Q)
+                             {
+                                 result += (float)(Damage.GetSpellDamage(enemy, me, spell.Slot) * 4);
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         case "Pantheon":
+                             if (spell.Slot != SpellSlot.R)
+                             {
+                                 result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         case "Nunu":
+                             if (spell.Slot != SpellSlot.R && spell.Slot != SpellSlot.Q)
+                             {
+                                 result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         case "Vladimir":
+                             if (spell.Slot == SpellSlot.E)
+                             {
+                                 result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot) * 2;
+
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         case "Riven":
+                             if (spell.Slot == SpellSlot.Q)
+                             {
+                                 result += RivenDamageQ(spell, enemy, me);
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         default:
+                             result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                     }
                  }
              }
              if (enemy.Spellbook.CanUseSpell(me.GetSpellSlot("summonerdot")) == SpellState.Ready)
@@ -197,11 +273,7 @@ namespace Executed
             }
             var barPos = me.HPBarPosition;
             var damage = (float)result;
-            //if (damage == 0) return;
-            if (me.Health - damage < me.MaxHealth * 0.6) color = Color.Orange;
-            if (me.Health - damage < me.MaxHealth * 0.4) color = Color.Crimson;
-
-
+            if (damage == 0) return;
             var percentHealthAfterDamage = Math.Max(0, me.Health - damage) / me.MaxHealth;
             var xPos = barPos.X + XOffset + Width * percentHealthAfterDamage;
 
@@ -214,6 +286,17 @@ namespace Executed
             }
 
             Drawing.DrawLine(xPos, barPos.Y + YOffset, xPos, barPos.Y + YOffset + Height, 3, color);
+        }
+        private static float RivenDamageQ(SpellDataInst spell, Obj_AI_Hero src, Obj_AI_Hero dsc)
+        {
+            double dmg = 0;
+            if (spell.IsReady())
+            {
+                dmg += src.CalcDamage(dsc, Damage.DamageType.Physical,
+                (-10 + (spell.Level * 20) +
+                (0.35 + (spell.Level * 0.05)) * (src.FlatPhysicalDamageMod + src.BaseAttackDamage)) * 3);
+            }
+            return (float)dmg;
         }
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
@@ -434,7 +517,6 @@ namespace Executed
         }
         private static void FlashCombo()
         {
-           
             Obj_AI_Hero target = TargetSelector.GetTarget(EFlash.Range, TargetSelector.DamageType.Magical);
             //System.IO.File.AppendAllText(@"C:\Users\Public\TestFolder\PacketLog.txt", "Target: " + target.Position.ToString() + "\n" + "Me: " + me.Position.ToString() + "\n" + "Best: " + getPosToEflash(target.Position).ToString() + "\n");
             if (config.Item("usee").GetValue<bool>() && E.IsReady() && me.Distance(target.Position) < EFlash.Range && me.Distance(target.Position) > 480 && !((getPosToEflash(target.Position)).IsWall()))
