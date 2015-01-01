@@ -410,6 +410,7 @@ namespace Executed
         {
            
             var minHit = config.Item("useemin").GetValue<Slider>().Value;
+            TargetSelector.GetSelectedTarget();
             Obj_AI_Hero target = TargetSelector.GetTarget(E.Range+400, TargetSelector.DamageType.Magical);
             if (config.Item("usee").GetValue<bool>() && E.IsReady() && me.Distance(target.Position)<E.Range)
             {
@@ -423,7 +424,7 @@ namespace Executed
                     
                 }
             }
-            if (Q.IsReady() && config.Item("useq").GetValue<bool>() && currEnergy - me.Spellbook.GetSpell(SpellSlot.Q).ManaCost >= eEnergy)
+            if (Q.IsReady() && config.Item("useq").GetValue<bool>() && me.Distance(target)<Q.Range && currEnergy - me.Spellbook.GetSpell(SpellSlot.Q).ManaCost >= eEnergy)
             {
                 Q.CastOnUnit(target, config.Item("packets").GetValue<bool>());
                 currEnergy -= me.Spellbook.GetSpell(SpellSlot.Q).ManaCost;
