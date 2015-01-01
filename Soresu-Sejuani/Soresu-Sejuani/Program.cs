@@ -82,7 +82,8 @@ namespace Soresu_Sejuani
             menuC.AddItem(new MenuItem("useq", "Use Q")).SetValue(true);
             menuC.AddItem(new MenuItem("usew", "Use W")).SetValue(true);
             menuC.AddItem(new MenuItem("useemin", "Use E min")).SetValue(new Slider(1, 1, 5));
-            menuC.AddItem(new MenuItem("useRmin", "Try to use R min")).SetValue(new Slider(1, 1, 5));
+            menuC.AddItem(new MenuItem("useEminr", "E minimum range")).SetValue(new Slider(0, 0, 900));
+            menuC.AddItem(new MenuItem("useRmin", "R only if more than")).SetValue(new Slider(1, 1, 5));
             menuC.AddItem(new MenuItem("useRminr", "Ulti minimum range")).SetValue(new Slider(0, 0, 350));
             menuC.AddItem(new MenuItem("manualR", "Cast R asap")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press));
             menuC.AddItem(new MenuItem("packets", "Use Packets")).SetValue(false);
@@ -188,7 +189,6 @@ namespace Soresu_Sejuani
 
         private static void Clear()
         {
-           
             float perc = (float)config.Item("minmana").GetValue<Slider>().Value/100f;
             if (me.Mana < me.MaxMana * perc) return;
             Q.SetSkillshot(Q.Instance.SData.SpellCastTime, Q.Instance.SData.LineWidth, Q.Instance.SData.MissileSpeed, false, SkillshotType.SkillshotLine);
@@ -201,27 +201,29 @@ namespace Soresu_Sejuani
                     Items.UseItem(3074);
             }
             var minionsSpells = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget(W.Range)).ToList();
-
             if (W.IsReady() && minionsSpells.Count() > 1 && config.Item("usewC").GetValue<bool>() && me.Spellbook.GetSpell(SpellSlot.W).ManaCost <= me.Mana) W.Cast();
             var minHit = config.Item("useeCmin").GetValue<Slider>().Value;
             if (E.IsReady() && me.Spellbook.GetSpell(SpellSlot.Q).ManaCost <= me.Mana && CountBuffMini(E.Range) >= minHit && (!(!Q.IsReady() && me.Mana - me.Spellbook.GetSpell(SpellSlot.Q).ManaCost < me.MaxMana * perc) || !(!W.IsReady() && me.Mana - me.Spellbook.GetSpell(SpellSlot.W).ManaCost < me.MaxMana * perc)))
             {
                 E.Cast();
             }
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Minion>().Where(i => !i.IsDead && i.IsEnemy && me.Distance(i) < Q.Range && countMinionsInrange(i, 250f)>1).OrderByDescending(l => countMinionsInrange(l, 250f)))
+            if (Q.IsReady() && me.Spellbook.GetSpell(SpellSlot.Q).ManaCost <= me.Mana)
             {
-                if (Q.IsReady() && me.Spellbook.GetSpell(SpellSlot.Q).ManaCost <= me.Mana)
-                {
-                    Q.Cast(enemy.Position, config.Item("packets").GetValue<bool>());
-                }
+                var minionsForQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
+                MinionManager.FarmLocation bestPosition = Q.GetLineFarmLocation(minionsForQ);
+                if (bestPosition.Position.IsValid())
+                    if (bestPosition.MinionsHit >= 2)
+                        Q.Cast(bestPosition.Position, config.Item("packets").GetValue<bool>());
+                //Q.Cast(enemy.Position, config.Item("packets").GetValue<bool>());
             }
+
             Q.SetSkillshot(Q.Instance.SData.SpellCastTime, Q.Instance.SData.LineWidth, Q.Instance.SData.MissileSpeed, true, SkillshotType.SkillshotLine);
         }
 
         private static int countMinionsInrange(Obj_AI_Minion l, float p)
         {
             int num=0;
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Minion>().Where(i => !i.IsDead&& i.IsEnemy && l.Distance(i) < p))
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Minion>().Where(i => !i.IsDead && i.IsEnemy && l.Distance(i) < p))
             {
                 num++;
             }
@@ -270,10 +272,10 @@ namespace Soresu_Sejuani
             {
                 W.Cast();
             }
-            if (E.IsReady() && (
-                (me.Distance(target.Position)<E.Range && CountBuff(E.Range) >= minHit)
+            if (E.IsReady() && me.Distance(target.Position) < E.Range && CountBuff(E.Range) > 0 && (
+                (CountBuff(E.Range) >= minHit)
                 || (Damage.GetSpellDamage(me, target, SpellSlot.E) >= target.Health)
-                || (me.Distance(target) > me.AttackRange+50 && me.Distance(target) < E.Range && CountBuff(E.Range)==1)))
+                || (me.Distance(target) > config.Item("useEminr").GetValue<Slider>().Value && me.Distance(target) < E.Range && CountBuff(E.Range)==1)))
             {
                 if (!(Q.IsReady() && me.Mana - me.Spellbook.GetSpell(SpellSlot.Q).ManaCost < me.MaxMana * perc) || !(W.IsReady() && me.Mana - me.Spellbook.GetSpell(SpellSlot.W).ManaCost < me.MaxMana * perc)) E.Cast();
             }
