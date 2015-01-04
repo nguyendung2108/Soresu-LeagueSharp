@@ -18,6 +18,7 @@ namespace TeamStats
         public int enemyTeamDmg;
         public int myTeamHP { get; set; }
         public int enemyTeamHP { get; set; }
+
         public Teams()
         {
             SetNums();
@@ -91,9 +92,16 @@ namespace TeamStats
                 var t = spell.CooldownExpires - Game.Time;
                 if (spell.Level > 0 && t < 0.5 && Damage.GetSpellDamage(src, dsc, spell.Slot) > 0)
                 {
-                    
                     switch (src.SkinName)
                     {
+
+                                case "Akali":
+                                    if (spell.Slot == SpellSlot.R)
+                                    {
+                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot) * spell.Ammo);
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    break;
                                 case "Fiddlesticks":
                                     if (spell.Slot == SpellSlot.W || spell.Slot == SpellSlot.E)
                                     {

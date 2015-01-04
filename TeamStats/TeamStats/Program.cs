@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Timers;
 using System.Threading.Tasks;
 using SharpDX.Direct3D9;
 using TeamStats.Properties;
@@ -16,6 +17,7 @@ namespace TeamStats
         public static readonly Obj_AI_Hero player = ObjectManager.Player;
         public static Teams teams;
         public static int range = 2500;
+        public static Timer timer = new Timer(300);
         private static Render.Sprite frame;
         public static int myTeamHpX = (int)(Drawing.Width*0.68);
         public static int myTeamHpY = (int)(Drawing.Height * 0.97);
@@ -43,14 +45,23 @@ namespace TeamStats
             Config.AddItem(new MenuItem("draw", "Draw range")).SetValue(new Circle(false, Color.LightBlue));
             Config.AddToMainMenu();
             //frame = loadFrame();
+            
+            timer.Elapsed += OnTimerTick;
+            timer.Enabled = true;
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- TeamStats</font>");
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void OnTimerTick(object sender, ElapsedEventArgs e)
         {
             if (Config.Item("Enabled").GetValue<bool>() && player.CountEnemysInRange(range) > 0 && countAllies(range) > 0) teams = new Teams();
+        }
+
+        private static void Game_OnGameUpdate(EventArgs args)
+        {
+            
+            
             if (Config.Item("Default").GetValue<bool>())
             {
                 Config.Item("Y-pos").SetValue(new Slider(0, 200, -1080));
@@ -66,7 +77,6 @@ namespace TeamStats
         {
             if (Config.Item("Enabled").GetValue<bool>() && player.CountEnemysInRange(range) > 0 && countAllies(range)>0)
             {
-                
                 var OffsetX = Config.Item("X-pos").GetValue<Slider>().Value;
                 var OffsetY = Config.Item("Y-pos").GetValue<Slider>().Value;
                 int myteamhpBar = teams.myTeamHP;
