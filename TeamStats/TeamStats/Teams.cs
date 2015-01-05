@@ -94,11 +94,37 @@ namespace TeamStats
                 {
                     switch (src.SkinName)
                     {
-
+                                case "Ahri":
+                                    if (spell.Slot == SpellSlot.Q)
+                                    {
+                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot));
+                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot,1));
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    break;
                                 case "Akali":
                                     if (spell.Slot == SpellSlot.R)
                                     {
-                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot) * spell.Ammo);
+                                        damage += (float) (Damage.GetSpellDamage(src, dsc, spell.Slot)*spell.Ammo);
+                                    }
+                                    else if (spell.Slot == SpellSlot.Q)
+                                    {
+                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot));
+                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot, 1));
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    break;
+                                case "Amumu":
+                                    if (spell.Slot == SpellSlot.W)
+                                    {
+                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot) * 5);
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    break;
+                                case "Cassiopeia":
+                                    if (spell.Slot == SpellSlot.Q || spell.Slot == SpellSlot.E || spell.Slot == SpellSlot.W)
+                                    {
+                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot) * 2);
                                     }
                                     else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
                                     break;
@@ -109,13 +135,19 @@ namespace TeamStats
                                     }
                                     else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
                                     break;
-                                case "Cassiopeia":
-                                    if (spell.Slot == SpellSlot.Q || spell.Slot == SpellSlot.E)
+                                case "Garen":
+                                    if (spell.Slot == SpellSlot.E)
                                     {
-                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot) * 2);
+                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot) * 3);
                                     }
                                     else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
-                                    
+                                    break;
+                                case "Irelia":
+                                    if (spell.Slot == SpellSlot.W)
+                                    {
+                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot) * attacks);
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
                                     break;
                                 case "Karthus":
                                     if (spell.Slot == SpellSlot.Q)
@@ -124,10 +156,25 @@ namespace TeamStats
                                     }
                                     else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
                                     break;
-                                case "Pantheon":
-                                    if (spell.Slot != SpellSlot.R)
+                                case "KogMaw":
+                                    if (spell.Slot == SpellSlot.W)
+                                    {
+                                        damage += (float)(Damage.GetSpellDamage(src, dsc, spell.Slot) * attacks);
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    break;
+                                case "LeeSin":
+                                    if (spell.Slot == SpellSlot.Q)
                                     {
                                         damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                        damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot,1);
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    break;
+                                case "Lucian":
+                                    if (spell.Slot == SpellSlot.R)
+                                    {
+                                        damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot)*4;
                                     }
                                     else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
                                     break;
@@ -138,11 +185,36 @@ namespace TeamStats
                                     }
                                     else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
                                     break;
-                                case "Vladimir":
+                                case "MasterYi":
+                                    if (spell.Slot != SpellSlot.E)
+                                    {
+                                        damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot)*attacks;
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    break;
+                                case "MonkeyKing":
+                                    if (spell.Slot != SpellSlot.R)
+                                    {
+                                        damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot) * 4;
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    break;
+                                case "Pantheon":
                                     if (spell.Slot == SpellSlot.E)
                                     {
-                                        damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot)*2;
-
+                                        damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot)*3;
+                                    }
+                                    else if (spell.Slot == SpellSlot.R)
+                                    {
+                                        damage +=0;
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    
+                                    break;
+                                case "Rammus":
+                                    if (spell.Slot == SpellSlot.R)
+                                    {
+                                        damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot)*6;
                                     }
                                     else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
                                     break;
@@ -150,6 +222,22 @@ namespace TeamStats
                                     if (spell.Slot == SpellSlot.Q)
                                     {
                                         damage += RivenDamageQ(spell, src, dsc);
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    break;
+                                case "Viktor":
+                                    if (spell.Slot == SpellSlot.R)
+                                    {
+                                        damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                        damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot,1) * 5;
+                                    }
+                                    else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
+                                    break;
+                                case "Vladimir":
+                                    if (spell.Slot == SpellSlot.E)
+                                    {
+                                        damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot) * 2;
+
                                     }
                                     else damage += (float)Damage.GetSpellDamage(src, dsc, spell.Slot);
                                     break;
