@@ -41,6 +41,13 @@ It works too when you are in 1v1.
 - It Calculate autoattacks (with attack speed and crit chance) over 5 sec.
 - Skillshots have 100% hitchance.
 
+<img src="http://www.niratisnordkyn.com/DontDeleteThis/Sejuani.jpg"></img>
+- Jungle clear with skills
+- QWER Combo
+- Ult multiple target
+- Use items
+- Combo damage
+
 <hr>
 
 By downloading these scripts you accept that you will use it at your own risk and responsibility.
