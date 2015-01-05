@@ -37,7 +37,7 @@ namespace PlsSaveMe
             config = new Menu("PlsSaveMe", "PlsSaveMe", true);
             // Draw settings
             Menu menu = new Menu("Settings ", "setting");
-            menu.AddItem(new MenuItem("Enable", "Enable")).SetValue(false);
+            menu.AddItem(new MenuItem("Enable", "Enable")).SetValue(true);
             config.AddSubMenu(menu);
         }
 
