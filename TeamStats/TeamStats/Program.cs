@@ -19,6 +19,7 @@ namespace TeamStats
         public static int range = 2500;
         public static Timer timer = new Timer(300);
         private static Render.Sprite frame;
+        private static bool refresh = true;
         public static int myTeamHpX = (int)(Drawing.Width*0.68);
         public static int myTeamHpY = (int)(Drawing.Height * 0.97);
         public static int enemyTeamHpX = (int)(Drawing.Width * 0.68);
@@ -55,7 +56,11 @@ namespace TeamStats
 
         private static void OnTimerTick(object sender, ElapsedEventArgs e)
         {
-            if (Config.Item("Enabled").GetValue<bool>() && player.CountEnemysInRange(range) > 0 && countAllies(range) > 0) teams = new Teams();
+            if (refresh == false)
+            {
+                refresh = true;
+            }
+            
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -70,12 +75,24 @@ namespace TeamStats
                 Config.Item("Default").SetValue(false);
             }
             range = Config.Item("Range").GetValue<Slider>().Value;
-            
+            try
+            {
+                if (Config.Item("Enabled").GetValue<bool>() && refresh && player.CountEnemysInRange(range) > 0 &&
+                    countAllies(range) > 0)
+                {
+                    teams = new Teams();
+                    refresh = false;
+                }
+            }
+            catch (Exception d)
+            {
+                Console.Write(d.ToString());
+            }
         }
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (Config.Item("Enabled").GetValue<bool>() && player.CountEnemysInRange(range) > 0 && countAllies(range)>0)
+            if (Config.Item("Enabled").GetValue<bool>() && player.CountEnemysInRange(range) > 0 && countAllies(range)>0 && teams!=null)
             {
                 var OffsetX = Config.Item("X-pos").GetValue<Slider>().Value;
                 var OffsetY = Config.Item("Y-pos").GetValue<Slider>().Value;
