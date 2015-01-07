@@ -28,17 +28,15 @@ namespace PlsSaveMe
         {
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- PlsSaveMe</font>");
             Game.OnGameUpdate += Game_OnGameUpdate;
-            Drawing.OnDraw += Game_OnDraw;
+            //Drawing.OnDraw += Game_OnDraw;
             LoadMenu();
         }
 
         private static void LoadMenu()
         {
             config = new Menu("PlsSaveMe", "PlsSaveMe", true);
-            // Draw settings
-            Menu menu = new Menu("Settings ", "setting");
-            menu.AddItem(new MenuItem("Enable", "Enable")).SetValue(true);
-            config.AddSubMenu(menu);
+            config.AddItem(new MenuItem("Enable", "Enable")).SetValue(false);
+            config.AddToMainMenu();
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
