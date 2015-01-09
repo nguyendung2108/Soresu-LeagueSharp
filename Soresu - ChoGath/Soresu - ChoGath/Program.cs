@@ -231,16 +231,16 @@ namespace Soresu___ChoGath
             if (config.Item("UseFlashC").GetValue<bool>() && !flashRblock && R.IsReady() && hasFlash && !CF.CheckCriticalBuffs(target) && player.GetSpell(SpellSlot.R).ManaCost <= player.Mana && player.Distance(target.Position) >= 400 && player.GetSpellDamage(target, SpellSlot.R) > target.Health && !Q.IsReady() && !W.IsReady() && player.Distance(target.Position) <= RFlash.Range && !player.Position.Extend(target.Position, 400).IsWall())
             {
                 player.Spellbook.CastSpell(player.GetSpellSlot("SummonerFlash"), player.Position.Extend(target.Position, 400));
-                Utility.DelayAction.Add(50, () => R.Cast(target, true));
+                Utility.DelayAction.Add(50, () => R.Cast(target, config.Item("packets").GetValue<bool>()));
             }
             if (config.Item("UseFlashC").GetValue<bool>() && !flashRblock && W.IsReady() && hasFlash && !CF.CheckCriticalBuffs(target) && player.GetSpell(SpellSlot.W).ManaCost <= player.Mana && player.Distance(target.Position) > W.Range + 300 && player.GetSpellDamage(target, SpellSlot.W) > target.Health && !Q.IsReady() && !R.IsReady() && player.Distance(target.Position) <= W.Range + 400 && !player.Position.Extend(target.Position, 400).IsWall())
             {
                 player.Spellbook.CastSpell(player.GetSpellSlot("SummonerFlash"), player.Position.Extend(target.Position, 400));
-                Utility.DelayAction.Add(50, () => W.Cast(target, true));
+                Utility.DelayAction.Add(50, () => W.Cast(target, config.Item("packets").GetValue<bool>()));
             }
             if (config.Item("user").GetValue<bool>() && player.GetSpellDamage(target, SpellSlot.R)>target.Health)
             {
-                if (target.IsValidTarget(R.Range) && R.IsReady()) R.Cast(target, true);
+                if (target.IsValidTarget(R.Range) && R.IsReady()) R.Cast(target, config.Item("packets").GetValue<bool>());
             }
             
         }
@@ -258,6 +258,7 @@ namespace Soresu___ChoGath
 
         private static void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
+            
             if (config.Item("useQgc").GetValue<bool>())
             {
                 if (gapcloser.Sender.IsValidTarget(Q.Range) && Q.IsReady()) Q.Cast(gapcloser.End, config.Item("packets").GetValue<bool>());
