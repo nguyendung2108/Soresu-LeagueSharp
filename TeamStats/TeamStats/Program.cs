@@ -121,11 +121,17 @@ namespace TeamStats
                 }
                    if (myteamhpBar-enemyteamdmgBar<enemyteamhpBar-myteamdmgBar)
                 {
-                    Drawing.DrawText(myTeamHpX+ 60 + OffsetX, myTeamHpY + OffsetY +14, Color.Red, "Enemy team is stronger");
+                    Drawing.DrawText(myTeamHpX+ 45 + OffsetX, myTeamHpY + OffsetY +14, Color.Red, "Enemy team is stronger");
+                    Drawing.DrawText(myTeamHpX + 225 + OffsetX, myTeamHpY + OffsetY + 14, Color.ForestGreen, teams.myTeamNum.ToString());
+                    Drawing.DrawText(myTeamHpX + 235 + OffsetX, myTeamHpY + OffsetY + 14, Color.White, "v");
+                    Drawing.DrawText(myTeamHpX + 245 + OffsetX, myTeamHpY + OffsetY + 14, Color.Red, teams.enemyTeamNum.ToString());
                 }
                 else
                 {
                     Drawing.DrawText(myTeamHpX + 55 + OffsetX, myTeamHpY + OffsetY +14, Color.ForestGreen, "Your team is stronger");
+                    Drawing.DrawText(myTeamHpX + 220 + OffsetX, myTeamHpY + OffsetY + 14, Color.ForestGreen, teams.myTeamNum.ToString());
+                    Drawing.DrawText(myTeamHpX + 230 + OffsetX, myTeamHpY + OffsetY + 14, Color.White, "v");
+                    Drawing.DrawText(myTeamHpX + 240 + OffsetX, myTeamHpY + OffsetY + 14, Color.Red, teams.enemyTeamNum.ToString());
                 }
 
             } 
