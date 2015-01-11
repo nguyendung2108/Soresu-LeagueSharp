@@ -21,6 +21,7 @@ namespace Others
         public static Items.Item hexgun = new Items.Item(3146, 700);
         public static Items.Item Dfg = new Items.Item(3128, 750);
         public static Items.Item Bft = new Items.Item(3188, 750);
+        public static Items.Item odins = new Items.Item(3180, 525);
         public static readonly Obj_AI_Hero player = Program.player;
         public static Spell Q=Program.Q, W=Program.W, E=Program.E, R=Program.R, RFlash=Program.RFlash;
         private static readonly string[] jungleMonsters = { "TT_Spiderboss", "SRU_Blue", "SRU_Red", "SRU_Dragon", "SRU_Baron" };
@@ -31,11 +32,20 @@ namespace Others
         {
             if (player.Distance(target) < 400)
             {
-                if (Items.HasItem(3077) && Items.CanUseItem(3077))
-                    Items.UseItem(3077);
-                if (Items.HasItem(3074) && Items.CanUseItem(3074))
-                    Items.UseItem(3074);
+                //tiamat
+                if (Items.HasItem(3077) && Items.CanUseItem(3077)) Items.UseItem(3077);
+                if (Items.HasItem(3074) && Items.CanUseItem(3074)) Items.UseItem(3074);
             }
+            if (player.Distance(target) < 500 && player.Distance(target)>player.AttackRange+100)
+            {
+                //randuin
+                if (Items.HasItem(3143) && Items.CanUseItem(3143)) Items.UseItem(3143);
+            }
+            if (Items.HasItem(3180) && Items.CanUseItem(3180))
+            {
+                if (player.Distance(target) < 525 && (player.CountEnemysInRange(525) > 1 || target.Health < Damage.GetItemDamage(player, target, Damage.DamageItems.OdingVeils))) Items.UseItem(3180);
+            }
+
             if (Items.HasItem(3144) && Items.CanUseItem(3144))
             {
                 bilgewater.Cast(target);

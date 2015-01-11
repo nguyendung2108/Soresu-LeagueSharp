@@ -684,7 +684,6 @@ namespace Executed
             {
                 //randuin
                 if (Items.HasItem(3143) && Items.CanUseItem(3143)) Items.UseItem(3143);
-                if (Items.HasItem(3180) && Items.CanUseItem(3180)) Items.UseItem(3180);
             }
             if (Items.HasItem(3180) && Items.CanUseItem(3180))
             {
