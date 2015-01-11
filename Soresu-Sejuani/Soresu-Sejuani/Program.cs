@@ -41,8 +41,6 @@ namespace Soresu_Sejuani
             //Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
             AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += OnPossibleToInterrupt;
-
-
         }
 
         private static void InitSejuani()
@@ -189,8 +187,6 @@ namespace Soresu_Sejuani
 
         private static void Clear()
         {
-            float perc = (float)config.Item("minmana").GetValue<Slider>().Value/100f;
-            if (me.Mana < me.MaxMana * perc) return;
             Q.SetSkillshot(Q.Instance.SData.SpellCastTime, Q.Instance.SData.LineWidth, Q.Instance.SData.MissileSpeed, false, SkillshotType.SkillshotLine);
             var minions = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget(400)).ToList();
             if (minions.Count() > 2)
@@ -200,6 +196,8 @@ namespace Soresu_Sejuani
                 if (Items.HasItem(3074) && Items.CanUseItem(3074))
                     Items.UseItem(3074);
             }
+			float perc = (float)config.Item("minmana").GetValue<Slider>().Value/100f;
+            if (me.Mana < me.MaxMana * perc) return;
             var minionsSpells = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget(W.Range)).ToList();
             if (W.IsReady() && minionsSpells.Count() > 1 && config.Item("usewC").GetValue<bool>() && me.Spellbook.GetSpell(SpellSlot.W).ManaCost <= me.Mana) W.Cast();
             var minHit = config.Item("useeCmin").GetValue<Slider>().Value;
@@ -268,7 +266,7 @@ namespace Soresu_Sejuani
             var minHit = config.Item("useemin").GetValue<Slider>().Value;
             Obj_AI_Hero target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
             UseItems(target);
-            if (W.IsReady() && config.Item("usew").GetValue<bool>()&& me.CountEnemysInRange((int)W.Range)>0 && me.Spellbook.GetSpell(SpellSlot.W).ManaCost<=me.Mana)
+            if (W.IsReady() && config.Item("usew").GetValue<bool>()&& me.CountEnemysInRange((int)me.AttackRange)>0 && me.Spellbook.GetSpell(SpellSlot.W).ManaCost<=me.Mana)
             {
                 W.Cast();
             }
@@ -282,12 +280,8 @@ namespace Soresu_Sejuani
             if (Q.IsReady() && config.Item("useq").GetValue<bool>() && me.Spellbook.GetSpell(SpellSlot.Q).ManaCost <= me.Mana)
             {
                 Q.Cast(target, config.Item("packets").GetValue<bool>());
-            }
-            
-
-           
+            } 
         }
-
         private static int CountBuff(float p)
         {
             var num = 0;
@@ -369,11 +363,21 @@ namespace Soresu_Sejuani
         {
             if (me.Distance(target) < 400)
             {
-                if (Items.HasItem(3077) && Items.CanUseItem(3077))
-                    Items.UseItem(3077);
-                if (Items.HasItem(3074) && Items.CanUseItem(3074))
-                    Items.UseItem(3074);
+                //tiamat
+                if (Items.HasItem(3077) && Items.CanUseItem(3077)) Items.UseItem(3077);
+                if (Items.HasItem(3074) && Items.CanUseItem(3074)) Items.UseItem(3074);
             }
+            if (me.Distance(target) < 500 && me.Distance(target) > me.AttackRange + 100)
+            {
+                //randuin
+                if (Items.HasItem(3143) && Items.CanUseItem(3143)) Items.UseItem(3143);
+                if (Items.HasItem(3180) && Items.CanUseItem(3180)) Items.UseItem(3180);
+            }
+            if (Items.HasItem(3180) && Items.CanUseItem(3180))
+            {
+                if (me.Distance(target) < 525 && (me.CountEnemysInRange(525) > 1 || target.Health < Damage.GetItemDamage(me, target, Damage.DamageItems.OdingVeils))) Items.UseItem(3180);
+            }
+
             if (Items.HasItem(3144) && Items.CanUseItem(3144))
             {
                 bilgewater.Cast(target);

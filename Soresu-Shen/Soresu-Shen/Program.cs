@@ -24,6 +24,8 @@ namespace Executed
         public static Items.Item botrk = new Items.Item(3153, 450);
         public static Items.Item bilgewater = new Items.Item(3144, 450);
         public static Items.Item hexgun = new Items.Item(3146, 700);
+        public static Items.Item Dfg = new Items.Item(3128, 750);
+        public static Items.Item Bft = new Items.Item(3188, 750);
         private const int XOffset = 36;
         private const int YOffset = 9;
         private const int Width = 103;
@@ -64,9 +66,7 @@ namespace Executed
             EFlash = new Spell(SpellSlot.E, 990);
             EFlash.SetSkillshot(E.Instance.SData.SpellCastTime, E.Instance.SData.LineWidth, E.Speed, false, SkillshotType.SkillshotLine);
             R = new Spell(SpellSlot.R, float.MaxValue);
-            P = new Spell(me.GetSpellSlot("ShenKiAttack", false));//Doesn't Work
-            
-            
+            P = new Spell(me.GetSpellSlot("ShenKiAttack", false));//Doesn't Work  
         }
         private static void InitMenu()
         {
@@ -80,12 +80,6 @@ namespace Executed
             Menu menuOrb = new Menu("Orbwalker", "orbwalker");
             orbwalker = new Orbwalking.Orbwalker(menuOrb);
             config.AddSubMenu(menuOrb);
-
-            Menu menuK = new Menu("Keybinds", "demkeys");
-            menuK.AddItem(new MenuItem("combokey", "Combo Key")).SetValue(new KeyBind(32, KeyBindType.Press));
-            menuK.AddItem(new MenuItem("harasskey", "Harass Key")).SetValue(new KeyBind(67, KeyBindType.Press));
-            menuK.AddItem(new MenuItem("clearkey", "Clear Key")).SetValue(new KeyBind(86, KeyBindType.Press));
-            config.AddSubMenu(menuK);
 
             // Draw settings
             Menu menuD = new Menu("Drawings ", "dsettings");
@@ -205,6 +199,40 @@ namespace Executed
                  {
                      switch (enemy.SkinName)
                      {
+                         case "Ahri":
+                             if (spell.Slot == SpellSlot.Q)
+                             {
+                                 result += (float)(Damage.GetSpellDamage(enemy, me, spell.Slot));
+                                 result += (float)(Damage.GetSpellDamage(enemy, me, spell.Slot, 1));
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         case "Akali":
+                             if (spell.Slot == SpellSlot.R)
+                             {
+                                 result += (float)(Damage.GetSpellDamage(enemy, me, spell.Slot) * spell.Ammo);
+                             }
+                             else if (spell.Slot == SpellSlot.Q)
+                             {
+                                 result += (float)(Damage.GetSpellDamage(enemy, me, spell.Slot));
+                                 result += (float)(Damage.GetSpellDamage(enemy, me, spell.Slot, 1));
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         case "Amumu":
+                             if (spell.Slot == SpellSlot.W)
+                             {
+                                 result += (float)(Damage.GetSpellDamage(enemy, me, spell.Slot) * 5);
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         case "Cassiopeia":
+                             if (spell.Slot == SpellSlot.Q || spell.Slot == SpellSlot.E || spell.Slot == SpellSlot.W)
+                             {
+                                 result += (float)(Damage.GetSpellDamage(enemy, me, spell.Slot) * 2);
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
                          case "Fiddlesticks":
                              if (spell.Slot == SpellSlot.W || spell.Slot == SpellSlot.E)
                              {
@@ -212,13 +240,19 @@ namespace Executed
                              }
                              else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
                              break;
-                         case "Cassiopeia":
-                             if (spell.Slot == SpellSlot.Q || spell.Slot == SpellSlot.E)
+                         case "Garen":
+                             if (spell.Slot == SpellSlot.E)
                              {
-                                 result += (float)(Damage.GetSpellDamage(enemy, me, spell.Slot) * 2);
+                                 result += (float)(Damage.GetSpellDamage(enemy, me, spell.Slot) * 3);
                              }
                              else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
-
+                             break;
+                         case "Irelia":
+                             if (spell.Slot == SpellSlot.W)
+                             {
+                                 result += (float)(Damage.GetSpellDamage(enemy, me, spell.Slot) * attacks);
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
                              break;
                          case "Karthus":
                              if (spell.Slot == SpellSlot.Q)
@@ -227,10 +261,25 @@ namespace Executed
                              }
                              else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
                              break;
-                         case "Pantheon":
-                             if (spell.Slot != SpellSlot.R)
+                         case "KogMaw":
+                             if (spell.Slot == SpellSlot.W)
+                             {
+                                 result += (float)(Damage.GetSpellDamage(enemy, me, spell.Slot) * attacks);
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         case "LeeSin":
+                             if (spell.Slot == SpellSlot.Q)
                              {
                                  result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                                 result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot, 1);
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         case "Lucian":
+                             if (spell.Slot == SpellSlot.R)
+                             {
+                                 result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot) * 4;
                              }
                              else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
                              break;
@@ -241,11 +290,36 @@ namespace Executed
                              }
                              else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
                              break;
-                         case "Vladimir":
+                         case "MasterYi":
+                             if (spell.Slot != SpellSlot.E)
+                             {
+                                 result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot) * attacks;
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         case "MonkeyKing":
+                             if (spell.Slot != SpellSlot.R)
+                             {
+                                 result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot) * 4;
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         case "Pantheon":
                              if (spell.Slot == SpellSlot.E)
                              {
-                                 result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot) * 2;
+                                 result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot) * 3;
+                             }
+                             else if (spell.Slot == SpellSlot.R)
+                             {
+                                 result += 0;
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
 
+                             break;
+                         case "Rammus":
+                             if (spell.Slot == SpellSlot.R)
+                             {
+                                 result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot) * 6;
                              }
                              else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
                              break;
@@ -253,6 +327,22 @@ namespace Executed
                              if (spell.Slot == SpellSlot.Q)
                              {
                                  result += RivenDamageQ(spell, enemy, me);
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         case "Viktor":
+                             if (spell.Slot == SpellSlot.R)
+                             {
+                                 result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                                 result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot, 1) * 5;
+                             }
+                             else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
+                             break;
+                         case "Vladimir":
+                             if (spell.Slot == SpellSlot.E)
+                             {
+                                 result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot) * 2;
+
                              }
                              else result += (float)Damage.GetSpellDamage(enemy, me, spell.Slot);
                              break;
@@ -584,18 +674,28 @@ namespace Executed
         }
         private static void UseItems(Obj_AI_Hero target)
         {
-            if (me.Distance(target.Position) < 400)
+            if (me.Distance(target) < 400)
             {
-                if (Items.HasItem(3077) && Items.CanUseItem(3077))
-                    Items.UseItem(3077);
-                if (Items.HasItem(3074) && Items.CanUseItem(3074))
-                    Items.UseItem(3074);
+                //tiamat
+                if (Items.HasItem(3077) && Items.CanUseItem(3077)) Items.UseItem(3077);
+                if (Items.HasItem(3074) && Items.CanUseItem(3074)) Items.UseItem(3074);
             }
+            if (me.Distance(target) < 500 && me.Distance(target) > me.AttackRange + 100)
+            {
+                //randuin
+                if (Items.HasItem(3143) && Items.CanUseItem(3143)) Items.UseItem(3143);
+                if (Items.HasItem(3180) && Items.CanUseItem(3180)) Items.UseItem(3180);
+            }
+            if (Items.HasItem(3180) && Items.CanUseItem(3180))
+            {
+                if (me.Distance(target) < 525 && (me.CountEnemysInRange(525) > 1 || target.Health < Damage.GetItemDamage(me, target, Damage.DamageItems.OdingVeils))) Items.UseItem(3180);
+            }
+
             if (Items.HasItem(3144) && Items.CanUseItem(3144))
             {
                 bilgewater.Cast(target);
             }
-            if (Items.HasItem(3153) && Items.CanUseItem(3153) && me.Health<me.MaxHealth/2)
+            if (Items.HasItem(3153) && Items.CanUseItem(3153) && me.Health < me.MaxHealth / 2)
             {
                 botrk.Cast(target);
             }
@@ -603,14 +703,20 @@ namespace Executed
             {
                 hexgun.Cast(target);
             }
+            if (Items.HasItem(Dfg.Id) && Items.CanUseItem(Dfg.Id))
+            {
+                Dfg.Cast(target);
+            }
+            if (Items.HasItem(Bft.Id) && Items.CanUseItem(Bft.Id))
+            {
+                Bft.Cast(target);
+            }
             if (me.Spellbook.CanUseSpell(me.GetSpellSlot("summonerdot")) == SpellState.Ready)
             {
-                if (me.Distance(target.Position) < 650 && ComboDamage(target) >= target.Health && (float)me.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite) >= target.Health)
+                if (me.Distance(target) < 650 && ComboDamage(target) >= target.Health && (float)me.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite) >= target.Health)
                 {
                     me.Spellbook.CastSpell(me.GetSpellSlot("SummonerDot"), target);
                 }
-
-
             }
         }
         public static List<Obj_AI_Base> CheckingCollision(Obj_AI_Base From, Obj_AI_Base Target, Spell Skill, bool Mid = true, bool OnlyHero = false)
