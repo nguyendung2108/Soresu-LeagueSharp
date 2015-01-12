@@ -51,6 +51,17 @@ namespace Soresu_Poppy
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
+            Obj_AI_Hero targetf = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var bestpos = CF.bestVectorToPoppyFlash(targetf);
+            if (config.Item("useeflashforced").GetValue<KeyBind>().Active)
+            {
+                bool hasFlash = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerFlash")) == SpellState.Ready;
+                if (E.IsReady() && hasFlash && !CheckWalls(player, targetf) && CF.bestVectorToPoppyFlash(targetf).IsValid())
+                {
+                    player.Spellbook.CastSpell(player.GetSpellSlot("SummonerFlash"), bestpos);
+                    Utility.DelayAction.Add(100, () => E.CastOnUnit(targetf, config.Item("packets").GetValue<bool>()));
+                }
+            }
             if (config.Item("useSmite").GetValue<bool>())
             {
                 CF.setSmiteSlot();
@@ -96,14 +107,13 @@ namespace Soresu_Poppy
                 W.Cast(config.Item("packets").GetValue<bool>());
             }
 
-            if (config.Item("usee").GetValue<bool>())
+            if (config.Item("usee").GetValue<bool>() && E.IsReady())
             {
 
                 if (config.Item("useewall").GetValue<bool>())
                 {
                     var bestpos = CF.bestVectorToPoppyFlash(target);
-                    float damage = (float)(CF.ComboDamage(target) + Damage.CalcDamage(player, target, Damage.DamageType.Magical, (eSecond[E.Level-1] + 0.8f * player.FlatMagicDamageMod)) + (player.GetAutoAttackDamage(target) * 3));
-                    Game.PrintChat(damage.ToString());
+                    float damage = (float)(CF.ComboDamage(target) + Damage.CalcDamage(player, target, Damage.DamageType.Magical, (eSecond[E.Level-1] + 0.8f * player.FlatMagicDamageMod)) + (player.GetAutoAttackDamage(target) * 4));
                     if (config.Item("useeflash").GetValue<bool>() && hasFlash && !CheckWalls(player, target) && damage > target.Health && CF.bestVectorToPoppyFlash(target).IsValid())
                     {
                         player.Spellbook.CastSpell(player.GetSpellSlot("SummonerFlash"), bestpos);
@@ -124,7 +134,7 @@ namespace Soresu_Poppy
             }
             if (config.Item("user").GetValue<bool>())
             {
-                if (R.IsReady() && player.Distance(target) < E.Range && CF.ComboDamage(target) + player.GetAutoAttackDamage(target) * 3 < target.Health && (CF.ComboDamage(target) + player.GetAutoAttackDamage(target) * 3) * ultMod[R.Level-1] > target.Health)
+                if (R.IsReady() && player.Distance(target) < E.Range && CF.ComboDamage(target) + player.GetAutoAttackDamage(target) * 5 < target.Health && (CF.ComboDamage(target) + player.GetAutoAttackDamage(target) * 3) * ultMod[R.Level-1] > target.Health)
                 {
                     R.CastOnUnit(target, config.Item("packets").GetValue<bool>());
                 }
@@ -143,7 +153,7 @@ namespace Soresu_Poppy
 
         private static void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("useEgap").GetValue<bool>() && E.IsReady() && E.CanCast(gapcloser.Sender) && CheckWalls(player, gapcloser.Sender)) E.CastOnUnit(gapcloser.Sender, config.Item("packets").GetValue<bool>());
+            if (config.Item("useEgap").GetValue<bool>() && E.IsReady() && E.CanCast(gapcloser.Sender) && CheckWalls(player, gapcloser.Sender) && gapcloser.Sender.Position==gapcloser.End) E.CastOnUnit(gapcloser.Sender, config.Item("packets").GetValue<bool>());
         }
         public static bool CheckWalls(Obj_AI_Base player, Obj_AI_Base enemy)
         {
@@ -196,6 +206,7 @@ namespace Soresu_Poppy
             menuC.AddItem(new MenuItem("usee", "Use E")).SetValue(true);
             menuC.AddItem(new MenuItem("useewall", "Use E only near walls")).SetValue(true);
             menuC.AddItem(new MenuItem("useeflash", "Use flash to positioning")).SetValue(true);
+            menuC.AddItem(new MenuItem("useeflashforced", "Forced flash+E if possible")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press));
             menuC.AddItem(new MenuItem("user", "Use R")).SetValue(true);
             config.AddSubMenu(menuC);
             // Misc Settings
