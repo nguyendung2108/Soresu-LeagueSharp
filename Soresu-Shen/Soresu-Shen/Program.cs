@@ -467,12 +467,12 @@ namespace Executed
         private static void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             if (!config.Item("useeagc").GetValue<bool>()) return;
-            if (gapcloser.Sender.IsValidTarget(E.Range) && E.IsReady() && me.Distance(gapcloser.Sender.Position) < 400) E.Cast(gapcloser.Sender.Position + Vector3.Normalize(gapcloser.Sender.Position - me.Position) * 200, config.Item("packets").GetValue<bool>());
+            if (gapcloser.Sender.IsValidTarget(E.Range) && E.IsReady() && me.Distance(gapcloser.Sender.Position) < 400) E.Cast(gapcloser.End, config.Item("packets").GetValue<bool>());
         }
         private static void OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
         {
             if (!config.Item("useeint").GetValue<bool>()) return;
-            if (unit.IsValidTarget(E.Range) && E.IsReady()) E.Cast(unit.Position + Vector3.Normalize(unit.Position - me.Position) * 200, config.Item("packets").GetValue<bool>());
+            if (unit.IsValidTarget(E.Range) && E.IsReady()) E.Cast(unit, config.Item("packets").GetValue<bool>());
         }
         private static void Clear()
         {
@@ -589,7 +589,7 @@ namespace Executed
             {
                 if (minHit > 1)
                 {
-                    E.Cast(target.Position + Vector3.Normalize(target.Position - me.Position) * ((CheckingCollision(me, target, E, false, true).Count >= minHit) ? E.Range : 200), config.Item("packets").GetValue<bool>());
+                    CastEmin(target, minHit);
                 }
                 else if (me.Distance(target.Position) > me.AttackRange && E.GetPrediction(target).Hitchance >= HitChance.Low)
                 {
@@ -604,6 +604,21 @@ namespace Executed
             }
             UseItems(target);
  
+        }
+
+        public static void CastEmin(Obj_AI_Base target, int min)
+        {
+            bool casted = false;
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Base>().Where(i => i.Distance(me)<E.Range && i.IsEnemy && !i.IsDead && !i.IsMinion))
+            {
+                E.CastIfWillHit(enemy, min-1, config.Item("packets").GetValue<bool>());
+                return;
+
+            }
+            if (me.Distance(target.Position) > me.AttackRange && E.IsReady())
+                {
+                    E.CastIfWillHit(target, 0, config.Item("packets").GetValue<bool>());    
+                }
         }
         private static void FlashCombo()
         {
@@ -728,6 +743,7 @@ namespace Executed
             }
             return ListCol.Distinct().ToList();
         }
+        
         public static bool IsValid(Obj_AI_Base Target, float Range = float.MaxValue, bool EnemyOnly = true, Vector3 From = default(Vector3))
         {
             if (Target == null || !Target.IsValid || Target.IsDead || !Target.IsVisible || (EnemyOnly && !Target.IsTargetable) || (EnemyOnly && Target.IsInvulnerable) || Target.IsMe) return false;
