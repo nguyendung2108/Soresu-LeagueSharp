@@ -67,7 +67,7 @@ namespace Others
             }
             if (player.Spellbook.CanUseSpell(player.GetSpellSlot("summonerdot")) == SpellState.Ready)
             {
-                if (player.Distance(target) < 650 && ComboDamage(target) >= target.Health && (float)player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite) >= target.Health)
+                if (player.Distance(target) < 650 && ComboDamage(target) >= target.Health)
                 {
                     player.Spellbook.CastSpell(player.GetSpellSlot("SummonerDot"), target);
                 }
@@ -79,6 +79,26 @@ namespace Others
             float damage = 0;
             if (Q.IsReady()) damage += (float)Damage.GetSpellDamage(player, hero, SpellSlot.Q);
             if (E.IsReady()) damage += (float)Damage.GetSpellDamage(player, hero, SpellSlot.E);
+            //lich
+            if (Items.HasItem(3100) && Items.CanUseItem(3100))
+            {
+                damage += (float)player.CalcDamage(hero,Damage.DamageType.Magical, player.BaseAttackDamage*0.75+player.FlatMagicDamageMod*0.5);
+            }
+            //sheen
+            if (Items.HasItem(3057) && Items.CanUseItem(3057))
+            {
+                damage += (float)player.CalcDamage(hero, Damage.DamageType.Physical, player.BaseAttackDamage);
+            }
+            //gaunlet
+            if (Items.HasItem(3025) && Items.CanUseItem(3025))
+            {
+                damage += (float)player.CalcDamage(hero, Damage.DamageType.Physical, player.BaseAttackDamage * 1.25);
+            }
+            //trinity
+            if (Items.HasItem(3078) && Items.CanUseItem(3078))
+            {
+                damage += (float)player.CalcDamage(hero, Damage.DamageType.Physical, player.BaseAttackDamage * 2);
+            }
             if ((Items.HasItem(Bft.Id) && Items.CanUseItem(Bft.Id)) ||
                 (Items.HasItem(Dfg.Id) && Items.CanUseItem(Dfg.Id)))
                 damage = (float)(damage * 1.2);
