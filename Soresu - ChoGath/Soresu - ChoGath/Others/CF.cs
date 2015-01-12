@@ -207,8 +207,31 @@ namespace Others
         public static int countMinionsInrange(Obj_AI_Minion l, float p)
         {
             return ObjectManager.Get<Obj_AI_Minion>().Count(i => !i.IsDead && i.IsEnemy && l.Distance(i) < p);
-
         }
+        public static int countMinionsInrange(Vector3 l, float p)
+        {
+            return ObjectManager.Get<Obj_AI_Minion>().Count(i => !i.IsDead && i.IsEnemy && i.Distance(l) < p);
+        }
+        public static Vector3 bestVectorToAoeFarm(List<Obj_AI_Base> minions)
+        {
+            Vector3 bestPos = new Vector3();
+            int hits = 0;
+            Random rndx = new Random(), rndy = new Random();
+            foreach (var minion in minions)
+            {
+
+                if (countMinionsInrange(minion.Position, 170f) > hits) bestPos = minion.Position;
+                Vector3 newPos = new Vector3(minion.Position.X + 80, minion.Position.Y + 80, minion.Position.Z);
+                for (int i = 1; i < 4; i++)
+                {
+                    var rotated = newPos.To2D().RotateAroundPoint(newPos.To2D(), 90 * i).To3D();
+                    if (countMinionsInrange(rotated, 170f) > hits && player.Distance(rotated) <= Q.Range) bestPos = newPos;
+                }
+            }
+
+            return bestPos;
+        }
+
         public static int countTurretsInRange(Obj_AI_Hero l)
         {
             return ObjectManager.Get<Obj_AI_Turret>().Count(i => !i.IsDead && i.IsEnemy && l.Distance(i) < 750f);

@@ -44,6 +44,7 @@ namespace Soresu___ChoGath
         }
         private static void Game_OnGameUpdate(EventArgs args)
         {
+            
             vSpikes = false;
             foreach (var buff in player.Buffs)
             {
@@ -73,7 +74,6 @@ namespace Soresu___ChoGath
                     {
                         Harass();
                     }
-
                     break;
                 case Orbwalking.OrbwalkingMode.LaneClear:
                     Clear();
@@ -122,6 +122,7 @@ namespace Soresu___ChoGath
 
         private static void Clear()
         {
+            
             var minions = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget(400)).ToList();
             if (minions.Count() > 2)
             {
@@ -140,14 +141,18 @@ namespace Soresu___ChoGath
                     if (bestPositionW.MinionsHit >= 2)
                         W.Cast(bestPositionW.Position, config.Item("packets").GetValue<bool>());
             }
+            
             if (Q.IsReady() && player.Spellbook.GetSpell(SpellSlot.Q).ManaCost <= player.Mana)
             {
-                var minionsForQ =
+               /* var minionsForQ =
                     ObjectManager.Get<Obj_AI_Minion>()
                         .Where(i => i.IsEnemy && !i.IsDead && player.Distance(i.Position) < Q.Range && CF.countMinionsInrange(i, 170f)>1)
                         .OrderByDescending(i => CF.countMinionsInrange(i, 170f))
                         .FirstOrDefault();
-                if (minionsForQ.IsValid)Q.Cast(minionsForQ.Position, config.Item("packets").GetValue<bool>());
+                */
+                var minionsForQ =CF.bestVectorToAoeFarm(MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly));
+                
+                if (minionsForQ.IsValid())Q.Cast(minionsForQ, config.Item("packets").GetValue<bool>());
             }
         }
 
@@ -170,7 +175,6 @@ namespace Soresu___ChoGath
 
         private static void Combo()
         {
-
             Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             bool hasFlash = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerFlash")) == SpellState.Ready;
             bool hasIgnite = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerDot")) == SpellState.Ready;
@@ -194,6 +198,7 @@ namespace Soresu___ChoGath
             }
             if (config.Item("useq").GetValue<bool>())
             {
+
                 if (target.IsValidTarget(Q.Range))
                 {
                     int qHit = config.Item("qHit", true).GetValue<Slider>().Value;
@@ -283,7 +288,7 @@ namespace Soresu___ChoGath
         private static void InitChoGath()
         {
             Q = new Spell(SpellSlot.Q, 950);
-            Q.SetSkillshot(Q.Instance.SData.SpellCastTime, Q.Instance.SData.LineWidth, Q.Speed, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(Q.Instance.SData.SpellCastTime, Q.Instance.SData.LineWidth, 1337f, false, SkillshotType.SkillshotCircle);
             W = new Spell(SpellSlot.W, 700);
             W.SetSkillshot(W.Instance.SData.SpellCastTime, W.Instance.SData.LineWidth, W.Speed, false, SkillshotType.SkillshotCone);
             E = new Spell(SpellSlot.E, 500);
