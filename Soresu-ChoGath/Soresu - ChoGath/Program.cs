@@ -200,7 +200,7 @@ namespace Soresu___ChoGath
             {
                 if (target.IsValidTarget(Q.Range) && Q.CanCast(target))
                 {
-                    var nextpos = target.Position.Extend(target.ServerPosition, target.MoveSpeed);
+                    var nextpos = target.Position.Extend(target.ServerPosition, target.MoveSpeed*0.7f);
                     Q.Cast(nextpos, config.Item("packets").GetValue<bool>());
                 }
             }

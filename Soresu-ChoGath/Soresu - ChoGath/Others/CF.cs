@@ -216,7 +216,6 @@ namespace Others
         {
             Vector3 bestPos = new Vector3();
             int hits = 0;
-            Random rndx = new Random(), rndy = new Random();
             foreach (var minion in minions)
             {
 
