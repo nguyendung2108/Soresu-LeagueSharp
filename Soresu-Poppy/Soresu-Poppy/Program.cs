@@ -36,16 +36,17 @@ namespace Soresu_Poppy
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Poppy</font>");
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
-            Orbwalking.OnAttack += OnAttack;
+            Orbwalking.AfterAttack += AfterAttack;
             AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += OnPossibleToInterrupt;
         }
 
-        private static void OnAttack(AttackableUnit unit, AttackableUnit target)
+        private static void AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
             if (unit.IsMe && Q.IsReady() && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && config.Item("useq").GetValue<bool>() && target.IsEnemy && target.Team!=player.Team)
             {
                 Q.Cast(config.Item("packets").GetValue<bool>());
+                Orbwalking.ResetAutoAttackTimer();
             }
         }
 
@@ -70,7 +71,7 @@ namespace Soresu_Poppy
                 if (target != null)
                 {
                     double smitedamage = CF.smiteDamage();
-                    if (smite.CanCast(target) && smiteReady && player.Distance(target) <= smite.Range && CF.smiteDamage() >= target.Health)
+                    if (smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= smite.Range && CF.smiteDamage() >= target.Health)
                     {
                         CF.CastSmite(target);
                     }
@@ -102,7 +103,7 @@ namespace Soresu_Poppy
             bool hasFlash = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerFlash")) == SpellState.Ready;
             bool hasIgnite = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerDot")) == SpellState.Ready;
 
-            if ( config.Item("usew").GetValue<bool>() && player.Distance(target)<R.Range && W.IsReady())
+            if ( config.Item("usew").GetValue<bool>() && player.Distance(target.Position)<R.Range && W.IsReady())
             {
                 W.Cast(config.Item("packets").GetValue<bool>());
             }
@@ -134,7 +135,7 @@ namespace Soresu_Poppy
             }
             if (config.Item("user").GetValue<bool>())
             {
-                if (R.IsReady() && player.Distance(target) < E.Range && CF.ComboDamage(target) + player.GetAutoAttackDamage(target) * 5 < target.Health && (CF.ComboDamage(target) + player.GetAutoAttackDamage(target) * 3) * ultMod[R.Level-1] > target.Health)
+                if (R.IsReady() && player.Distance(target.Position) < E.Range && CF.ComboDamage(target) + player.GetAutoAttackDamage(target) * 5 < target.Health && (CF.ComboDamage(target) + player.GetAutoAttackDamage(target) * 3) * ultMod[R.Level-1] > target.Health)
                 {
                     R.CastOnUnit(target, config.Item("packets").GetValue<bool>());
                 }
@@ -153,7 +154,7 @@ namespace Soresu_Poppy
 
         private static void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (config.Item("useEgap").GetValue<bool>() && E.IsReady() && E.CanCast(gapcloser.Sender) && CheckWalls(player, gapcloser.Sender) && gapcloser.Sender.Position==gapcloser.End) E.CastOnUnit(gapcloser.Sender, config.Item("packets").GetValue<bool>());
+            if (config.Item("useEgap").GetValue<bool>() && E.IsReady() && E.CanCast(gapcloser.Sender) && CheckWalls(player, gapcloser.Sender)) E.CastOnUnit(gapcloser.Sender, config.Item("packets").GetValue<bool>());
         }
         public static bool CheckWalls(Obj_AI_Base player, Obj_AI_Base enemy)
         {
