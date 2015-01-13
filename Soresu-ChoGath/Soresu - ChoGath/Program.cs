@@ -196,29 +196,12 @@ namespace Soresu___ChoGath
             {
                 flashRblock = false;
             }
-            if (config.Item("useq").GetValue<bool>())
+            if (config.Item("useq").GetValue<bool>() && Q.IsReady())
             {
-
-                if (target.IsValidTarget(Q.Range))
+                if (target.IsValidTarget(Q.Range) && Q.CanCast(target))
                 {
-                    int qHit = config.Item("qHit", true).GetValue<Slider>().Value;
-                    var hitC = HitChance.High;
-                    switch (qHit)
-                    {
-                        case 1:
-                            hitC = HitChance.Low;
-                            break;
-                        case 2:
-                            hitC = HitChance.Medium;
-                            break;
-                        case 3:
-                            hitC = HitChance.High;
-                            break;
-                        case 4:
-                            hitC = HitChance.VeryHigh;
-                            break;
-                    }
-                    Q.CastIfHitchanceEquals(target, hitC, config.Item("packets").GetValue<bool>());
+                    var nextpos = target.Position.Extend(target.ServerPosition, target.MoveSpeed);
+                    Q.Cast(nextpos, config.Item("packets").GetValue<bool>());
                 }
             }
             if (config.Item("usew").GetValue<bool>())
@@ -322,7 +305,6 @@ namespace Soresu___ChoGath
             // Combo Settings
             Menu menuC = new Menu("Combo ", "csettings");
             menuC.AddItem(new MenuItem("useq", "Use Q")).SetValue(true);
-            menuC.AddItem(new MenuItem("qHit", "Q hitChance", true).SetValue(new Slider(3, 1, 4)));
             menuC.AddItem(new MenuItem("usew", "Use W")).SetValue(true);
             menuC.AddItem(new MenuItem("usee", "Use E")).SetValue(true);
             menuC.AddItem(new MenuItem("user", "Use R")).SetValue(true);
