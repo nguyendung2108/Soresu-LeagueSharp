@@ -183,7 +183,7 @@ namespace Soresu___ChoGath
             {
                 player.Spellbook.CastSpell(player.GetSpellSlot("SummonerDot"), target);
             }
-            CF.UseSpells(target);
+            if (config.Item("usespells").GetValue<bool>()) CF.UseSpells(target);
                 //VorpalSpikes
                 //rupturelaunch
                 //Silence
@@ -198,11 +198,37 @@ namespace Soresu___ChoGath
             }
             if (config.Item("useq").GetValue<bool>() && Q.IsReady())
             {
-                if (target.IsValidTarget(Q.Range) && Q.CanCast(target))
+                if (config.Item("useqfaster").GetValue<bool>())
                 {
-                    var nextpos = target.Position.Extend(target.ServerPosition, target.MoveSpeed*0.7f);
-                    Q.Cast(nextpos, config.Item("packets").GetValue<bool>());
+                    
+                    if (target.IsValidTarget(Q.Range) && Q.CanCast(target))
+                    {
+                        var nextpos = target.Position.Extend(target.ServerPosition, target.MoveSpeed * 0.7f);
+                        Q.Cast(nextpos, config.Item("packets").GetValue<bool>());
+                    }   
                 }
+                else
+                {
+                    int qHit = config.Item("qHit", true).GetValue<Slider>().Value;
+                    var hitC = HitChance.High;
+                    switch (qHit)
+                    {
+                        case 1:
+                            hitC = HitChance.Low;
+                            break;
+                        case 2:
+                            hitC = HitChance.Medium;
+                            break;
+                        case 3:
+                            hitC = HitChance.High;
+                            break;
+                        case 4:
+                            hitC = HitChance.VeryHigh;
+                            break;
+                    }
+                    Q.CastIfHitchanceEquals(target, hitC, config.Item("packets").GetValue<bool>());
+                }
+
             }
             if (config.Item("usew").GetValue<bool>())
             {
@@ -305,10 +331,13 @@ namespace Soresu___ChoGath
             // Combo Settings
             Menu menuC = new Menu("Combo ", "csettings");
             menuC.AddItem(new MenuItem("useq", "Use Q")).SetValue(true);
+            menuC.AddItem(new MenuItem("qHit", "Q hitChance", true).SetValue(new Slider(3, 1, 4)));
+            menuC.AddItem(new MenuItem("useqfaster", "Use faster Q prediction")).SetValue(false);
             menuC.AddItem(new MenuItem("usew", "Use W")).SetValue(true);
             menuC.AddItem(new MenuItem("usee", "Use E")).SetValue(true);
             menuC.AddItem(new MenuItem("user", "Use R")).SetValue(true);
             menuC.AddItem(new MenuItem("UseFlashC", "Use flash")).SetValue(false);
+            menuC.AddItem(new MenuItem("usespells", "Use Items and ignite")).SetValue(true);
             config.AddSubMenu(menuC);
             // Harass Settings
             Menu menuH = new Menu("Harass ", "Hsettings");
