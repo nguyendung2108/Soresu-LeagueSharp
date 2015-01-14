@@ -179,7 +179,7 @@ namespace Soresu___ChoGath
             bool hasFlash = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerFlash")) == SpellState.Ready;
             bool hasIgnite = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerDot")) == SpellState.Ready;
             var combodmg = CF.ComboDamage(target);
-            if (combodmg > target.Health && hasIgnite)
+            if (combodmg > target.Health && hasIgnite && (R.IsReady() && (float)Damage.GetSpellDamage(player, target, SpellSlot.R) < target.Health))
             {
                 player.Spellbook.CastSpell(player.GetSpellSlot("SummonerDot"), target);
             }
