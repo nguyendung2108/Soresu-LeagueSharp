@@ -85,7 +85,7 @@ namespace Others
                 damage += (float)player.CalcDamage(hero,Damage.DamageType.Magical, player.BaseAttackDamage*0.75+player.FlatMagicDamageMod*0.5);
             }
             //sheen
-            if (Items.HasItem(3057) && Items.CanUseItem(3057))
+            if (Items.HasItem(3057) && (Items.CanUseItem(3057) || player.HasBuff("sheen",true)))
             {
                 damage += (float)player.CalcDamage(hero, Damage.DamageType.Physical, player.BaseAttackDamage);
             }

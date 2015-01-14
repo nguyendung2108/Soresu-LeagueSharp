@@ -52,7 +52,7 @@ namespace Soresu_Poppy
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            Obj_AI_Hero targetf = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            Obj_AI_Hero targetf = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
             var bestpos = CF.bestVectorToPoppyFlash(targetf);
             if (config.Item("useeflashforced").GetValue<KeyBind>().Active)
             {
@@ -97,11 +97,11 @@ namespace Soresu_Poppy
 
         private static void Combo()
         {
-            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
             if (target==null)return;
-            CF.UseSpells(target);
+            if (config.Item("useItems").GetValue<bool>()) CF.UseSpells(target);
             bool hasFlash = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerFlash")) == SpellState.Ready;
-            bool hasIgnite = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerDot")) == SpellState.Ready;
+            //bool hasIgnite = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerDot")) == SpellState.Ready;
 
             if ( config.Item("usew").GetValue<bool>() && player.Distance(target.Position)<R.Range && W.IsReady())
             {
@@ -115,7 +115,8 @@ namespace Soresu_Poppy
                 {
                     var bestpos = CF.bestVectorToPoppyFlash(target);
                     float damage = (float)(CF.ComboDamage(target) + Damage.CalcDamage(player, target, Damage.DamageType.Magical, (eSecond[E.Level-1] + 0.8f * player.FlatMagicDamageMod)) + (player.GetAutoAttackDamage(target) * 4));
-                    if (config.Item("useeflash").GetValue<bool>() && hasFlash && !CheckWalls(player, target) && damage > target.Health && CF.bestVectorToPoppyFlash(target).IsValid())
+                    float damageno = (float)(CF.ComboDamage(target) + (player.GetAutoAttackDamage(target) * 4));
+                    if (config.Item("useeflash").GetValue<bool>() && hasFlash && !CheckWalls(player, target) && damage > target.Health && target.Health > damageno && CF.bestVectorToPoppyFlash(target).IsValid())
                     {
                         player.Spellbook.CastSpell(player.GetSpellSlot("SummonerFlash"), bestpos);
                         Utility.DelayAction.Add(100, () => E.CastOnUnit(target, config.Item("packets").GetValue<bool>()));
@@ -139,6 +140,10 @@ namespace Soresu_Poppy
                 {
                     R.CastOnUnit(target, config.Item("packets").GetValue<bool>());
                 }
+            }
+            if (config.Item("userindanger").GetValue<Slider>().Value < player.CountEnemysInRange(R.Range))
+            {
+                R.CastOnUnit(target, config.Item("packets").GetValue<bool>());
             }
 
         }
@@ -208,7 +213,9 @@ namespace Soresu_Poppy
             menuC.AddItem(new MenuItem("useewall", "Use E only near walls")).SetValue(true);
             menuC.AddItem(new MenuItem("useeflash", "Use flash to positioning")).SetValue(true);
             menuC.AddItem(new MenuItem("useeflashforced", "Forced flash+E if possible")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press));
-            menuC.AddItem(new MenuItem("user", "Use R")).SetValue(true);
+            menuC.AddItem(new MenuItem("user", "Use R to maximize dmg")).SetValue(true);
+            menuC.AddItem(new MenuItem("userindanger", "Auto activate if more than")).SetValue(new Slider(3, 1, 6));
+            menuC.AddItem(new MenuItem("useItems", "Use items and ignite")).SetValue(true);
             config.AddSubMenu(menuC);
             // Misc Settings
             Menu menuM = new Menu("Misc ", "Msettings");
