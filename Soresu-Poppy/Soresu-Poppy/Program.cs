@@ -52,7 +52,7 @@ namespace Soresu_Poppy
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            Obj_AI_Hero targetf = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+            Obj_AI_Hero targetf = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
             var bestpos = CF.bestVectorToPoppyFlash(targetf);
             if (config.Item("useeflashforced").GetValue<KeyBind>().Active)
             {
@@ -156,7 +156,6 @@ namespace Soresu_Poppy
             Utility.HpBarDamageIndicator.DamageToUnit = CF.ComboDamage;
             Utility.HpBarDamageIndicator.Enabled = config.Item("drawcombo").GetValue<bool>();
         }
-
         private static void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             if (config.Item("useEgap").GetValue<bool>() && E.IsReady() && E.CanCast(gapcloser.Sender) && CheckWalls(player, gapcloser.Sender)) E.CastOnUnit(gapcloser.Sender, config.Item("packets").GetValue<bool>());

@@ -248,19 +248,22 @@ namespace Others
         }
         public static Vector3 bestVectorToPoppyFlash(Obj_AI_Base target)
         {
-            Vector3 bestPos = new Vector3();
-
             Vector3 newPos = new Vector3();
-                for (int i = 1; i < 8; i++)
+            for (int i = 1; i < 7; i++)
+            {
+                for (int j = 1; j < 6; j++)
                 {
-                    newPos = new Vector3(target.Position.X + 65*i, target.Position.Y + 65*i, target.Position.Z);
-                    var rotated = newPos.To2D().RotateAroundPoint(newPos.To2D(), 45 * i).To3D();
-                    if (rotated.IsValid() && CheckWalls(rotated, target.Position)) return rotated;
+                    newPos = new Vector3(target.Position.X + 65 * j, target.Position.Y + 65 * j, target.Position.Z);
+                    var rotated = newPos.To2D().RotateAroundPoint(target.Position.To2D(), 45 * i).To3D();
+                    if (rotated.IsValid() && CF.CheckWalls(rotated, target.Position) && player.Distance(rotated) < 400)
+                        return rotated;
                 }
+            }
 
                 return new Vector3();
         }
-        private static bool CheckWalls(Vector3 player, Vector3 enemy)
+
+        public static bool CheckWalls(Vector3 player, Vector3 enemy)
         {
             var distance = player.Distance(enemy);
             for (int i = 1; i < 6; i++)
