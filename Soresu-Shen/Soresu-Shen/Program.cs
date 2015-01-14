@@ -110,6 +110,7 @@ namespace Executed
             menuU.AddItem(new MenuItem("autow", "Try to block non-skillshot spells")).SetValue(true);
             menuU.AddItem(new MenuItem("wabove", "Min damage in shield %")).SetValue(new Slider(50, 0, 100));
             menuU.AddItem(new MenuItem("autowwithe", "Keep energy for E")).SetValue(true);
+            menuU.AddItem(new MenuItem("autotauntattower", "Auto taunt in tower range")).SetValue(true);
             menuU.AddItem(new MenuItem("useeagc", "Use E to anti gap closer")).SetValue(false);
             menuU.AddItem(new MenuItem("useeint", "Use E to interrupt")).SetValue(true);
 			menuU.AddItem(new MenuItem("useeflash", "Flash+E")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press));
@@ -443,6 +444,13 @@ namespace Executed
                     }
                     break;
             }
+            if (config.Item("autotauntattower").GetValue<bool>())
+            {
+                var enemy = getEnemiesAtMyTurret(me);
+                if (getEnemiesAtMyTurret(me).IsValid && E.CanCast(enemy)) E.Cast(enemy, config.Item("packets").GetValue<bool>()); 
+            }
+
+
         }
         private static void GetPassive()
         {
@@ -547,8 +555,8 @@ namespace Executed
                     Q.CastOnUnit(target, config.Item("packets").GetValue<bool>());
                     currEnergy -= me.Spellbook.GetSpell(SpellSlot.Q).ManaCost;
             }
-
         }
+
         private static void LasthitQ()
         {
             if (config.Item("autoqwithe").GetValue<bool>() && !(currEnergy - me.Spellbook.GetSpell(SpellSlot.Q).ManaCost > eEnergy)) return;
@@ -604,6 +612,14 @@ namespace Executed
             }
             UseItems(target);
  
+        }
+        public static Obj_AI_Hero getEnemiesAtMyTurret(Obj_AI_Hero me, float distance=750f)
+        {
+            var myturret =
+                ObjectManager.Get<Obj_AI_Turret>()
+                    .Where(turret => turret.IsAlly && !turret.IsDead)
+                    .OrderBy(turret => me.Distance(turret.Position)).FirstOrDefault();
+            return ObjectManager.Get<Obj_AI_Hero>().Where(hero => !hero.IsDead && hero.IsEnemy && myturret.Distance(hero) < distance).OrderBy(hero => hero.Health).FirstOrDefault();
         }
 
         public static void CastEmin(Obj_AI_Base target, int min)
