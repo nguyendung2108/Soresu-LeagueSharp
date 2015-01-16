@@ -20,6 +20,8 @@ namespace Tesztek
         int XP;
         int yp;
         System.Drawing.Point NewPoint;
+        NotifyIcon notifyIcon2 = new NotifyIcon();
+        private int notcount = 0;
         public Form1()
         {
             InitializeComponent();
@@ -34,7 +36,7 @@ namespace Tesztek
             NotifyIcon notifyIcon1 = new NotifyIcon();
             notifyIcon1.BalloonTipText = "L# is probably updated, check it!";
             notifyIcon1.BalloonTipTitle = "L#Checker";
-            notifyIcon1.Icon = new Icon("appicon.ico");
+            notifyIcon1.Icon = global::UpdateChecker.Properties.Resources.appicon;
             notifyIcon1.Visible = true;
             notifyIcon1.ShowBalloonTip(3000);
 
@@ -51,16 +53,22 @@ namespace Tesztek
         }
         private void button1_Click(object sender, EventArgs e)
         {
-            
-            double min = double.Parse(minutes.Text);
-            min = (int)Math.Ceiling(min);
-                    var timer = new System.Threading.Timer(
-                    t => GetStatus(),
-                    null,
-                    TimeSpan.Zero,
-                    TimeSpan.FromSeconds(min*60));
-                    Console.WriteLine(min);
-                    button1.Text = "Checking";
+            string min = minutes.Text;
+            int min2 = 2;
+            button1.Text = "Checking...";
+            button1.Enabled = false;
+            if (IsNumeric(min))
+            {
+                min2 = int.Parse(min);
+            }
+            timer1.Interval = min2*60*1000;
+            timer1.Start();
+        }
+
+        public static bool IsNumeric(string s)
+        {
+            float output;
+            return float.TryParse(s, out output);
         }
         private void panel1_MouseDown(object sender, MouseEventArgs e)
         {
@@ -86,16 +94,16 @@ namespace Tesztek
         }
         private async void GetStatus()
         {
-	//login the site and get the text from the shoutbox
             System.Uri uri = new System.Uri("http://www.niratisnordkyn.com/DontDeleteThis/ls.php");
             string data = await DownloadStringAsync(uri);
+            data = data.ToLower();
             Console.WriteLine(data);
             this.Invoke((MethodInvoker)delegate
                 {
                     statuslabel.Text = "OUTDATED";
                     statuslabel.ForeColor = Color.Red;
                 });
-            if (!data.Contains("OUTDATED") && data.Length>5)
+            if (!data.Contains("outdated") && data.Length>5)
             {
                 this.Invoke((MethodInvoker)delegate
                     {
@@ -108,7 +116,7 @@ namespace Tesztek
                 {
                 time.Text = DateTime.Now.ToString("HH:mm:ss");
                 });
-            Console.WriteLine("Checked");
+            Console.WriteLine("Checked: "+DateTime.Now.ToString("HH:mm:ss"));
             
         }
         public static Task<string> DownloadStringAsync(Uri url)
@@ -128,7 +136,45 @@ namespace Tesztek
             wc.DownloadStringAsync(url);
             
             return tcs.Task;
-        } 
+        }
 
+        private void minimizeToTray_Click(object sender, EventArgs e)
+        {
+            if (notcount == 0)
+            {
+                notifyIcon2.BalloonTipText = "You can find me here";
+                notifyIcon2.BalloonTipTitle = "L#Checker";
+                notifyIcon2.Icon = global::UpdateChecker.Properties.Resources.appicon;
+                notifyIcon2.Visible = true;
+                notifyIcon2.ShowBalloonTip(2000);
+                notcount++;
+            }
+            else
+            {
+                notifyIcon2.BalloonTipText = "";
+                notifyIcon2.BalloonTipTitle = "";
+                notifyIcon2.Icon = global::UpdateChecker.Properties.Resources.appicon;
+                notifyIcon2.Visible = true;
+            }
+            notifyIcon2.MouseClick += new MouseEventHandler(notiHandler);
+            this.Hide();
+        }
+
+        private void notiHandler(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+            this.Show();
+            notifyIcon2.Visible = false;
+            notifyIcon2.MouseClick -= notiHandler;
+            }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            timer1.Stop();
+            GetStatus();
+            timer1.Start();
+        }
     }
 }
