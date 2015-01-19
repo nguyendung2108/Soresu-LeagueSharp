@@ -13,8 +13,7 @@ namespace UnderratedAIO.Champions
         public static Menu config;
         private static Orbwalking.Orbwalker orbwalker;
         private static readonly Obj_AI_Hero me = ObjectManager.Player;
-        public static Spell Q, W, E, R, smite;
-        public static SpellSlot smiteSlot = SpellSlot.Unknown;
+        public static Spell Q, W, E, R;
         static Sejuani()
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
@@ -72,10 +71,10 @@ namespace UnderratedAIO.Champions
             {
                 Jungle.setSmiteSlot();
                 var target = Jungle.GetNearest(me.Position);
-                bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(smiteSlot) == SpellState.Ready;
+                bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
                 if (target != null)
                 {
-                    if (smite.CanCast(target) && smiteReady && me.Distance(target.Position) <= smite.Range && Jungle.smiteDamage() >= target.Health)
+                    if (Jungle.smite.CanCast(target) && smiteReady && me.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage() >= target.Health)
                     {
                         Jungle.CastSmite(target);
                     }

@@ -1,27 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Color = System.Drawing.Color;
+
 using LeagueSharp;
 using LeagueSharp.Common;
+
 using UnderratedAIO.Helpers;
-using Color = System.Drawing.Color;
 using Environment = UnderratedAIO.Helpers.Environment;
 
 namespace UnderratedAIO.Champions
 {
-    class ChoGath
+    class Chogath
     {
         public static Menu config;
         private static Orbwalking.Orbwalker orbwalker;
         public static readonly Obj_AI_Hero player = ObjectManager.Player;
-        public static Spell Q, W, E, R, RFlash, smite;
-        public static SpellSlot smiteSlot = SpellSlot.Unknown;
+        public static Spell Q, W, E, R, RFlash;
         public static List<int> silence = new List<int>(new int[] { 1500, 1750, 2000, 2250, 2500});
         public static int knockUp = 1000;
         public static bool flashRblock = false; 
         public static bool vSpikes=false;
 
-        public ChoGath()
+        public Chogath()
         {
             if (player.BaseSkinName != "Chogath") return;
             InitMenu();
@@ -82,14 +83,13 @@ namespace UnderratedAIO.Champions
         {
             var target = UnderratedAIO.Helpers.Jungle.GetNearest(player.Position);
             bool hasFlash = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerFlash")) == SpellState.Ready;
-            bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(smiteSlot) == SpellState.Ready;
+            bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Helpers.Jungle.smiteSlot) == SpellState.Ready;
             if (target != null)
             {
-                UnderratedAIO.Helpers.Jungle.setSmiteSlot();
-                double smitedamage = UnderratedAIO.Helpers.Jungle.smiteDamage();
-                if (target.CountEnemysInRange(smite.Range)>0)
+                Helpers.Jungle.setSmiteSlot();
+                if (target.CountEnemysInRange(Helpers.Jungle.smite.Range) > 0)
                 {
-                    if (config.Item("useRJ").GetValue<bool>() && config.Item("useFlashJ").GetValue<bool>() && R.IsReady() && hasFlash && 1000+player.FlatMagicDamageMod >= target.Health &&  player.GetSpell(SpellSlot.R).ManaCost <= player.Mana &&
+                    if (config.Item("useRJ").GetValue<bool>() && config.Item("useFlashJ").GetValue<bool>() && R.IsReady() && hasFlash && 1000+player.FlatMagicDamageMod*0.7f >= target.Health &&  player.GetSpell(SpellSlot.R).ManaCost <= player.Mana &&
                         player.Distance(target.Position) > 400 && player.Distance(target.Position) <= RFlash.Range &&
                         !player.Position.Extend(target.Position, 400).IsWall())
                     {
@@ -97,15 +97,15 @@ namespace UnderratedAIO.Champions
                         //Utility.DelayAction.Add(50, () => R.Cast(target, config.Item("packets").GetValue<bool>()));
                     }
                 }
-                if (config.Item("useRJ").GetValue<bool>() && R.CanCast(target) && !(config.Item("priorizeSmite").GetValue<bool>() && smiteReady) && player.GetSpell(SpellSlot.R).ManaCost <= player.Mana && 1000 + player.FlatMagicDamageMod >= target.Health)
+                if (config.Item("useRJ").GetValue<bool>() && R.CanCast(target) && !(config.Item("priorizeSmite").GetValue<bool>() && smiteReady) && player.GetSpell(SpellSlot.R).ManaCost <= player.Mana && 1000 + player.FlatMagicDamageMod*0.7 >= target.Health)
                 {
                     R.Cast(target, config.Item("packets").GetValue<bool>());
-                } 
-                
-                if (config.Item("useSmite").GetValue<bool>() && smite.CanCast(target) && smiteReady && player.Distance(target) <= smite.Range && UnderratedAIO.Helpers.Jungle.smiteDamage() >= target.Health)
+                }
+
+                if (config.Item("useSmite").GetValue<bool>() && Helpers.Jungle.smite.CanCast(target) && smiteReady && player.Distance(target) <= Helpers.Jungle.smite.Range && Helpers.Jungle.smiteDamage() >= target.Health)
                 {
                     
-                    UnderratedAIO.Helpers.Jungle.CastSmite(target);
+                    Helpers.Jungle.CastSmite(target);
                 }
             }
         }
@@ -174,7 +174,7 @@ namespace UnderratedAIO.Champions
             {
                 player.Spellbook.CastSpell(player.GetSpellSlot("SummonerDot"), target);
             }
-            if (combodmg > target.Health && hasIgnite && (R.IsReady() && (float)Damage.GetSpellDamage(player, target, SpellSlot.R) < target.Health))
+            if (combodmg > target.Health && hasIgnite && (R.IsReady() && R.CanCast(target) && (float)Damage.GetSpellDamage(player, target, SpellSlot.R) < target.Health))
             {
                 player.Spellbook.CastSpell(player.GetSpellSlot("SummonerDot"), target);
             }

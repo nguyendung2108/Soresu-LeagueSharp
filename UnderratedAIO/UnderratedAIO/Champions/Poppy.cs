@@ -1,8 +1,9 @@
 ﻿using System;
 using LeagueSharp;
 using LeagueSharp.Common;
-using UnderratedAIO.Helpers;
 using Color = System.Drawing.Color;
+
+using UnderratedAIO.Helpers;
 
 namespace UnderratedAIO.Champions
 {
@@ -11,10 +12,9 @@ namespace UnderratedAIO.Champions
         public static Menu config;
         private static Orbwalking.Orbwalker orbwalker;
         public static readonly Obj_AI_Hero player = ObjectManager.Player;
-        public static Spell Q, W, E, R, smite;
+        public static Spell Q, W, E, R;
         public static double[] ultMod=new double[3]{1.2, 1.3, 1.4};
         public static double[] eSecond = new double[5] { 75, 125, 175, 225, 275};
-        public static SpellSlot smiteSlot = SpellSlot.Unknown;
         
         static Poppy()
         {
@@ -40,6 +40,21 @@ namespace UnderratedAIO.Champions
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
+            if (config.Item("useSmite").GetValue<bool>())
+            {
+
+                var target = Jungle.GetNearest(player.Position);
+                bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
+                if (target != null)
+                {
+                    Jungle.setSmiteSlot();
+                    if (Jungle.smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage() >= target.Health)
+                    {
+
+                        Jungle.CastSmite(target);
+                    }
+                }
+            }
             Obj_AI_Hero targetf = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
             var bestpos = CombatHelper.bestVectorToPoppyFlash(targetf);
             if (config.Item("useeflashforced").GetValue<KeyBind>().Active)
@@ -49,19 +64,6 @@ namespace UnderratedAIO.Champions
                 {
                     player.Spellbook.CastSpell(player.GetSpellSlot("SummonerFlash"), bestpos);
                     Utility.DelayAction.Add(100, () => E.CastOnUnit(targetf, config.Item("packets").GetValue<bool>()));
-                }
-            }
-            if (config.Item("useSmite").GetValue<bool>())
-            {
-                Jungle.setSmiteSlot();
-                var target = Jungle.GetNearest(player.Position);
-                bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(smiteSlot) == SpellState.Ready;
-                if (target != null)
-                {
-                    if (smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= smite.Range && Jungle.smiteDamage() >= target.Health)
-                    {
-                        Jungle.CastSmite(target);
-                    }
                 }
             }
             switch (orbwalker.ActiveMode)
@@ -86,7 +88,6 @@ namespace UnderratedAIO.Champions
             if (target==null)return;
             if (config.Item("useItems").GetValue<bool>()) ItemHandler.UseItems(target);
             bool hasFlash = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerFlash")) == SpellState.Ready;
-            //bool hasIgnite = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerDot")) == SpellState.Ready;
 
             if ( config.Item("usew").GetValue<bool>() && player.Distance(target.Position)<R.Range && W.IsReady())
             {
