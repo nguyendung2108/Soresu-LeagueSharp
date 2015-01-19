@@ -76,7 +76,7 @@ namespace UnderratedAIO.Champions
                }
                if (Gtarget != null)
                {
-                   R.CastOnUnit(Gtarget);
+                   R.CastOnUnit(Gtarget, config.Item("packets").GetValue<bool>());
                    GhostDelay = true;
                    Utility.DelayAction.Add(1000, () => GhostDelay = false);
                }

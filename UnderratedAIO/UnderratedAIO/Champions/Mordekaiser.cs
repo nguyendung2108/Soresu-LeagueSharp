@@ -45,27 +45,29 @@ namespace UnderratedAIO.Champions
            if (MordeGhost && !GhostDelay)
            {
                var Gtarget = TargetSelector.GetTarget(GhostRange, TargetSelector.DamageType.Magical);
-               switch (config.Item("ghostTarget", true).GetValue<StringList>().SelectedIndex)
+               switch (config.Item("ghostTarget").GetValue<StringList>().SelectedIndex)
                {
                    case 0:
                        Gtarget = TargetSelector.GetTarget(GhostRange, TargetSelector.DamageType.Magical);
-                       break;
+                   break;
                    case 1:
                        Gtarget = ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && player.Distance(i) <= GhostRange).OrderBy(i => i.Health).FirstOrDefault();
-                       break;
+                   break;
                    case 2:
                        Gtarget = ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && player.Distance(i) <= GhostRange).OrderBy(i => player.Distance(i)).FirstOrDefault();
-                       break;
+                   break;
                    default:
                        break;
                }
-               if (Gtarget != null)
+               if (Gtarget.IsValid)
                {
-                   R.CastOnUnit(Gtarget);
+                   
+                   R.CastOnUnit(Gtarget, config.Item("packets").GetValue<bool>());
                    GhostDelay = true;
                    Utility.DelayAction.Add(1000, () => GhostDelay = false);
                }
            }
+           
            switch (orbwalker.ActiveMode)
            {
                case Orbwalking.OrbwalkingMode.Combo:
@@ -90,6 +92,10 @@ namespace UnderratedAIO.Champions
            }
        }
 
+        private static bool HasDef()
+        {
+            return true;
+        }
        private static void AfterAttack(AttackableUnit unit, AttackableUnit target)
        {
            if (unit.IsMe && Q.IsReady() && ((orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && config.Item("useq").GetValue<bool>() && target.IsEnemy && target.Team != player.Team) || (config.Item("useqLC").GetValue<bool>() && Jungle.GetNearest(player.Position).Distance(player.Position) < player.AttackRange + 30)))
@@ -115,13 +121,14 @@ namespace UnderratedAIO.Champions
            bool hasIgnite = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerDot")) == SpellState.Ready;
            if (config.Item("usew").GetValue<bool>())
            {
-               W.Cast(Environment.Hero.mostEnemyAtFriend(player, W.Range, 250f), config.Item("packets").GetValue<bool>());
+               var wTarget = Environment.Hero.mostEnemyAtFriend(player, W.Range, 250f);
+               if(wTarget!=null) W.Cast(wTarget, config.Item("packets").GetValue<bool>());
            }
            if (config.Item("usee").GetValue<bool>() && E.CanCast(target))
            {
                E.Cast(target.Position, config.Item("packets").GetValue<bool>());
            }
-           if (config.Item("user").GetValue<bool>() && !MordeGhost && R.CanCast(target) && combodmg > target.Health && !config.Item("ult" + target.SkinName).GetValue<bool>())
+           if (config.Item("user").GetValue<bool>() && !MordeGhost && (player.Distance(target) <= 400f || (R.CanCast(target) && target.Health<250f && Environment.Hero.countChampsAtrangeA(player.Position,600f)>1)) && !config.Item("ult" + target.SkinName).GetValue<bool>() && combodmg > target.Health)
            {
                R.CastOnUnit(target, config.Item("packets").GetValue<bool>());
            }
@@ -129,7 +136,6 @@ namespace UnderratedAIO.Champions
            {
                player.Spellbook.CastSpell(player.GetSpellSlot("SummonerDot"), target);
            }
-           Game.PrintChat("combo ok");
        }
        private static bool MordeGhost
        {
@@ -152,7 +158,7 @@ namespace UnderratedAIO.Champions
            {
                E.Cast(bestpos, config.Item("packets").GetValue<bool>());
            }
-           if (config.Item("useWLC").GetValue<bool>() && W.IsReady() && Environment.Minion.countMinionsInrange(player.Position,250f)>1)
+           if (config.Item("usewLC").GetValue<bool>() && W.IsReady() && Environment.Minion.countMinionsInrange(player.Position,250f)>1)
            {
                W.Cast(player, config.Item("packets").GetValue<bool>());
            }
@@ -208,7 +214,7 @@ namespace UnderratedAIO.Champions
         {
             Q = new Spell(SpellSlot.Q, player.AttackRange);
             W = new Spell(SpellSlot.W, 750);
-            E = new Spell(SpellSlot.E, 700);
+            E = new Spell(SpellSlot.E, 650);
             E.SetSkillshot(E.Instance.SData.SpellCastTime, E.Instance.SData.LineWidth, E.Speed, false, SkillshotType.SkillshotCone);
             R = new Spell(SpellSlot.R, 850);
         }
@@ -245,8 +251,6 @@ namespace UnderratedAIO.Champions
            config.AddSubMenu(menuC);
            // Harass Settings
            Menu menuH = new Menu("Harass ", "Hsettings");
-           menuH.AddItem(new MenuItem("useqH", "Use Q")).SetValue(true);
-           menuH.AddItem(new MenuItem("usewH", "Use W")).SetValue(true);
            menuH.AddItem(new MenuItem("useeH", "Use E")).SetValue(true);
            config.AddSubMenu(menuH);
            // LaneClear Settings

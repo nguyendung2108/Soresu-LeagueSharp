@@ -57,12 +57,15 @@ namespace UnderratedAIO.Helpers
             {
                 return ObjectManager.Get<Obj_AI_Hero>().Count(i => !i.IsDead && i.IsEnemy && i.Distance(l) < p);
             }
-
-            public static Obj_AI_Hero mostEnemyAtFriend(Obj_AI_Hero player, float spellRange, float spellWidth)
+            public static int countChampsAtrangeA(Vector3 l, float p)
+            {
+                return ObjectManager.Get<Obj_AI_Hero>().Count(i => !i.IsDead && i.IsAlly && i.Distance(l) < p);
+            }
+            public static Obj_AI_Hero mostEnemyAtFriend(Obj_AI_Hero player, float spellRange, float spellWidth, int min=0)
             {
                 return
                     ObjectManager.Get<Obj_AI_Hero>()
-                        .Where(i => !i.IsDead && i.IsAlly && i.Distance(player) < spellRange)
+                        .Where(i => !i.IsDead && i.IsAlly && i.CountEnemysInRange(spellWidth)>min && i.Distance(player) < spellRange)
                         .OrderByDescending(i => i.CountEnemysInRange(spellWidth))
                         .FirstOrDefault();
             }
