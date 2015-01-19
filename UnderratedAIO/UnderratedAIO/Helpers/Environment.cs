@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-
+using System.Runtime.Remoting.Messaging;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -21,19 +22,28 @@ namespace UnderratedAIO.Helpers
             {
                 return ObjectManager.Get<Obj_AI_Minion>().Count(i => !i.IsDead && i.IsEnemy && i.Distance(l) < p);
             }
-            public static Vector3 bestVectorToAoeFarm(List<Obj_AI_Base> minions, float spellrange)
+            public static Vector3 bestVectorToAoeFarm(Vector3 center, float spellrange, float spellWidth)
             {
+                var minions = MinionManager.GetMinions(center, spellrange, MinionTypes.All, MinionTeam.NotAlly);
                 Vector3 bestPos = new Vector3();
                 int hits = 0;
                 foreach (var minion in minions)
                 {
 
-                    if (countMinionsInrange(minion.Position, 170f) > hits) bestPos = minion.Position;
+                    if (countMinionsInrange(minion.Position, spellWidth) > hits)
+                    {
+                        bestPos = minion.Position;
+                        hits = countMinionsInrange(minion.Position, spellWidth);
+                    }
                     Vector3 newPos = new Vector3(minion.Position.X + 80, minion.Position.Y + 80, minion.Position.Z);
                     for (int i = 1; i < 4; i++)
                     {
                         var rotated = newPos.To2D().RotateAroundPoint(newPos.To2D(), 90 * i).To3D();
-                        if (countMinionsInrange(rotated, 170f) > hits && player.Distance(rotated) <= spellrange) bestPos = newPos;
+                        if (countMinionsInrange(rotated, spellWidth) > hits && player.Distance(rotated) <= spellrange)
+                        {
+                            bestPos = newPos;
+                            hits = countMinionsInrange(rotated, spellWidth);
+                        }
                     }
                 }
 
@@ -43,10 +53,71 @@ namespace UnderratedAIO.Helpers
 
         public class Hero
         {
-            public static int countChampsAtrange(Obj_AI_Hero l, float p)
+            public static int countChampsAtrange(Vector3 l, float p)
             {
                 return ObjectManager.Get<Obj_AI_Hero>().Count(i => !i.IsDead && i.IsEnemy && i.Distance(l) < p);
             }
+
+            public static Obj_AI_Hero mostEnemyAtFriend(Obj_AI_Hero player, float spellRange, float spellWidth)
+            {
+                return
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(i => !i.IsDead && i.IsAlly && i.Distance(player) < spellRange)
+                        .OrderByDescending(i => i.CountEnemysInRange(spellWidth))
+                        .FirstOrDefault();
+            }
+
+            public static Vector3 bestVectorToAoeSpell(IEnumerable<Obj_AI_Hero> heroes,
+                float spellrange,
+                float spellwidth)
+            {
+                Vector3 bestPos = new Vector3();
+                int hits = 0;
+                foreach (var hero in heroes)
+                {
+
+                    if (countChampsAtrange(hero.Position, spellwidth) > hits)
+                    {
+                        bestPos = hero.Position;
+                        hits = countChampsAtrange(hero.Position, spellwidth);
+                    }
+                    Vector3 newPos = new Vector3(hero.Position.X + 80, hero.Position.Y + 80, hero.Position.Z);
+                    for (int i = 1; i < 4; i++)
+                    {
+                        var rotated = newPos.To2D().RotateAroundPoint(newPos.To2D(), 90 * i).To3D();
+                        if (countChampsAtrange(rotated, spellwidth) > hits && player.Distance(rotated) <= spellrange)
+                        {
+                            bestPos = newPos;
+                            hits = countChampsAtrange(rotated, spellwidth);
+                        }
+                    }
+                }
+
+                return bestPos;
+            }
+
+            public static float GetAdOverFive(Obj_AI_Hero hero)
+            {
+                    double basicDmg = 0;
+                    int attacks = (int)Math.Floor(hero.AttackSpeedMod * 5);
+                    for (int i = 0; i < attacks; i++)
+                    {
+
+                        if (hero.Crit > 0)
+                        {
+
+                            basicDmg += hero.GetAutoAttackDamage(player) * (1 + hero.Crit / attacks);
+                        }
+                        else
+                        {
+
+                            basicDmg += hero.GetAutoAttackDamage(player);
+                        }
+                    } 
+                return (float)basicDmg;
+                }
+
+             
         }
 
         public class Turret

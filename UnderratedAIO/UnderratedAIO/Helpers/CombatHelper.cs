@@ -113,7 +113,7 @@ namespace UnderratedAIO.Helpers
                         basicDmg += enemy.GetAutoAttackDamage(player);
                     }
 
-                };
+                }
                 result += basicDmg;
                 var spells = enemy.Spellbook.Spells;
                 foreach (var spell in spells)

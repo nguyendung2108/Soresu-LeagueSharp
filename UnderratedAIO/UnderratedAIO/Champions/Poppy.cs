@@ -27,6 +27,7 @@ namespace UnderratedAIO.Champions
             Orbwalking.AfterAttack += AfterAttack;
             AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += OnPossibleToInterrupt;
+            Jungle.setSmiteSlot();
         }
 
         private static void AfterAttack(AttackableUnit unit, AttackableUnit target)
@@ -40,7 +41,7 @@ namespace UnderratedAIO.Champions
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (config.Item("useSmite").GetValue<bool>())
+            if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
             {
 
                 var target = Jungle.GetNearest(player.Position);
@@ -133,7 +134,7 @@ namespace UnderratedAIO.Champions
             }
             bool hasIgnite = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerDot")) == SpellState.Ready;
             var ignitedmg = (float)player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
-            if (ignitedmg > target.Health && hasIgnite && !E.CanCast(target) && !Q.CanCast(target))
+            if (config.Item("useIgnite").GetValue<bool>() && ignitedmg > target.Health && hasIgnite && !E.CanCast(target) && !Q.CanCast(target))
             {
                 player.Spellbook.CastSpell(player.GetSpellSlot("SummonerDot"), target);
             }

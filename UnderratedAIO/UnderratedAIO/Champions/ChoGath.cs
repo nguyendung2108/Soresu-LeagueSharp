@@ -32,6 +32,7 @@ namespace UnderratedAIO.Champions
             Drawing.OnDraw += Game_OnDraw;
             AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += OnPossibleToInterrupt;
+            Helpers.Jungle.setSmiteSlot();
         }
         public static void Game_OnGameUpdate(EventArgs args)
         {
@@ -102,7 +103,7 @@ namespace UnderratedAIO.Champions
                     R.Cast(target, config.Item("packets").GetValue<bool>());
                 }
 
-                if (config.Item("useSmite").GetValue<bool>() && Helpers.Jungle.smite.CanCast(target) && smiteReady && player.Distance(target) <= Helpers.Jungle.smite.Range && Helpers.Jungle.smiteDamage() >= target.Health)
+                if (config.Item("useSmite").GetValue<bool>() && Helpers.Jungle.smiteSlot != SpellSlot.Unknown && Helpers.Jungle.smite.CanCast(target) && smiteReady && player.Distance(target) <= Helpers.Jungle.smite.Range && Helpers.Jungle.smiteDamage() >= target.Health)
                 {
                     
                     Helpers.Jungle.CastSmite(target);
@@ -140,7 +141,7 @@ namespace UnderratedAIO.Champions
                         .OrderByDescending(i => CF.countMinionsInrange(i, 170f))
                         .FirstOrDefault();
                 */
-                var minionsForQ =Environment.Minion.bestVectorToAoeFarm(MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly),Q.Range);
+                var minionsForQ =Environment.Minion.bestVectorToAoeFarm(player.Position, Q.Range, 170f);
                 
                 if (minionsForQ.IsValid())Q.Cast(minionsForQ, config.Item("packets").GetValue<bool>());
             }

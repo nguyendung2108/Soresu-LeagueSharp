@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -14,7 +15,7 @@ namespace UnderratedAIO.Champions
         public static Menu config;
         private static Orbwalking.Orbwalker orbwalker;
         private static readonly Obj_AI_Hero me = ObjectManager.Player;
-        public static Spell Q, W, E, EFlash, R, P;
+        public static Spell Q, W, E, EFlash, R;
         public static float currEnergy;
         public static bool haspassive = true;
         public static bool PingCasted = false;
@@ -36,6 +37,7 @@ namespace UnderratedAIO.Champions
             Obj_AI_Base.OnCreate += OnCreate;
             AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += OnPossibleToInterrupt;
+            Jungle.setSmiteSlot();
 
 
         }
@@ -132,11 +134,25 @@ namespace UnderratedAIO.Champions
                         //AutoW();
                     }
                     break;
+
             }
             if (config.Item("autotauntattower").GetValue<bool>())
             {
                 var enemy = getEnemiesAtMyTurret(me);
                 if (getEnemiesAtMyTurret(me).IsValid && E.CanCast(enemy)) E.Cast(enemy, config.Item("packets").GetValue<bool>()); 
+            }
+            if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
+            {
+                Jungle.setSmiteSlot();
+                var target = Jungle.GetNearest(me.Position);
+                bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
+                if (target != null)
+                {
+                    if (Jungle.smite.CanCast(target) && smiteReady && me.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage() >= target.Health)
+                    {
+                        Jungle.CastSmite(target);
+                    }
+                }
             }
         }
 
@@ -282,7 +298,7 @@ namespace UnderratedAIO.Champions
             if (config.Item("useItems").GetValue<bool>()) ItemHandler.UseItems(target);
             bool hasIgnite = me.Spellbook.CanUseSpell(me.GetSpellSlot("SummonerDot")) == SpellState.Ready;
             var ignitedmg = (float)me.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
-            if (ignitedmg > target.Health && hasIgnite && !E.CanCast(target) && !Q.CanCast(target))
+            if (config.Item("useIgnite").GetValue<bool>() && ignitedmg > target.Health && hasIgnite && !E.CanCast(target) && !Q.CanCast(target))
             {
                 me.Spellbook.CastSpell(me.GetSpellSlot("SummonerDot"), target);
             }
@@ -299,7 +315,6 @@ namespace UnderratedAIO.Champions
 
         public static void CastEmin(Obj_AI_Base target, int min)
         {
-            bool casted = false;
             foreach (var enemy in ObjectManager.Get<Obj_AI_Base>().Where(i => i.Distance(me)<E.Range && i.IsEnemy && !i.IsDead && !i.IsMinion))
             {
                 E.CastIfWillHit(enemy, min-1, config.Item("packets").GetValue<bool>());
@@ -425,7 +440,7 @@ namespace UnderratedAIO.Champions
                                 currEnergy -= me.Spellbook.GetSpell(SpellSlot.W).ManaCost;
                             }
                         }
-                        else if (ShieldBuff / 100 * config.Item("wabove").GetValue<Slider>().Value < (caster as Obj_AI_Hero).GetSpellDamage(me, (caster as Obj_AI_Hero).GetSpellSlot(missle.SData.Name, false), 1))
+                        else if (ShieldBuff / 100 * config.Item("wabove").GetValue<Slider>().Value < (caster as Obj_AI_Hero).GetSpellDamage(me, (caster as Obj_AI_Hero).GetSpellSlot(missle.SData.Name), 1))
                         {
                             W.Cast();
                             currEnergy -= me.Spellbook.GetSpell(SpellSlot.W).ManaCost;
@@ -444,11 +459,10 @@ namespace UnderratedAIO.Champions
             EFlash = new Spell(SpellSlot.E, 990);
             EFlash.SetSkillshot(E.Instance.SData.SpellCastTime, E.Instance.SData.LineWidth, E.Speed, false, SkillshotType.SkillshotLine);
             R = new Spell(SpellSlot.R, float.MaxValue);
-            P = new Spell(me.GetSpellSlot("ShenKiAttack", false));//Doesn't Work  
         }
         private static void InitMenu()
         {
-            config = new Menu("Soresu-Shen", "SRS_Shen", true);
+            config = new Menu("Shen", "SRS_Shen", true);
             // Target Selector
             Menu menuTS = new Menu("Selector", "tselect");
             TargetSelector.AddToMenu(menuTS);

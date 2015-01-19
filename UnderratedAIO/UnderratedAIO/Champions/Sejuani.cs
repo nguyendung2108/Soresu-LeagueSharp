@@ -29,6 +29,7 @@ namespace UnderratedAIO.Champions
             Drawing.OnDraw += Game_OnDraw;
             AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += OnPossibleToInterrupt;
+            Jungle.setSmiteSlot();
         }
 
         private static void Game_OnDraw(EventArgs args)
@@ -67,7 +68,7 @@ namespace UnderratedAIO.Champions
                     break;
             }
 
-            if (config.Item("useSmite").GetValue<bool>())
+            if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
             {
                 Jungle.setSmiteSlot();
                 var target = Jungle.GetNearest(me.Position);
@@ -86,7 +87,7 @@ namespace UnderratedAIO.Champions
 
         private static void CastR()
         {
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && me.Distance(i) < R.Range).OrderByDescending(l => Environment.Hero.countChampsAtrange(l, 350f)))
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && me.Distance(i) < R.Range).OrderByDescending(l => Environment.Hero.countChampsAtrange(l.Position, 350f)))
             {
                 R.Cast(enemy, config.Item("packets").GetValue<bool>());
                 break;
@@ -117,7 +118,6 @@ namespace UnderratedAIO.Champions
 
         private static void Clear()
         {
-            Q.SetSkillshot(Q.Instance.SData.SpellCastTime, Q.Instance.SData.LineWidth, Q.Instance.SData.MissileSpeed, false, SkillshotType.SkillshotLine);
             var minions = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget(400)).ToList();
             if (minions.Count() > 2)
             {
@@ -126,8 +126,10 @@ namespace UnderratedAIO.Champions
                 if (Items.HasItem(3074) && Items.CanUseItem(3074))
                     Items.UseItem(3074);
             }
-			float perc = (float)config.Item("minmana").GetValue<Slider>().Value/100f;
+            float perc = (float)config.Item("minmana").GetValue<Slider>().Value / 100f;
             if (me.Mana < me.MaxMana * perc) return;
+
+            Q.SetSkillshot(Q.Instance.SData.SpellCastTime, Q.Instance.SData.LineWidth, Q.Instance.SData.MissileSpeed, false, SkillshotType.SkillshotLine);
             var minionsSpells = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget(W.Range)).ToList();
             if (W.IsReady() && minionsSpells.Count() > 1 && config.Item("usewC").GetValue<bool>() && me.Spellbook.GetSpell(SpellSlot.W).ManaCost <= me.Mana) W.Cast();
             var minHit = config.Item("useeCmin").GetValue<Slider>().Value;
@@ -158,7 +160,7 @@ namespace UnderratedAIO.Champions
                 if (!config.Item("ult" + target.SkinName).GetValue<bool>()) R.Cast(target, config.Item("packets").GetValue<bool>());
                 }
             else {
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && me.Distance(i) < R.Range && me.Distance(i) > config.Item("useRminr").GetValue<Slider>().Value && !config.Item("ult" + i.SkinName).GetValue<bool>() && Environment.Hero.countChampsAtrange(i, 350f) >= config.Item("useRmin").GetValue<Slider>().Value).OrderByDescending(l => Environment.Hero.countChampsAtrange(l, 350f)))
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && me.Distance(i) < R.Range && me.Distance(i) > config.Item("useRminr").GetValue<Slider>().Value && !config.Item("ult" + i.SkinName).GetValue<bool>() && Environment.Hero.countChampsAtrange(i.Position, 350f) >= config.Item("useRmin").GetValue<Slider>().Value).OrderByDescending(l => Environment.Hero.countChampsAtrange(l.Position, 350f)))
                 {
                     R.Cast(enemy, config.Item("packets").GetValue<bool>());
                     return;
