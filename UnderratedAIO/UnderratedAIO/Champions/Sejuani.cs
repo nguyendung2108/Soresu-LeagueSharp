@@ -14,12 +14,8 @@ namespace UnderratedAIO.Champions
         private static Orbwalking.Orbwalker orbwalker;
         private static readonly Obj_AI_Hero me = ObjectManager.Player;
         public static Spell Q, W, E, R;
-        static Sejuani()
-        {
-            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
-        }
 
-        private static void Game_OnGameLoad(EventArgs args)
+        public Sejuani()
         {
             if (me.BaseSkinName != "Sejuani") return;
             InitMenu();
@@ -273,7 +269,7 @@ namespace UnderratedAIO.Champions
             menuC.AddItem(new MenuItem("useq", "Use Q")).SetValue(true);
             menuC.AddItem(new MenuItem("usew", "Use W")).SetValue(true);
             menuC.AddItem(new MenuItem("useemin", "Use E min")).SetValue(new Slider(1, 1, 5));
-            menuC.AddItem(new MenuItem("useEminr", "E minimum range")).SetValue(new Slider(0, 0, 900));
+            menuC.AddItem(new MenuItem("useEminr", "E minimum range")).SetValue(new Slider(250, 0, 900));
             menuC.AddItem(new MenuItem("useRmin", "R only if more than")).SetValue(new Slider(1, 0, 5));
             menuC.AddItem(new MenuItem("useRminr", "Ulti minimum range")).SetValue(new Slider(0, 0, 350));
             menuC.AddItem(new MenuItem("manualR", "Cast R asap")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press));

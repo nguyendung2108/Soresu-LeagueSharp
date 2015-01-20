@@ -16,7 +16,7 @@ namespace UnderratedAIO.Champions
         public static double[] ultMod=new double[3]{1.2, 1.3, 1.4};
         public static double[] eSecond = new double[5] { 75, 125, 175, 225, 275};
         
-        static Poppy()
+        public Poppy()
         {
             if (player.BaseSkinName != "Poppy") return;
             InitMenu();
