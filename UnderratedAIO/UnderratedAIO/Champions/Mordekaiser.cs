@@ -92,10 +92,7 @@ namespace UnderratedAIO.Champions
            }
        }
 
-        private static bool HasDef()
-        {
-            return true;
-        }
+
        private static void AfterAttack(AttackableUnit unit, AttackableUnit target)
        {
            if (unit.IsMe && Q.IsReady() && ((orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && config.Item("useq").GetValue<bool>() && target.IsEnemy && target.Team != player.Team) || (config.Item("useqLC").GetValue<bool>() && Jungle.GetNearest(player.Position).Distance(player.Position) < player.AttackRange + 30)))
@@ -128,7 +125,7 @@ namespace UnderratedAIO.Champions
            {
                E.Cast(target.Position, config.Item("packets").GetValue<bool>());
            }
-           if (config.Item("user").GetValue<bool>() && !MordeGhost && (player.Distance(target) <= 400f || (R.CanCast(target) && target.Health<250f && Environment.Hero.countChampsAtrangeA(player.Position,600f)>1)) && !config.Item("ult" + target.SkinName).GetValue<bool>() && combodmg > target.Health)
+           if (config.Item("user").GetValue<bool>() && !MordeGhost && (player.Distance(target.Position) <= 400f || (R.CanCast(target) && target.Health < 250f && Environment.Hero.countChampsAtrangeA(player.Position, 600f) > 1)) && !config.Item("ult" + target.SkinName).GetValue<bool>() && combodmg > target.Health)
            {
                R.CastOnUnit(target, config.Item("packets").GetValue<bool>());
            }
@@ -246,6 +243,7 @@ namespace UnderratedAIO.Champions
            menuC.AddItem(new MenuItem("usew", "Use W")).SetValue(true);
            menuC.AddItem(new MenuItem("usee", "Use E")).SetValue(true);
            menuC.AddItem(new MenuItem("user", "Use R")).SetValue(true);
+           //menuC.AddItem(new MenuItem("ultDef", "Don't use on Qss/barrier etc...")).SetValue(true);
            menuC.AddItem(new MenuItem("useItems", "Use Items")).SetValue(true);
            menuC.AddItem(new MenuItem("useIgnite", "Use Ignite")).SetValue(true);
            config.AddSubMenu(menuC);

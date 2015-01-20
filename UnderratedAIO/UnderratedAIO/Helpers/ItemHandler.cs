@@ -24,6 +24,9 @@ namespace UnderratedAIO.Helpers
         public static Items.Item trinity = new Items.Item(3078, player.AttackRange);
         public static Items.Item lich = new Items.Item(3100, player.AttackRange);
 
+        public static Items.Item Qss = new Items.Item(3140, 0);
+        public static Items.Item Mercurial = new Items.Item(3139, 0);
+
         public static void UseItems(Obj_AI_Hero target)
         {
             if (player.Distance(target) < hydra.Range)

@@ -87,8 +87,7 @@ namespace UnderratedAIO.Champions
             bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Helpers.Jungle.smiteSlot) == SpellState.Ready;
             if (target != null)
             {
-                Helpers.Jungle.setSmiteSlot();
-                if (target.CountEnemysInRange(Helpers.Jungle.smite.Range) > 0)
+                if (target.CountEnemysInRange(760f) > 0)
                 {
                     if (config.Item("useRJ").GetValue<bool>() && config.Item("useFlashJ").GetValue<bool>() && R.IsReady() && hasFlash && 1000+player.FlatMagicDamageMod*0.7f >= target.Health &&  player.GetSpell(SpellSlot.R).ManaCost <= player.Mana &&
                         player.Distance(target.Position) > 400 && player.Distance(target.Position) <= RFlash.Range &&
@@ -102,7 +101,7 @@ namespace UnderratedAIO.Champions
                 {
                     R.Cast(target, config.Item("packets").GetValue<bool>());
                 }
-
+                Helpers.Jungle.setSmiteSlot();
                 if (config.Item("useSmite").GetValue<bool>() && Helpers.Jungle.smiteSlot != SpellSlot.Unknown && Helpers.Jungle.smite.CanCast(target) && smiteReady && player.Distance(target) <= Helpers.Jungle.smite.Range && Helpers.Jungle.smiteDamage() >= target.Health)
                 {
                     
@@ -223,7 +222,6 @@ namespace UnderratedAIO.Champions
                     }
                     Q.CastIfHitchanceEquals(target, hitC, config.Item("packets").GetValue<bool>());
                 }
-
             }
             if (config.Item("usew").GetValue<bool>())
             {

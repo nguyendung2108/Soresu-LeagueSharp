@@ -287,6 +287,13 @@ namespace UnderratedAIO.Helpers
             }
             return (float)result;
         }
+        public static bool HasDef(Obj_AI_Hero target)
+        {
+            if (target.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerBarrier")) == SpellState.Ready) return true;
+            if (target.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerHeal")) == SpellState.Ready) return true;
+            if (target.InventoryItems.Equals(ItemHandler.Qss) || target.InventoryItems.Equals(ItemHandler.Mercurial)) return true;
+            return false;
+        }
         #endregion
     }
 }
