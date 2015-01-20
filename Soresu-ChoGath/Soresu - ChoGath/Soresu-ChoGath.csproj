@@ -57,7 +57,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Others\CF.cs" />
+    <Compile Include="Helpers\CombatHelper.cs" />
+    <Compile Include="Helpers\DrawHelper.cs" />
+    <Compile Include="Helpers\Environment.cs" />
+    <Compile Include="Helpers\ItemHandler.cs" />
+    <Compile Include="Helpers\Jungle.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
