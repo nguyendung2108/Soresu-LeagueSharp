@@ -185,7 +185,7 @@ namespace UnderratedAIO.Champions
 
             var buffs = CombatHelper.SejuaniCountFrostHero(E.Range);
             if (E.IsReady() && me.Distance(target.Position) < E.Range && buffs > 0 && (
-                (buffs >= minHit)
+                (buffs > minHit)
                 || (Damage.GetSpellDamage(me, target, SpellSlot.E) >= target.Health)
                 || (me.Distance(target) > config.Item("useEminr").GetValue<Slider>().Value && me.Distance(target) < E.Range && buffs == 1)))
             {
@@ -274,7 +274,7 @@ namespace UnderratedAIO.Champions
             menuC.AddItem(new MenuItem("usew", "Use W")).SetValue(true);
             menuC.AddItem(new MenuItem("useemin", "Use E min")).SetValue(new Slider(1, 1, 5));
             menuC.AddItem(new MenuItem("useEminr", "E minimum range")).SetValue(new Slider(0, 0, 900));
-            menuC.AddItem(new MenuItem("useRmin", "R only if more than")).SetValue(new Slider(1, 1, 5));
+            menuC.AddItem(new MenuItem("useRmin", "R only if more than")).SetValue(new Slider(1, 0, 5));
             menuC.AddItem(new MenuItem("useRminr", "Ulti minimum range")).SetValue(new Slider(0, 0, 350));
             menuC.AddItem(new MenuItem("manualR", "Cast R asap")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press));
             menuC.AddItem(new MenuItem("useItems", "Use items")).SetValue(true);
