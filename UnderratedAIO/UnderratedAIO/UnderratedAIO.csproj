@@ -58,9 +58,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Champions\ChoGath.cs" />
+    <Compile Include="Champions\Evelynn.cs" />
+    <Compile Include="Champions\Mordekaiser.cs" />
     <Compile Include="Champions\Poppy.cs" />
     <Compile Include="Champions\Sejuani.cs" />
     <Compile Include="Champions\Shen.cs" />
+    <Compile Include="Champions\Yorick.cs" />
     <Compile Include="Helpers\CombatHelper.cs" />
     <Compile Include="Helpers\DrawHelper.cs" />
     <Compile Include="Helpers\Environment.cs" />
