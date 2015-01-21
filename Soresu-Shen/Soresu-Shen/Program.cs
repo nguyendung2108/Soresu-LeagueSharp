@@ -65,8 +65,7 @@ namespace Executed
 			E.SetSkillshot(0f, 50f, 1600f, false, SkillshotType.SkillshotLine);
             EFlash = new Spell(SpellSlot.E, 990);
             EFlash.SetSkillshot(E.Instance.SData.SpellCastTime, E.Instance.SData.LineWidth, E.Speed, false, SkillshotType.SkillshotLine);
-            R = new Spell(SpellSlot.R, float.MaxValue);
-            P = new Spell(me.GetSpellSlot("ShenKiAttack", false));//Doesn't Work  
+            R = new Spell(SpellSlot.R, float.MaxValue); 
         }
         private static void InitMenu()
         {
@@ -725,7 +724,7 @@ namespace Executed
             {
                 bilgewater.Cast(target);
             }
-            if (Items.HasItem(3153) && Items.CanUseItem(3153) && me.Health < me.MaxHealth / 2)
+            if (Items.HasItem(3153) && Items.CanUseItem(3153) && (me.Health < me.MaxHealth / 2 || target.Health < (float)me.GetItemDamage(target, Damage.DamageItems.Botrk)))
             {
                 botrk.Cast(target);
             }
@@ -795,7 +794,7 @@ namespace Executed
                                 currEnergy -= me.Spellbook.GetSpell(SpellSlot.W).ManaCost;
                             }
                         }
-                        else if (ShieldBuff / 100 * config.Item("wabove").GetValue<Slider>().Value < (caster as Obj_AI_Hero).GetSpellDamage(me, (caster as Obj_AI_Hero).GetSpellSlot(missle.SData.Name, false), 1))
+                        else if (ShieldBuff / 100 * config.Item("wabove").GetValue<Slider>().Value < (caster as Obj_AI_Hero).GetSpellDamage(me, (caster as Obj_AI_Hero).GetSpellSlot(missle.SData.Name), 1))
                         {
                             W.Cast();
                             currEnergy -= me.Spellbook.GetSpell(SpellSlot.W).ManaCost;
