@@ -56,31 +56,6 @@ namespace UnderratedAIO.Champions
                    }
                }
            }
-           if (Yorickghost && !GhostDelay)
-           {
-               
-               var Gtarget = TargetSelector.GetTarget(GhostRange, TargetSelector.DamageType.Magical);
-               switch (config.Item("ghostTarget").GetValue<StringList>().SelectedIndex)
-               {
-                   case 0:
-                    Gtarget = TargetSelector.GetTarget(GhostRange, TargetSelector.DamageType.Magical);
-                   break;
-                   case 1:
-                    Gtarget = ObjectManager.Get<Obj_AI_Hero>().Where(i=> i.IsEnemy && !i.IsDead &&player.Distance(i)<=GhostRange).OrderBy(i=> i.Health).FirstOrDefault();
-                   break;
-                   case 2:
-                    Gtarget = ObjectManager.Get<Obj_AI_Hero>().Where(i=> i.IsEnemy && !i.IsDead &&player.Distance(i)<=GhostRange).OrderBy(i=> player.Distance(i)).FirstOrDefault();
-                   break;
-                   default:
-                   break;
-               }
-               if (Gtarget != null)
-               {
-                   R.CastOnUnit(Gtarget, config.Item("packets").GetValue<bool>());
-                   GhostDelay = true;
-                   Utility.DelayAction.Add(1000, () => GhostDelay = false);
-               }
-           }
            switch (orbwalker.ActiveMode)
            {
                case Orbwalking.OrbwalkingMode.Combo:
@@ -111,7 +86,7 @@ namespace UnderratedAIO.Champions
            {
                Q.Cast(config.Item("packets").GetValue<bool>());
                Orbwalking.ResetAutoAttackTimer();
-               player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+               //player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
            }
        }
        private void Combo()
@@ -129,7 +104,7 @@ namespace UnderratedAIO.Champions
            {
                E.CastOnUnit(target, config.Item("packets").GetValue<bool>());
            }
-           var ally = ObjectManager.Get<Obj_AI_Hero>().Where(i =>!i.IsDead && i.Health<i.MaxHealth/2 && i.IsAlly && player.Distance(i) < R.Range && !config.Item("ulty" + i.SkinName).GetValue<bool>()).OrderByDescending(i => Environment.Hero.GetAdOverFive(i)).FirstOrDefault();
+           var ally = ObjectManager.Get<Obj_AI_Hero>().Where(i =>!i.IsDead && (i.Health * 100 / i.MaxHealth) <= config.Item("atpercenty").GetValue<Slider>().Value && i.IsAlly && player.Distance(i) < R.Range && !config.Item("ulty" + i.SkinName).GetValue<bool>()).OrderByDescending(i => Environment.Hero.GetAdOverFive(i)).FirstOrDefault();
            if (!Yorickghost && config.Item("user").GetValue<bool>() && R.IsInRange(ally) && R.IsReady() && ally != null)
            {
                R.Cast(ally, config.Item("packets").GetValue<bool>());
@@ -137,6 +112,31 @@ namespace UnderratedAIO.Champions
            if (config.Item("useIgnite").GetValue<bool>() && combodmg > target.Health && hasIgnite)
            {
                player.Spellbook.CastSpell(player.GetSpellSlot("SummonerDot"), target);
+           }
+           if (Yorickghost && !GhostDelay)
+           {
+
+               var Gtarget = TargetSelector.GetTarget(GhostRange, TargetSelector.DamageType.Magical);
+               switch (config.Item("ghostTarget").GetValue<StringList>().SelectedIndex)
+               {
+                   case 0:
+                       Gtarget = TargetSelector.GetTarget(GhostRange, TargetSelector.DamageType.Magical);
+                       break;
+                   case 1:
+                       Gtarget = ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && player.Distance(i) <= GhostRange).OrderBy(i => i.Health).FirstOrDefault();
+                       break;
+                   case 2:
+                       Gtarget = ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && player.Distance(i) <= GhostRange).OrderBy(i => player.Distance(i)).FirstOrDefault();
+                       break;
+                   default:
+                       break;
+               }
+               if (Gtarget != null)
+               {
+                   R.CastOnUnit(Gtarget, config.Item("packets").GetValue<bool>());
+                   GhostDelay = true;
+                   Utility.DelayAction.Add(1000, () => GhostDelay = false);
+               }
            }
        }
        private static bool Yorickghost
@@ -257,6 +257,7 @@ namespace UnderratedAIO.Champions
            menuC.AddItem(new MenuItem("usew", "Use W")).SetValue(true);
            menuC.AddItem(new MenuItem("usee", "Use E")).SetValue(true);
            menuC.AddItem(new MenuItem("user", "Use R")).SetValue(true);
+           menuC.AddItem(new MenuItem("atpercenty", "Ult friend under")).SetValue(new Slider(30, 0, 100));
            menuC.AddItem(new MenuItem("useItems", "Use Items")).SetValue(true);
            menuC.AddItem(new MenuItem("useIgnite", "Use Ignite")).SetValue(true);
            config.AddSubMenu(menuC);

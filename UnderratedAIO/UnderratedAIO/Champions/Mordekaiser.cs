@@ -40,34 +40,7 @@ namespace UnderratedAIO.Champions
            {
                if (HealthPrediction.GetHealthPrediction(minion, 3000) <= Damage.GetAutoAttackDamage(player, minion, false))
                    minionBlock = true;
-           }
-         
-           if (MordeGhost && !GhostDelay)
-           {
-               var Gtarget = TargetSelector.GetTarget(GhostRange, TargetSelector.DamageType.Magical);
-               switch (config.Item("ghostTarget").GetValue<StringList>().SelectedIndex)
-               {
-                   case 0:
-                       Gtarget = TargetSelector.GetTarget(GhostRange, TargetSelector.DamageType.Magical);
-                   break;
-                   case 1:
-                       Gtarget = ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && player.Distance(i) <= GhostRange).OrderBy(i => i.Health).FirstOrDefault();
-                   break;
-                   case 2:
-                       Gtarget = ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && player.Distance(i) <= GhostRange).OrderBy(i => player.Distance(i)).FirstOrDefault();
-                   break;
-                   default:
-                       break;
-               }
-               if (Gtarget.IsValid)
-               {
-                   
-                   R.CastOnUnit(Gtarget, config.Item("packets").GetValue<bool>());
-                   GhostDelay = true;
-                   Utility.DelayAction.Add(1000, () => GhostDelay = false);
-               }
-           }
-           
+           }   
            switch (orbwalker.ActiveMode)
            {
                case Orbwalking.OrbwalkingMode.Combo:
@@ -99,14 +72,14 @@ namespace UnderratedAIO.Champions
            {
                Q.Cast(config.Item("packets").GetValue<bool>());
                Orbwalking.ResetAutoAttackTimer();
-               player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+               //player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                return;
            }
            if (unit.IsMe && Q.IsReady() && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && config.Item("useqLC").GetValue<bool>() && Environment.Minion.countMinionsInrange(player.Position, 600f)>1)
            {
                Q.Cast(config.Item("packets").GetValue<bool>());
                Orbwalking.ResetAutoAttackTimer();
-               player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+               //player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
            }
        }
        private void Combo()
@@ -132,6 +105,31 @@ namespace UnderratedAIO.Champions
            if (config.Item("useIgnite").GetValue<bool>() && combodmg > target.Health && hasIgnite)
            {
                player.Spellbook.CastSpell(player.GetSpellSlot("SummonerDot"), target);
+           }
+           if (MordeGhost && !GhostDelay)
+           {
+               var Gtarget = TargetSelector.GetTarget(GhostRange, TargetSelector.DamageType.Magical);
+               switch (config.Item("ghostTarget").GetValue<StringList>().SelectedIndex)
+               {
+                   case 0:
+                       Gtarget = TargetSelector.GetTarget(GhostRange, TargetSelector.DamageType.Magical);
+                       break;
+                   case 1:
+                       Gtarget = ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && player.Distance(i) <= GhostRange).OrderBy(i => i.Health).FirstOrDefault();
+                       break;
+                   case 2:
+                       Gtarget = ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && player.Distance(i) <= GhostRange).OrderBy(i => player.Distance(i)).FirstOrDefault();
+                       break;
+                   default:
+                       break;
+               }
+               if (Gtarget.IsValid)
+               {
+
+                   R.CastOnUnit(Gtarget, config.Item("packets").GetValue<bool>());
+                   GhostDelay = true;
+                   Utility.DelayAction.Add(1000, () => GhostDelay = false);
+               }
            }
        }
        private static bool MordeGhost
