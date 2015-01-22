@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -13,7 +14,8 @@ namespace UnderratedAIO.Helpers
         private static List<string> dotsHighDmg = new List<string>(new string[] { "karthusfallenonecastsound", "CaitlynAceintheHole", "zedulttargetmark", "timebombenemybuff", "VladimirHemoplague" });
         private static List<string> dotsMedDmg = new List<string>(new string[] { "summonerdot", "cassiopeiamiasmapoison", "cassiopeianoxiousblastpoison", "bantamtraptarget", "explosiveshotdebuff", "swainbeamdamage", "SwainTorment", "AlZaharMaleficVisions", "fizzmarinerdoombomb" });
         private static List<string> dotsSmallDmg = new List<string>(new string[] { "deadlyvenom", "toxicshotparticle", "MordekaiserChildrenOfTheGrave", "DariusNoxianTacticsONH" });
-      
+        private static List<string> defSpells = new List<string>(new string[] { "summonerheal", "summonerbarrier"});
+        private static List<int> defItems = new List<int>(new int[] { ItemHandler.Qss.Id, ItemHandler.Qss.Id, ItemHandler.Dervish.Id});
         #region Poppy
         public static Vector3 bestVectorToPoppyFlash(Obj_AI_Base target)
         {
@@ -94,7 +96,7 @@ namespace UnderratedAIO.Helpers
         public static float getIncDmg()
         {
             double result = 0;
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.Distance(player.Position) < 750 && i.IsEnemy && !i.IsAlly && !i.IsDead && !i.IsMinion && !i.IsMe))
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.Distance(player.Position) < 950 && i.IsEnemy && !i.IsAlly && !i.IsDead && !i.IsMinion && !i.IsMe))
             {
 
                 double basicDmg = 0;
@@ -289,9 +291,20 @@ namespace UnderratedAIO.Helpers
         }
         public static bool HasDef(Obj_AI_Hero target)
         {
-            if (target.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerBarrier")) == SpellState.Ready) return true;
-            if (target.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerHeal")) == SpellState.Ready) return true;
-            if (target.InventoryItems.Equals(ItemHandler.Qss) || target.InventoryItems.Equals(ItemHandler.Mercurial)) return true;
+            foreach (SpellDataInst spell in target.Spellbook.Spells)
+            {
+                if (defSpells.Contains(spell.Name) && (spell.CooldownExpires - Game.Time) < 0)
+                {
+                    return true;
+                }
+            }
+            foreach (var item in target.InventoryItems)
+            {
+                if (defItems.Contains((int)item.Id))
+                {
+                    return true;
+                }
+            }
             return false;
         }
         #endregion
