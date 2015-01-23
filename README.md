@@ -1,4 +1,4 @@
-<img src="http://www.niratisnordkyn.com/DontDeleteThis/Ctranslator.jpg"></img>
+#[OUTDATED]ChatTranslator
 
 **How it works:**
 
@@ -13,22 +13,16 @@ ru, ko, it,  be , vi, uk
 **Awesome feature:**
 It detects the language of all the incoming chat-messages and translates them to your selected language.
 
+#Underrated AIO
+* Cho'Gath, Evelynn, Fiora, Mordekasier, Poppy, Sejuani, Shen, Yorick
+* **[More info](http://www.joduska.me/forum/topic/8093-51underrated-champions-aio/)**
 
-
-<img src="http://www.niratisnordkyn.com/DontDeleteThis/bigShen.png"></img>
-- Auto Ult with target selector
-- Lasthit with Q
-- Interrupt with E
-- Use items in combo mode
-- Combo damage
-- Flash + E (Recommended to select a target by clicking on him)
-
-<img src="http://www.niratisnordkyn.com/DontDeleteThis/lsc.png"></img>
+#L# Update checker
 
 It will check the actual status of the L# for you, and if it's up to date it will alert you 
 with sound and popup message.
 
-<img src="http://www.niratisnordkyn.com/DontDeleteThis/TeamStats.jpg"></img>
+#TeamStats - Simulating teamfights
 
 **How it works:**
 It collects the players data around you(you can set the range), and it will try to simulate a fight between them.
@@ -41,12 +35,6 @@ It works too when you are in 1v1.
 - It Calculate autoattacks (with attack speed and crit chance) over 5 sec.
 - Skillshots have 100% hitchance.
 
-<img src="http://www.niratisnordkyn.com/DontDeleteThis/Sejuani.jpg"></img>
-- Jungle clear with skills
-- QWER Combo
-- Ult multiple target
-- Use items
-- Combo damage
 
 <hr>
 
