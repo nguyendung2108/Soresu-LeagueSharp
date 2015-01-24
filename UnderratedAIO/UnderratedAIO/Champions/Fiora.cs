@@ -193,16 +193,19 @@ namespace UnderratedAIO.Champions
         }
         private void Clear()
         {
+            float perc = (float)config.Item("minmana").GetValue<Slider>().Value / 100f;
+            if (player.Mana < player.MaxMana * perc) return;
+
             var target =
-     ObjectManager.Get<Obj_AI_Minion>()
-         .Where(i => i.Distance(player) < Q.Range && i.Health < Q.GetDamage(i))
-         .OrderByDescending(i => i.Distance(player))
-         .FirstOrDefault();
+                ObjectManager.Get<Obj_AI_Minion>()
+                     .Where(i => i.Distance(player) < Q.Range && i.Health < Q.GetDamage(i))
+                     .OrderByDescending(i => i.Distance(player))
+                     .FirstOrDefault();
             if (config.Item("useqLC").GetValue<bool>() && Q.CanCast(target))
             {
                 Q.CastOnUnit(target, config.Item("packets").GetValue<bool>());
             }
-            if (Environment.Minion.countMinionsInrange(player.Position,Q.Range)>3)
+            if (config.Item("useeLC").GetValue<bool>() && Environment.Minion.countMinionsInrange(player.Position,Q.Range)>3)
             {
                 E.Cast(config.Item("packets").GetValue<bool>());
             }

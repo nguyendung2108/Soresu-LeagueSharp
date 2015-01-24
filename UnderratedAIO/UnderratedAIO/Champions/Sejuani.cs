@@ -134,7 +134,7 @@ namespace UnderratedAIO.Champions
             {
                 E.Cast();
             }
-            if (Q.IsReady() && me.Spellbook.GetSpell(SpellSlot.Q).ManaCost <= me.Mana)
+            if (config.Item("useqC").GetValue<bool>() && Q.IsReady() && me.Spellbook.GetSpell(SpellSlot.Q).ManaCost <= me.Mana)
             {
                 var minionsForQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
                 MinionManager.FarmLocation bestPosition = Q.GetLineFarmLocation(minionsForQ);

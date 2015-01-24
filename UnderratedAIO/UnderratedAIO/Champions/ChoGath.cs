@@ -124,7 +124,7 @@ namespace UnderratedAIO.Champions
             }
             float perc = (float)config.Item("minmana").GetValue<Slider>().Value / 100f;
             if (player.Mana < player.MaxMana * perc) return;
-            if (W.IsReady() && player.Spellbook.GetSpell(SpellSlot.W).ManaCost <= player.Mana)
+            if (config.Item("usewLC").GetValue<bool>() && W.IsReady() && player.Spellbook.GetSpell(SpellSlot.W).ManaCost <= player.Mana)
             {
                 var minionsForW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range, MinionTypes.All, MinionTeam.NotAlly);
                 MinionManager.FarmLocation bestPositionW = W.GetLineFarmLocation(minionsForW);
@@ -132,8 +132,8 @@ namespace UnderratedAIO.Champions
                     if (bestPositionW.MinionsHit >= 2)
                         W.Cast(bestPositionW.Position, config.Item("packets").GetValue<bool>());
             }
-            
-            if (Q.IsReady() && player.Spellbook.GetSpell(SpellSlot.Q).ManaCost <= player.Mana)
+
+            if (config.Item("useqLC").GetValue<bool>() && Q.IsReady() && player.Spellbook.GetSpell(SpellSlot.Q).ManaCost <= player.Mana)
             {
                /* var minionsForQ =
                     ObjectManager.Get<Obj_AI_Minion>()
@@ -374,7 +374,6 @@ namespace UnderratedAIO.Champions
             Menu menuLC = new Menu("LaneClear ", "Lcsettings");
             menuLC.AddItem(new MenuItem("useqLC", "Use Q")).SetValue(true);
             menuLC.AddItem(new MenuItem("usewLC", "Use W")).SetValue(true);
-            menuLC.AddItem(new MenuItem("useeLC", "Use E")).SetValue(true);
             menuLC.AddItem(new MenuItem("minmana", "Keep X% mana")).SetValue(new Slider(1, 1, 100));
             config.AddSubMenu(menuLC);
             // Jungle Settings

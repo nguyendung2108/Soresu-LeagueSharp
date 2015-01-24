@@ -116,7 +116,10 @@ namespace UnderratedAIO.Champions
 
        private void Clear()
        {
-           if (Q.IsReady())
+           float perc = (float)config.Item("minmana").GetValue<Slider>().Value / 100f;
+           if (player.Mana < player.MaxMana * perc) return;
+
+           if (config.Item("useqLC").GetValue<bool>() && Q.IsReady())
            {
                Q.Cast();
            }

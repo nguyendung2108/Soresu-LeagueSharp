@@ -31,7 +31,6 @@ namespace UnderratedAIO.Champions
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.AfterAttack += AfterAttack;
             Drawing.OnDraw += Game_OnDraw;
-            Jungle.setSmiteSlot();
         }
 
        private void Game_OnGameUpdate(EventArgs args)

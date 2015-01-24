@@ -31,6 +31,7 @@ namespace UnderratedAIO.Champions
             Jungle.setSmiteSlot();
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.AfterAttack += AfterAttack;
+            Orbwalking.BeforeAttack += beforeAttack;
             Drawing.OnDraw += Game_OnDraw;
         }
 
@@ -90,6 +91,14 @@ namespace UnderratedAIO.Champions
                //player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
            }
        }
+       private void beforeAttack(Orbwalking.BeforeAttackEventArgs args)
+       {
+           if (args.Unit.IsMe && Q.IsReady() && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && config.Item("useqLC").GetValue<bool>() && (args.Target.Health>700 || args.Target.Health < player.GetAutoAttackDamage((Obj_AI_Base)args.Target, true) + Damage.GetSpellDamage(player, (Obj_AI_Base)args.Target, SpellSlot.Q)))
+           {
+               Q.Cast(config.Item("packets").GetValue<bool>());
+           }
+       }
+
        private void Combo()
        {
            Obj_AI_Hero target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
@@ -172,6 +181,15 @@ namespace UnderratedAIO.Champions
                    .Where(i => i.Distance(player) < E.Range && i.Health < E.GetDamage(i))
                    .OrderByDescending(i => i.Distance(player))
                    .FirstOrDefault();
+           var targetJ =
+            ObjectManager.Get<Obj_AI_Base>()
+                .Where(i => i.Distance(player) < E.Range && i.Health>700f)
+                .OrderByDescending(i => i.Health)
+                .FirstOrDefault();
+           if (target==null)
+           {
+               target = (Obj_AI_Minion)targetJ;
+           }
            if (config.Item("useeLC").GetValue<bool>() && E.CanCast(target))
            {
                E.CastOnUnit(target, config.Item("packets").GetValue<bool>());
