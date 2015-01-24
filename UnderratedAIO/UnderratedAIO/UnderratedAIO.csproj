@@ -62,6 +62,7 @@
     <Compile Include="Champions\Fiora.cs" />
     <Compile Include="Champions\Mordekaiser.cs" />
     <Compile Include="Champions\Poppy.cs" />
+    <Compile Include="Champions\Renekton.cs" />
     <Compile Include="Champions\Sejuani.cs" />
     <Compile Include="Champions\Shen.cs" />
     <Compile Include="Champions\Yorick.cs" />
