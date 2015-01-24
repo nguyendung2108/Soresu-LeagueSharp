@@ -1,21 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 using LeagueSharp;
 using LeagueSharp.Common;
 using Color = System.Drawing.Color;
 
 using UnderratedAIO.Helpers;
+using Orbwalking =UnderratedAIO.Helpers.Orbwalking;
 
 namespace UnderratedAIO.Champions
 {
     class Poppy
     {
         public static Menu config;
-        private static Orbwalking.Orbwalker orbwalker;
+        public static Orbwalking.Orbwalker orbwalker;
         public static readonly Obj_AI_Hero player = ObjectManager.Player;
         public static Spell Q, W, E, R;
         public static double[] ultMod=new double[3]{1.2, 1.3, 1.4};
         public static double[] eSecond = new double[5] { 75, 125, 175, 225, 275};
-        
         public Poppy()
         {
             if (player.BaseSkinName != "Poppy") return;
@@ -43,7 +44,6 @@ namespace UnderratedAIO.Champions
         {
             if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
             {
-
                 var target = Jungle.GetNearest(player.Position);
                 bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
                 if (target != null)
@@ -108,7 +108,7 @@ namespace UnderratedAIO.Champions
                         player.Spellbook.CastSpell(player.GetSpellSlot("SummonerFlash"), bestpos);
                         Utility.DelayAction.Add(100, () => E.CastOnUnit(target, config.Item("packets").GetValue<bool>()));
                     }
-                    if (E.CanCast(target) && CheckWalls(player,target))
+                    if (E.CanCast(target) && (CheckWalls(player, target) || target.Health < ComboDamage(target)+2*player.GetAutoAttackDamage(target,true)))
                     {
                         E.CastOnUnit(target, config.Item("packets").GetValue<bool>());
                     } 
@@ -128,7 +128,7 @@ namespace UnderratedAIO.Champions
                     R.CastOnUnit(target, config.Item("packets").GetValue<bool>());
                 }
             }
-            if (config.Item("userindanger").GetValue<Slider>().Value < player.CountEnemysInRange(R.Range))
+            if (config.Item("userindanger").GetValue<Slider>().Value < player.CountEnemiesInRange(R.Range))
             {
                 R.CastOnUnit(target, config.Item("packets").GetValue<bool>());
             }

@@ -7,6 +7,7 @@ using LeagueSharp.Common;
 using SharpDX;
 using UnderratedAIO.Helpers;
 using Color = System.Drawing.Color;
+using Orbwalking = UnderratedAIO.Helpers.Orbwalking;
 
 namespace UnderratedAIO.Champions
 {
@@ -47,7 +48,7 @@ namespace UnderratedAIO.Champions
             DrawHelper.DrawCircle(config.Item("drawaa").GetValue<Circle>(), me.AttackRange);
             DrawHelper.DrawCircle(config.Item("drawqq").GetValue<Circle>(), Q.Range);
             DrawHelper.DrawCircle(config.Item("drawee").GetValue<Circle>(), E.Range);
-            DrawHelper.DrawCircle(config.Item("useeflash").GetValue<Circle>(), EFlash.Range);
+            DrawHelper.DrawCircle(config.Item("draweeflash").GetValue<Circle>(), EFlash.Range);
             if (config.Item("drawallyhp").GetValue<bool>()) DrawHealths();
             if (config.Item("drawincdmg").GetValue<bool>()) getIncDmg();
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
@@ -75,7 +76,7 @@ namespace UnderratedAIO.Champions
         private static void getIncDmg()
         {
             var color = Color.Red;
-            var result = CombatHelper.getIncDmg();
+            float result = CombatHelper.getIncDmg();
             var barPos = me.HPBarPosition;
             var damage = (float)result;
             if (damage == 0) return;
@@ -274,10 +275,11 @@ namespace UnderratedAIO.Champions
         }
         private static void Combo()
         {
-           
+            
             var minHit = config.Item("useemin").GetValue<Slider>().Value;
-            TargetSelector.GetSelectedTarget();
             Obj_AI_Hero target = TargetSelector.GetTarget(E.Range+400, TargetSelector.DamageType.Magical);
+            if (config.Item("useItems").GetValue<bool>()) ItemHandler.UseItems(target);
+            if (target == null) return;
             if (config.Item("usee").GetValue<bool>() && E.IsReady() && me.Distance(target.Position)<E.Range)
             {
                 if (minHit > 1)
@@ -295,7 +297,6 @@ namespace UnderratedAIO.Champions
                 Q.CastOnUnit(target, config.Item("packets").GetValue<bool>());
                 currEnergy -= me.Spellbook.GetSpell(SpellSlot.Q).ManaCost;
             }
-            if (config.Item("useItems").GetValue<bool>()) ItemHandler.UseItems(target);
             bool hasIgnite = me.Spellbook.CanUseSpell(me.GetSpellSlot("SummonerDot")) == SpellState.Ready;
             var ignitedmg = (float)me.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
             if (config.Item("useIgnite").GetValue<bool>() && ignitedmg > target.Health && hasIgnite && !E.CanCast(target) && !Q.CanCast(target))

@@ -8,6 +8,7 @@ using LeagueSharp.Common;
 
 using UnderratedAIO.Helpers;
 using Environment = UnderratedAIO.Helpers.Environment;
+using Orbwalking = UnderratedAIO.Helpers.Orbwalking;
 
 namespace UnderratedAIO.Champions
 {
