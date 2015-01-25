@@ -93,7 +93,7 @@ namespace UnderratedAIO.Champions
        }
        private void beforeAttack(Orbwalking.BeforeAttackEventArgs args)
        {
-           if (args.Unit.IsMe && Q.IsReady() && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && config.Item("useqLC").GetValue<bool>() && (args.Target.Health > 700))
+           if (args.Unit.IsMe && Q.IsReady() && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && config.Item("useqLC").GetValue<bool>() && !(args.Target is Obj_AI_Hero) && (args.Target.Health > 700))
            {
                Q.Cast(config.Item("packets").GetValue<bool>());
                player.IssueOrder(GameObjectOrder.AutoAttack, args.Target);
@@ -183,7 +183,7 @@ namespace UnderratedAIO.Champions
                    .OrderByDescending(i => i.Distance(player))
                    .FirstOrDefault();
            var targetJ =
-            ObjectManager.Get<Obj_AI_Base>()
+            ObjectManager.Get<Obj_AI_Minion>()
                 .Where(i => i.Distance(player) < E.Range && i.Health>700f)
                 .OrderByDescending(i => i.Health)
                 .FirstOrDefault();
@@ -197,7 +197,7 @@ namespace UnderratedAIO.Champions
            }
            if (config.Item("useqLC").GetValue<bool>() && Q.IsReady())
            {
-               var targetQ = ObjectManager.Get<Obj_AI_Base>()
+               var targetQ = ObjectManager.Get<Obj_AI_Minion>()
                 .Where(i => i.Distance(player) < Q.Range && (i.Health < Damage.GetSpellDamage(player, i, SpellSlot.Q) && !(i.Health < player.GetAutoAttackDamage(i))))
                 .OrderByDescending(i => i.Health)
                 .FirstOrDefault();
