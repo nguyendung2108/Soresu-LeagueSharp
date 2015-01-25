@@ -93,7 +93,7 @@ namespace UnderratedAIO.Champions
        }
        private void beforeAttack(Orbwalking.BeforeAttackEventArgs args)
        {
-           if (args.Unit.IsMe && Q.IsReady() && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && config.Item("useqLC").GetValue<bool>() && (args.Target.Health > 700 || (args.Target.Health < player.GetAutoAttackDamage((Obj_AI_Base)args.Target, true) + Damage.GetSpellDamage(player, (Obj_AI_Base)args.Target, SpellSlot.Q) && !(args.Target.Health < player.GetAutoAttackDamage((Obj_AI_Base)args.Target)))))
+           if (args.Unit.IsMe && Q.IsReady() && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && config.Item("useqLC").GetValue<bool>() && (args.Target.Health > 700))
            {
                Q.Cast(config.Item("packets").GetValue<bool>());
                player.IssueOrder(GameObjectOrder.AutoAttack, args.Target);
@@ -195,6 +195,18 @@ namespace UnderratedAIO.Champions
            {
                E.CastOnUnit(target, config.Item("packets").GetValue<bool>());
            }
+           if (config.Item("useqLC").GetValue<bool>() && Q.IsReady())
+           {
+               var targetQ = ObjectManager.Get<Obj_AI_Base>()
+                .Where(i => i.Distance(player) < Q.Range && (i.Health < Damage.GetSpellDamage(player, i, SpellSlot.Q) && !(i.Health < player.GetAutoAttackDamage(i))))
+                .OrderByDescending(i => i.Health)
+                .FirstOrDefault();
+               if(targetQ==null)return;
+               Q.Cast(config.Item("packets").GetValue<bool>());
+               player.IssueOrder(GameObjectOrder.AutoAttack, targetQ);
+           }
+
+
        }
 
        private void Game_OnDraw(EventArgs args)
