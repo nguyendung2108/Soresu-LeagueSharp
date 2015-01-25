@@ -84,7 +84,7 @@ namespace UnderratedAIO.Champions
 
        private static void AfterAttack(AttackableUnit unit, AttackableUnit target)
        {
-           if (unit.IsMe && Q.IsReady() && ((orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && config.Item("useq").GetValue<bool>() && target.IsEnemy && target.Team != player.Team) || (config.Item("useqLC").GetValue<bool>() && Jungle.GetNearest(player.Position).Distance(player.Position) < player.AttackRange + 30)))
+           if (unit.IsMe && Q.IsReady() && ((orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && config.Item("useq").GetValue<bool>() && target is Obj_AI_Hero) || (config.Item("useqLC").GetValue<bool>() && Jungle.GetNearest(player.Position).Distance(player.Position) < player.AttackRange + 30)))
            {
                Q.Cast(config.Item("packets").GetValue<bool>());
                Orbwalking.ResetAutoAttackTimer();
@@ -93,9 +93,10 @@ namespace UnderratedAIO.Champions
        }
        private void beforeAttack(Orbwalking.BeforeAttackEventArgs args)
        {
-           if (args.Unit.IsMe && Q.IsReady() && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && config.Item("useqLC").GetValue<bool>() && (args.Target.Health>700 || args.Target.Health < player.GetAutoAttackDamage((Obj_AI_Base)args.Target, true) + Damage.GetSpellDamage(player, (Obj_AI_Base)args.Target, SpellSlot.Q)))
+           if (args.Unit.IsMe && Q.IsReady() && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && config.Item("useqLC").GetValue<bool>() && (args.Target.Health > 700 || (args.Target.Health < player.GetAutoAttackDamage((Obj_AI_Base)args.Target, true) + Damage.GetSpellDamage(player, (Obj_AI_Base)args.Target, SpellSlot.Q) && !(args.Target.Health < player.GetAutoAttackDamage((Obj_AI_Base)args.Target)))))
            {
                Q.Cast(config.Item("packets").GetValue<bool>());
+               player.IssueOrder(GameObjectOrder.AutoAttack, args.Target);
            }
        }
 
