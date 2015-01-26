@@ -134,7 +134,7 @@ namespace UnderratedAIO.Champions
                     }
                 }
             }
-            if (config.Item("useq").GetValue<bool>() && Q.CanCast(target) && (!W.IsReady() || ((W.IsReady() && fury) || player.Health<target.Health)))
+            if (config.Item("useq").GetValue<bool>() && Q.CanCast(target) && !player.IsDashing() && (!W.IsReady() || ((W.IsReady() && fury) || player.Health<target.Health)))
             {
                 Q.Cast(config.Item("packets").GetValue<bool>());
             }
@@ -144,10 +144,10 @@ namespace UnderratedAIO.Champions
                 lastE = System.Environment.TickCount;
                 return;
             }
-            if (config.Item("usee").GetValue<bool>() && !lastE.Equals(0) && E.CanCast(target) && (eDmg+player.GetAutoAttackDamage(target) < target.Health || (!((W.IsReady() && canBeOpWIthQ(player.Position) && !rene) || (player.Distance(target.Position) < target.Distance(player.Position.Extend(target.Position, E.Range)))))))
+            if (config.Item("usee").GetValue<bool>() && !lastE.Equals(0) && (eDmg+player.GetAutoAttackDamage(target) > target.Health || (!((W.IsReady() && canBeOpWIthQ(player.Position) && !rene) || (player.Distance(target.Position) < target.Distance(player.Position.Extend(target.Position, E.Range)))))))
             {
                 var time = System.Environment.TickCount - lastE;
-                if (time > 3600f)
+                if (time > 3600f || combodamage>target.Health)
                 {
                    E.Cast(target.Position, config.Item("packets").GetValue<bool>());
                     lastE = 0;
@@ -192,7 +192,7 @@ namespace UnderratedAIO.Champions
                         E.Cast(bestPosition.Position, config.Item("packets").GetValue<bool>());
                         return;
             }
-            if (config.Item("useqLC").GetValue<bool>() && Q.IsReady())
+            if (config.Item("useqLC").GetValue<bool>() && Q.IsReady() && !player.IsDashing())
             {
                 if (Environment.Minion.countMinionsInrange(player.Position, Q.Range) >= 2)
                 {
