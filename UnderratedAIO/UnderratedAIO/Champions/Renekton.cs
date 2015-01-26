@@ -105,7 +105,7 @@ namespace UnderratedAIO.Champions
 
         private void Combo()
         {
-            Obj_AI_Hero target = TargetSelector.GetTarget(E.Range * 2, TargetSelector.DamageType.Magical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(E.Range * 2, TargetSelector.DamageType.Physical);
             if (config.Item("useItems").GetValue<bool>())
                 ItemHandler.UseItems(target);
             if (target == null)return;
@@ -173,7 +173,7 @@ namespace UnderratedAIO.Champions
         }
         private void Harass()
         {
-            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (target == null) return;
             if (config.Item("useqH").GetValue<bool>() && Q.CanCast(target))
             {

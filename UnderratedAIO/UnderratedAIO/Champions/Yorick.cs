@@ -102,7 +102,7 @@ namespace UnderratedAIO.Champions
 
        private void Combo()
        {
-           Obj_AI_Hero target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
+           Obj_AI_Hero target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
            if (config.Item("useItems").GetValue<bool>()) ItemHandler.UseItems(target);
            if (target == null) return;
            var combodmg = ComboDamage(target);
@@ -127,11 +127,11 @@ namespace UnderratedAIO.Champions
            if (Yorickghost && !GhostDelay)
            {
 
-               var Gtarget = TargetSelector.GetTarget(GhostRange, TargetSelector.DamageType.Magical);
+               var Gtarget = TargetSelector.GetTarget(GhostRange, TargetSelector.DamageType.Physical);
                switch (config.Item("ghostTarget").GetValue<StringList>().SelectedIndex)
                {
                    case 0:
-                       Gtarget = TargetSelector.GetTarget(GhostRange, TargetSelector.DamageType.Magical);
+                       Gtarget = TargetSelector.GetTarget(GhostRange, TargetSelector.DamageType.Physical);
                        break;
                    case 1:
                        Gtarget = ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && player.Distance(i) <= GhostRange).OrderBy(i => i.Health).FirstOrDefault();
