@@ -291,7 +291,7 @@ namespace UnderratedAIO.Helpers
             return LastMoveCommandPosition;
         }
 
-        private static void MoveTo(Vector3 position,
+        public static void MoveTo(Vector3 position,
             float holdAreaRadius = 0,
             bool overrideTimer = false,
             bool useFixedDistance = true,
@@ -366,7 +366,7 @@ namespace UnderratedAIO.Helpers
                 if (CanMove(extraWindup))
                 {
                     if (IsMelee(player) && target != null &&
-                        target.Position.Distance(player.Position) < GetAutoAttackRange(player, target) && target is Obj_AI_Hero &&
+                        target.Position.Distance(player.Position) < GetAutoAttackRange(player, target) && target is Obj_AI_Hero && target.Position.Distance(Player.Position)>Player.AttackRange &&
                         Game.CursorPos.Distance(target.Position) < 300)
                     {
                         AutoAttack.Delay = player.BasicAttack.SpellCastTime;
