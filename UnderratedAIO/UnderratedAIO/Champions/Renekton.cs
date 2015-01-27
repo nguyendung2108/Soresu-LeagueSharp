@@ -114,13 +114,13 @@ namespace UnderratedAIO.Champions
             var FuryW = Damage.GetSpellDamage(player, target, SpellSlot.W) * 0.5;
             var eDmg = Damage.GetSpellDamage(player, target, SpellSlot.E);
             var combodamage = ComboDamage(target);
-            if (config.Item("useIgnite").GetValue<bool>() && combodamage > target.Health && hasIgnite)
+            if (config.Item("useIgnite").GetValue<bool>() && hasIgnite && player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite) > target.Health)
             {
                 player.Spellbook.CastSpell(player.GetSpellSlot("SummonerDot"), target);
             }
             if (player.Distance(target) > E.Range && E.IsReady()&& (W.IsReady() || Q.IsReady()) && lastE.Equals(0) && config.Item("usee").GetValue<bool>())
             {
-                var closeGapTarget = ObjectManager.Get<Obj_AI_Base>().FirstOrDefault(i => i.IsEnemy && player.Distance(i)<E.Range && !i.IsDead && i.Distance(target) < E.Range);
+                var closeGapTarget = ObjectManager.Get<Obj_AI_Base>().FirstOrDefault(i => i.IsEnemy && player.Distance(i)<E.Range && !i.IsDead && i.Distance(target.ServerPosition) < E.Range);
                 if (closeGapTarget != null)
                 {
                     if ((canBeOpWIthQ(closeGapTarget.Position) || fury) && !rene)
