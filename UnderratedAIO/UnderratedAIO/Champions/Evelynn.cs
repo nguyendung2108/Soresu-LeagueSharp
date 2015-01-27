@@ -64,12 +64,23 @@ namespace UnderratedAIO.Champions
                    Clear();
                    break;
                case Orbwalking.OrbwalkingMode.LastHit:
+                   LastHit();
                    break;
                default:
                    if (!minionBlock)
                    {
                    }
                    break;
+           }
+       }
+
+       private void LastHit()
+       {
+           var target =
+               ObjectManager.Get<Obj_AI_Minion>().Where(i => i.IsEnemy && !i.IsDead && Q.GetDamage(i)>i.Health).OrderBy(i => player.Distance(i)).FirstOrDefault();
+           if (target.IsValid && Q.CanCast(target))
+           {
+               Q.Cast(config.Item("useqLH").GetValue<bool>());
            }
        }
 
@@ -94,7 +105,7 @@ namespace UnderratedAIO.Champions
                E.CastOnUnit(target);
            }
            var Ultpos =Environment.Hero.bestVectorToAoeSpell(ObjectManager.Get<Obj_AI_Hero>().Where(i=>(i.IsEnemy && R.CanCast(i))),R.Range, 250f);
-           if (config.Item("user").GetValue<bool>() && R.IsReady() && R.Range > player.Distance(Ultpos))
+           if (config.Item("user").GetValue<bool>() && R.IsReady() && config.Item("useRmin").GetValue<Slider>().Value <= Ultpos.CountEnemiesInRange(250f) && R.Range > player.Distance(Ultpos))
            {
                R.Cast(Ultpos);
            }
@@ -225,6 +236,10 @@ namespace UnderratedAIO.Champions
            Menu menuH = new Menu("Harass ", "Hsettings");
            menuH.AddItem(new MenuItem("useqH", "Use Q")).SetValue(true);
            config.AddSubMenu(menuH);
+           // Lasthit Settings
+           Menu menuLH = new Menu("Lasthit ", "LHsettings");
+           menuLH.AddItem(new MenuItem("useqLH", "Use Q")).SetValue(true);
+           config.AddSubMenu(menuLH);
            // LaneClear Settings
            Menu menuLC = new Menu("LaneClear ", "Lcsettings");
            menuLC.AddItem(new MenuItem("useqLC", "Use Q")).SetValue(true);
