@@ -105,7 +105,7 @@ namespace UnderratedAIO.Champions
                E.CastOnUnit(target);
            }
            var Ultpos =Environment.Hero.bestVectorToAoeSpell(ObjectManager.Get<Obj_AI_Hero>().Where(i=>(i.IsEnemy && R.CanCast(i))),R.Range, 250f);
-           if (config.Item("user").GetValue<bool>() && R.IsReady() && config.Item("useRmin").GetValue<Slider>().Value <= Ultpos.CountEnemiesInRange(250f) && R.Range > player.Distance(Ultpos))
+           if (config.Item("user").GetValue<bool>() && R.IsReady() && config.Item("useRmin").GetValue<Slider>().Value < Ultpos.CountEnemiesInRange(250f) && R.Range > player.Distance(Ultpos))
            {
                R.Cast(Ultpos);
            }
