@@ -142,23 +142,24 @@ namespace UnderratedAIO.Champions
             {
                 Q.Cast(config.Item("packets").GetValue<bool>());
             }
-            if (config.Item("usee").GetValue<bool>() && lastE.Equals(0) && E.CanCast(target) && (eDmg < target.Health || (!(!(W.IsReady() && canBeOpWIthQ(player.Position) && !rene) || (player.Distance(target.Position) < target.Distance(player.Position.Extend(target.Position, E.Range)))))))
+            var distance = player.Distance(target.Position);
+            if (config.Item("usee").GetValue<bool>() && lastE.Equals(0) && E.CanCast(target) && (eDmg > target.Health || (((W.IsReady() && canBeOpWIthQ(target.Position) && !rene) || (distance > target.Distance(player.Position.Extend(target.Position, E.Range)) - distance)))))
             {
                 E.Cast(target.Position, config.Item("packets").GetValue<bool>());
                 lastE = System.Environment.TickCount;
                 return;
             }
-            if (config.Item("usee").GetValue<bool>() && !lastE.Equals(0) && (eDmg+player.GetAutoAttackDamage(target) > target.Health || (!((W.IsReady() && canBeOpWIthQ(player.Position) && !rene) || (player.Distance(target.Position) < target.Distance(player.Position.Extend(target.Position, E.Range)))))))
+            if (config.Item("usee").GetValue<bool>() && !lastE.Equals(0) && (eDmg + player.GetAutoAttackDamage(target) > target.Health || (((W.IsReady() && canBeOpWIthQ(target.Position) && !rene) || (distance < target.Distance(player.Position.Extend(target.Position, E.Range)) - distance) || player.Distance(target) > E.Range-100))))
             {
                 var time = System.Environment.TickCount - lastE;
-                if (time > 3600f || combodamage > target.Health || (player.Distance(target) > E.Range - 50 && player.Distance(target) < E.Range))
+                if (time > 3600f || combodamage > target.Health || (player.Distance(target) > E.Range - 100))
                 {
                    E.Cast(target.Position, config.Item("packets").GetValue<bool>());
                     lastE = 0;
                 }
                 
             }
-            if ((player.Health * 100 / player.MaxHealth) <= config.Item("user").GetValue<Slider>().Value)
+            if ((player.Health * 100 / player.MaxHealth) <= config.Item("user").GetValue<Slider>().Value || config.Item("userindanger").GetValue<Slider>().Value < player.CountEnemiesInRange(R.Range))
             {
                 R.Cast(config.Item("packets").GetValue<bool>());
             }
@@ -189,7 +190,7 @@ namespace UnderratedAIO.Champions
         {
             if (config.Item("useqLC").GetValue<bool>() && Q.IsReady() && !player.IsDashing())
             {
-                if (Environment.Minion.countMinionsInrange(player.Position, Q.Range) >= 2)
+                if (Environment.Minion.countMinionsInrange(player.Position, Q.Range) >= config.Item("minimumMini").GetValue<Slider>().Value)
                 {
                     Q.Cast(config.Item("packets").GetValue<bool>());
                     return;
@@ -291,6 +292,7 @@ namespace UnderratedAIO.Champions
             menuC.AddItem(new MenuItem("usew", "Use W")).SetValue(true);
             menuC.AddItem(new MenuItem("usee", "Use E")).SetValue(true);
             menuC.AddItem(new MenuItem("user", "Use R under")).SetValue(new Slider(20, 0, 100));
+            menuC.AddItem(new MenuItem("userindanger", "Use R above X enemy")).SetValue(new Slider(2, 1, 5));
             menuC.AddItem(new MenuItem("useItems", "Use Items")).SetValue(true);
             menuC.AddItem(new MenuItem("useIgnite", "Use Ignite")).SetValue(true);
             config.AddSubMenu(menuC);
@@ -301,6 +303,7 @@ namespace UnderratedAIO.Champions
             // LaneClear Settings
             Menu menuLC = new Menu("LaneClear ", "Lcsettings");
             menuLC.AddItem(new MenuItem("useqLC", "Use Q")).SetValue(true);
+            menuLC.AddItem(new MenuItem("minimumMini", "Use Q min minion")).SetValue(new Slider(2, 1, 6));
             menuLC.AddItem(new MenuItem("usewLC", "Use W")).SetValue(true);
             menuLC.AddItem(new MenuItem("useeLC", "Use E")).SetValue(true);
             config.AddSubMenu(menuLC);
