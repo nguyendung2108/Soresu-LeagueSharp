@@ -91,7 +91,7 @@ namespace UnderratedAIO.Champions
 
         private void AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if (unit.IsMe && Q.IsReady() && !GarenE && target.IsEnemy && target is Obj_AI_Hero)
+            if (unit.IsMe && Q.IsReady() && config.Item("useqAAA").GetValue<bool>() && !GarenE && target.IsEnemy && target is Obj_AI_Hero)
             {
                 Q.Cast(config.Item("packets").GetValue<bool>());
                 player.IssueOrder(GameObjectOrder.AutoAttack, target);
@@ -177,11 +177,11 @@ namespace UnderratedAIO.Champions
             {
                 damage = (float)(damage * 1.2);
             }
-            if (Q.IsReady())
+            if (Q.IsReady() && !GarenQ)
             {
                 damage += Damage.GetSpellDamage(player, hero, SpellSlot.Q);
             }
-            if (E.IsReady())
+            if (E.IsReady() && !GarenE)
             {
                 damage += Damage.GetSpellDamage(player, hero, SpellSlot.E)*3;
             }
@@ -237,6 +237,7 @@ namespace UnderratedAIO.Champions
             // Misc Settings
             Menu menuM = new Menu("Misc ", "Msettings");
             menuM.AddItem(new MenuItem("useSmite", "Use Smite")).SetValue(true);
+            menuM.AddItem(new MenuItem("useqAAA", "Use Q after AA")).SetValue(true);
             config.AddSubMenu(menuM);
             config.AddItem(new MenuItem("packets", "Use Packets")).SetValue(false);
             config.AddToMainMenu();
