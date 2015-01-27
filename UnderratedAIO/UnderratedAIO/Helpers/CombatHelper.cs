@@ -362,7 +362,6 @@ namespace UnderratedAIO.Helpers
             }
             return (float)result;
         }
-    
 
         public static bool HasDef(Obj_AI_Hero target)
         {
@@ -382,6 +381,18 @@ namespace UnderratedAIO.Helpers
             }
             return false;
         }
+
+        public static bool IsPossibleToReachHim(Obj_AI_Hero target, float moveSpeedBuff, float duration)
+        {
+            var distance = player.Distance(target);
+            var diff = Math.Abs((player.MoveSpeed * (1 + moveSpeedBuff)) - target.MoveSpeed);
+            if (diff*duration>distance)
+            {
+                return true;
+            }
+            return false;
+        }
+        
         #endregion
     }
 }

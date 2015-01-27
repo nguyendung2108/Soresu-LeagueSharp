@@ -51,7 +51,7 @@ namespace UnderratedAIO.Helpers
             if (Items.HasItem(odins.Id) && Items.CanUseItem(odins.Id))
             {
                 if (player.Distance(target) < odins.Range &&
-                    (player.CountEnemysInRange(odins.Range) > 1 ||
+                    (player.CountEnemiesInRange(odins.Range) > 1 ||
                      target.Health < Damage.GetItemDamage(player, target, Damage.DamageItems.OdingVeils)))
                 {
                     Items.UseItem(odins.Id);
