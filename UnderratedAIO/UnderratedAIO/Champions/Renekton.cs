@@ -102,7 +102,11 @@ namespace UnderratedAIO.Champions
             get
             { return player.Buffs.Any(buff => buff.Name == "renektonrageready"); }
         }
-
+        private static bool renw
+        {
+            get
+            { return player.Buffs.Any(buff => buff.Name == "renektonpreexecute"); }
+        }
         private void Combo()
         {
             Obj_AI_Hero target = TargetSelector.GetTarget(E.Range * 2, TargetSelector.DamageType.Physical);
@@ -134,11 +138,11 @@ namespace UnderratedAIO.Champions
                     }
                 }
             }
-            if (config.Item("useq").GetValue<bool>() && Q.CanCast(target) && !player.IsDashing() && (!W.IsReady() || ((W.IsReady() && fury) || player.Health<target.Health)))
+            if (config.Item("useq").GetValue<bool>() && Q.CanCast(target) && !renw && !player.IsDashing() && (!W.IsReady() || ((W.IsReady() && !fury) || (player.Health<target.Health) || Environment.Minion.countMinionsInrange(player.Position, Q.Range)+player.CountEnemiesInRange(Q.Range)>3 && fury) ))
             {
                 Q.Cast(config.Item("packets").GetValue<bool>());
             }
-            if (config.Item("usee").GetValue<bool>() && lastE.Equals(0) && E.CanCast(target) && (eDmg < target.Health || (!((W.IsReady() && canBeOpWIthQ(player.Position) && !rene) || (player.Distance(target.Position) < target.Distance(player.Position.Extend(target.Position, E.Range)))))))
+            if (config.Item("usee").GetValue<bool>() && lastE.Equals(0) && E.CanCast(target) && (eDmg < target.Health || (!(!(W.IsReady() && canBeOpWIthQ(player.Position) && !rene) || (player.Distance(target.Position) < target.Distance(player.Position.Extend(target.Position, E.Range)))))))
             {
                 E.Cast(target.Position, config.Item("packets").GetValue<bool>());
                 lastE = System.Environment.TickCount;
@@ -147,7 +151,7 @@ namespace UnderratedAIO.Champions
             if (config.Item("usee").GetValue<bool>() && !lastE.Equals(0) && (eDmg+player.GetAutoAttackDamage(target) > target.Health || (!((W.IsReady() && canBeOpWIthQ(player.Position) && !rene) || (player.Distance(target.Position) < target.Distance(player.Position.Extend(target.Position, E.Range)))))))
             {
                 var time = System.Environment.TickCount - lastE;
-                if (time > 3600f || combodamage>target.Health)
+                if (time > 3600f || combodamage > target.Health || (player.Distance(target) > E.Range - 50 && player.Distance(target) < E.Range))
                 {
                    E.Cast(target.Position, config.Item("packets").GetValue<bool>());
                     lastE = 0;
@@ -183,6 +187,14 @@ namespace UnderratedAIO.Champions
 
         private void Clear()
         {
+            if (config.Item("useqLC").GetValue<bool>() && Q.IsReady() && !player.IsDashing())
+            {
+                if (Environment.Minion.countMinionsInrange(player.Position, Q.Range) >= 2)
+                {
+                    Q.Cast(config.Item("packets").GetValue<bool>());
+                    return;
+                }
+            }
             if (config.Item("useeLC").GetValue<bool>() && E.IsReady())
             {
                 var minionsForE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.NotAlly);
@@ -190,14 +202,6 @@ namespace UnderratedAIO.Champions
                 if (bestPosition.Position.IsValid() && !bestPosition.Position.IsWall())
                     if (bestPosition.MinionsHit >= 2)
                         E.Cast(bestPosition.Position, config.Item("packets").GetValue<bool>());
-                        return;
-            }
-            if (config.Item("useqLC").GetValue<bool>() && Q.IsReady() && !player.IsDashing())
-            {
-                if (Environment.Minion.countMinionsInrange(player.Position, Q.Range) >= 2)
-                {
-                    Q.Cast(config.Item("packets").GetValue<bool>());
-                }
             }
         }
 
