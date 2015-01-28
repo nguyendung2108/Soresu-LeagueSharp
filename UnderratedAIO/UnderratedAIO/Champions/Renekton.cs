@@ -36,12 +36,15 @@ namespace UnderratedAIO.Champions
         private void Game_OnGameUpdate(EventArgs args)
         {
             bool minionBlock = false;
-            foreach (Obj_AI_Minion minion in MinionManager.GetMinions(player.Position, player.AttackRange, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None))
+            foreach (Obj_AI_Minion minion in MinionManager.GetMinions(player.Position, player.AttackRange + 55, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None))
             {
                 if (HealthPrediction.GetHealthPrediction(minion, 3000) <= Damage.GetAutoAttackDamage(player, minion, false))
                     minionBlock = true;
             }
-
+            if (System.Environment.TickCount - lastE>4100)
+            {
+                lastE = 0;
+            }
             if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
             {
                 var target = Jungle.GetNearest(player.Position);
@@ -178,8 +181,32 @@ namespace UnderratedAIO.Champions
         }
         private void Harass()
         {
-            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             if (target == null) return;
+            if (config.Item("eqweb").GetValue<bool>() && Q.IsReady() && E.IsReady() && lastE.Equals(0) && fury)
+            {
+                var closeGapTarget = ObjectManager.Get<Obj_AI_Minion>().Where(i => i.IsEnemy && player.Distance(i) < E.Range && !i.IsDead && i.Distance(target.ServerPosition) < Q.Range-10).OrderByDescending(i=> Environment.Minion.countMinionsInrange(i.Position,Q.Range)).FirstOrDefault();
+                if (closeGapTarget!=null)
+                {
+                        E.Cast(closeGapTarget.Position, config.Item("packets").GetValue<bool>());
+                        lastE = System.Environment.TickCount;
+                        return;
+                }
+                else
+                {
+                        E.Cast(target.Position, config.Item("packets").GetValue<bool>());
+                        lastE = System.Environment.TickCount;
+                        return;
+                }
+            }
+            if (config.Item("eqweb").GetValue<bool>() && !lastE.Equals(0) && rene && !Q.IsReady() && !renw)
+            {
+                    var nearestTower = ObjectManager.Get<Obj_AI_Turret>().Where(i => i.IsAlly).OrderBy(i => player.Distance(i)).FirstOrDefault();
+                    if (nearestTower != null)
+                    {
+                        E.Cast(player.Position.Extend(nearestTower.Position,350f), config.Item("packets").GetValue<bool>());
+                    }
+            }
             if (config.Item("useqH").GetValue<bool>() && Q.CanCast(target))
             {
                 Q.Cast(config.Item("packets").GetValue<bool>());
@@ -208,7 +235,7 @@ namespace UnderratedAIO.Champions
 
         private void Game_OnDraw(EventArgs args)
         {
-            DrawHelper.DrawCircle(config.Item("drawaa").GetValue<Circle>(), player.AttackRange);
+            DrawHelper.DrawCircle(config.Item("drawaa").GetValue<Circle>(), player.AttackRange + 55);
             DrawHelper.DrawCircle(config.Item("drawqq").GetValue<Circle>(), Q.Range);
             DrawHelper.DrawCircle(config.Item("drawee").GetValue<Circle>(), E.Range);
             DrawHelper.DrawCircle(config.Item("drawrr").GetValue<Circle>(), R.Range);
@@ -258,7 +285,7 @@ namespace UnderratedAIO.Champions
         private void InitRenekton()
         {
             Q = new Spell(SpellSlot.Q, 300);
-            W = new Spell(SpellSlot.W, player.AttackRange);
+            W = new Spell(SpellSlot.W, player.AttackRange + 55);
             E = new Spell(SpellSlot.E, 450);
             E.SetSkillshot(E.Instance.SData.SpellCastTime, E.Instance.SData.LineWidth, E.Speed, false, SkillshotType.SkillshotCone);
             R = new Spell(SpellSlot.R, 300);
@@ -299,6 +326,7 @@ namespace UnderratedAIO.Champions
             // Harass Settings
             Menu menuH = new Menu("Harass ", "Hsettings");
             menuH.AddItem(new MenuItem("useqH", "Use Q")).SetValue(true);
+            menuH.AddItem(new MenuItem("eqweb", "E-furyQ-Eback if possible")).SetValue(true);
             config.AddSubMenu(menuH);
             // LaneClear Settings
             Menu menuLC = new Menu("LaneClear ", "Lcsettings");
