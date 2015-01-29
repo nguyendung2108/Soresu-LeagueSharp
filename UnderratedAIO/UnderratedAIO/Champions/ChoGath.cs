@@ -88,7 +88,7 @@ namespace UnderratedAIO.Champions
             bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Helpers.Jungle.smiteSlot) == SpellState.Ready;
             if (target != null)
             {
-                if (target.CountEnemysInRange(760f) > 0)
+                if (target.CountEnemiesInRange(760f) > 0)
                 {
                     if (config.Item("useRJ").GetValue<bool>() && config.Item("useFlashJ").GetValue<bool>() && R.IsReady() && hasFlash && 1000+player.FlatMagicDamageMod*0.7f >= target.Health &&  player.GetSpell(SpellSlot.R).ManaCost <= player.Mana &&
                         player.Distance(target.Position) > 400 && player.Distance(target.Position) <= RFlash.Range &&
@@ -199,6 +199,10 @@ namespace UnderratedAIO.Champions
                     if (target.IsValidTarget(Q.Range) && Q.CanCast(target))
                     {
                         var nextpos = target.Position.Extend(target.ServerPosition, target.MoveSpeed * 0.7f);
+                        if (target.HasBuff("OdinCaptureChanner"))
+                        {
+                            nextpos = target.Position;
+                        }
                         Q.Cast(nextpos, config.Item("packets").GetValue<bool>());
                     }   
                 }
@@ -226,7 +230,7 @@ namespace UnderratedAIO.Champions
             }
             if (config.Item("usew").GetValue<bool>())
             {
-                if (target.IsValidTarget(W.Range) && W.IsReady())
+                if (W.CanCast(target) && W.IsReady())
                 {
                     W.Cast(target, config.Item("packets").GetValue<bool>());
                 }
@@ -241,11 +245,6 @@ namespace UnderratedAIO.Champions
             {
                 player.Spellbook.CastSpell(player.GetSpellSlot("SummonerFlash"), player.Position.Extend(target.Position, 400));
                 Utility.DelayAction.Add(50, () => R.Cast(target, config.Item("packets").GetValue<bool>()));
-            }
-            if (config.Item("UseFlashC").GetValue<bool>() && !flashRblock && W.IsReady() && hasFlash && !CombatHelper.CheckCriticalBuffs(target) && player.GetSpell(SpellSlot.W).ManaCost <= player.Mana && player.Distance(target.Position) > W.Range + 300 && player.GetSpellDamage(target, SpellSlot.W) > target.Health && !Q.IsReady() && !R.IsReady() && player.Distance(target.Position) <= W.Range + 400 && !player.Position.Extend(target.Position, 400).IsWall())
-            {
-                player.Spellbook.CastSpell(player.GetSpellSlot("SummonerFlash"), player.Position.Extend(target.Position, 400));
-                Utility.DelayAction.Add(50, () => W.Cast(target, config.Item("packets").GetValue<bool>()));
             }
             if (config.Item("user").GetValue<bool>() && player.GetSpellDamage(target, SpellSlot.R)>target.Health)
             {
@@ -293,10 +292,6 @@ namespace UnderratedAIO.Champions
             if (Q.IsReady())
             {
                 damage += Damage.GetSpellDamage(player, hero, SpellSlot.Q);
-            }
-            if (E.IsReady())
-            {
-                damage += Damage.GetSpellDamage(player, hero, SpellSlot.E);
             }
             if (W.IsReady())
             {
