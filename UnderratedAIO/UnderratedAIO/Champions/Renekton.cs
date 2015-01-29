@@ -21,6 +21,7 @@ namespace UnderratedAIO.Champions
         public static readonly Obj_AI_Hero player = ObjectManager.Player;
         public static Spell Q, W, E, R;
         private static float lastE;
+        private static Vector3 lastEpos;
         public Renekton()
         {
             if (player.BaseSkinName != "Renekton") return;
@@ -113,8 +114,7 @@ namespace UnderratedAIO.Champions
         private void Combo()
         {
             Obj_AI_Hero target = TargetSelector.GetTarget(E.Range * 2, TargetSelector.DamageType.Physical);
-            if (config.Item("useItems").GetValue<bool>())
-                ItemHandler.UseItems(target);
+            if (config.Item("useItems").GetValue<bool>())ItemHandler.UseItems(target);
             if (target == null)return;
             bool hasIgnite = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerDot")) == SpellState.Ready;
             var FuryQ = Damage.GetSpellDamage(player, target, SpellSlot.Q) * 0.5;
@@ -183,33 +183,36 @@ namespace UnderratedAIO.Champions
         {
             Obj_AI_Hero target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             if (target == null) return;
-            if (config.Item("eqweb").GetValue<bool>() && Q.IsReady() && E.IsReady() && lastE.Equals(0) && fury)
+            if (config.Item("eqweb").GetValue<bool>() && Q.IsReady() && E.IsReady() && lastE.Equals(0) && fury && !rene)
             {
-                var closeGapTarget = ObjectManager.Get<Obj_AI_Minion>().Where(i => i.IsEnemy && player.Distance(i) < E.Range && !i.IsDead && i.Distance(target.ServerPosition) < Q.Range-10).OrderByDescending(i=> Environment.Minion.countMinionsInrange(i.Position,Q.Range)).FirstOrDefault();
+                var closeGapTarget = ObjectManager.Get<Obj_AI_Minion>().Where(i => i.IsEnemy && player.Distance(i) < E.Range && !i.IsDead && i.Distance(target.ServerPosition) < Q.Range-40).OrderByDescending(i=> Environment.Minion.countMinionsInrange(i.Position,Q.Range)).FirstOrDefault();
                 if (closeGapTarget!=null)
                 {
+                        lastEpos = player.ServerPosition;
+                        Utility.DelayAction.Add(4100, () => lastEpos=new Vector3());
                         E.Cast(closeGapTarget.Position, config.Item("packets").GetValue<bool>());
                         lastE = System.Environment.TickCount;
                         return;
                 }
                 else
                 {
+                        lastEpos = player.ServerPosition;
+                        Utility.DelayAction.Add(4100, () => lastEpos = new Vector3());
                         E.Cast(target.Position, config.Item("packets").GetValue<bool>());
                         lastE = System.Environment.TickCount;
                         return;
                 }
             }
-            if (config.Item("eqweb").GetValue<bool>() && !lastE.Equals(0) && rene && !Q.IsReady() && !renw)
-            {
-                    var nearestTower = ObjectManager.Get<Obj_AI_Turret>().Where(i => i.IsAlly).OrderBy(i => player.Distance(i)).FirstOrDefault();
-                    if (nearestTower != null)
-                    {
-                        E.Cast(player.Position.Extend(nearestTower.Position,350f), config.Item("packets").GetValue<bool>());
-                    }
-            }
             if (config.Item("useqH").GetValue<bool>() && Q.CanCast(target))
             {
                 Q.Cast(config.Item("packets").GetValue<bool>());
+            }
+            if (config.Item("eqweb").GetValue<bool>() && !lastE.Equals(0) && rene && !Q.IsReady() && !renw)
+            {
+                    if (lastEpos.IsValid())
+                    {
+                        E.Cast(player.Position.Extend(lastEpos, 350f), config.Item("packets").GetValue<bool>());
+                    }
             }
         }
 
