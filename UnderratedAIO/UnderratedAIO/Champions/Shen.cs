@@ -40,8 +40,8 @@ namespace UnderratedAIO.Champions
             Interrupter.OnPossibleToInterrupt += OnPossibleToInterrupt;
             Jungle.setSmiteSlot();
 
-
         }
+
 
         private static void Game_OnDraw(EventArgs args)
         {
@@ -115,6 +115,7 @@ namespace UnderratedAIO.Champions
                     Combo();
                     break;
                 case Orbwalking.OrbwalkingMode.Mixed:
+                    LasthitQ();
                     if (!minionBlock) Harass();
                     Ulti();
                     break;
@@ -202,10 +203,10 @@ namespace UnderratedAIO.Champions
         {
 
             if (!R.IsReady() || PingCasted || me.IsDead) return;
-            
-                foreach (var allyObj in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsAlly && !i.IsMe && !i.IsDead && ((Checkinrange(i) && ((i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value)) || (CombatHelper.CheckCriticalBuffs(i) && i.CountEnemysInRange(600)<1))))
+
+            foreach (var allyObj in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsAlly && !i.IsMe && !i.IsDead && ((Checkinrange(i) && ((i.Health * 100 / i.MaxHealth) <= config.Item("atpercent").GetValue<Slider>().Value)) || (CombatHelper.CheckCriticalBuffs(i) && i.CountEnemiesInRange(600) < 1))))
                 {
-                    if (config.Item("user").GetValue<bool>() && R.IsReady() && me.CountEnemysInRange((int)E.Range) < 1 && !config.Item("ult" + allyObj.SkinName).GetValue<bool>())
+                    if (config.Item("user").GetValue<bool>() && R.IsReady() && me.CountEnemiesInRange((int)E.Range) < 1 && !config.Item("ult" + allyObj.SkinName).GetValue<bool>())
                     {
                         
                         R.Cast(allyObj);
@@ -223,7 +224,7 @@ namespace UnderratedAIO.Champions
         }
         private static bool Checkinrange(Obj_AI_Hero i)
         {
-            if (i.CountEnemysInRange(750) >= 1 && i.CountEnemysInRange(750) < 3)
+            if (i.CountEnemiesInRange(750) >= 1 && i.CountEnemiesInRange(750) < 3)
             {
                 return true;
             }
@@ -473,7 +474,6 @@ namespace UnderratedAIO.Champions
             Menu menuOrb = new Menu("Orbwalker", "orbwalker");
             orbwalker = new Orbwalking.Orbwalker(menuOrb);
             config.AddSubMenu(menuOrb);
-
             // Draw settings
             Menu menuD = new Menu("Drawings ", "dsettings");
             menuD.AddItem(new MenuItem("drawaa", "Draw AA range")).SetValue(new Circle(false, Color.FromArgb(150, 150, 62, 172)));
