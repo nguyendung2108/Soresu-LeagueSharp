@@ -208,6 +208,10 @@ namespace UnderratedAIO.Champions
             if (target == null) return;
             if (config.Item("eqweb").GetValue<bool>() && Q.IsReady() && E.IsReady() && lastE.Equals(0) && fury && !rene)
             {
+                if (config.Item("donteqwebtower").GetValue<bool>() &&  player.Position.Extend(target.Position,E.Range).UnderTurret(true))
+                {
+                    return;                
+                }
                 var closeGapTarget = ObjectManager.Get<Obj_AI_Minion>().Where(i => i.IsEnemy && player.Distance(i) < E.Range && !i.IsDead && i.Distance(target.ServerPosition) < Q.Range-40).OrderByDescending(i=> Environment.Minion.countMinionsInrange(i.Position,Q.Range)).FirstOrDefault();
                 if (closeGapTarget!=null)
                 {
@@ -253,7 +257,7 @@ namespace UnderratedAIO.Champions
             {
                 var minionsForE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.NotAlly);
                 MinionManager.FarmLocation bestPosition = E.GetLineFarmLocation(minionsForE);
-                if (bestPosition.Position.IsValid() && !bestPosition.Position.IsWall())
+                if (bestPosition.Position.IsValid() && !player.Position.Extend(bestPosition.Position.To3D(), E.Range).UnderTurret(true) && !bestPosition.Position.IsWall())
                     if (bestPosition.MinionsHit >= 2)
                         E.Cast(bestPosition.Position, config.Item("packets").GetValue<bool>());
             }
@@ -354,6 +358,7 @@ namespace UnderratedAIO.Champions
             menuH.AddItem(new MenuItem("useqH", "Use Q")).SetValue(true);
             menuH.AddItem(new MenuItem("usewH", "Use W")).SetValue(true);
             menuH.AddItem(new MenuItem("eqweb", "E-furyQ-Eback if possible")).SetValue(true);
+            menuH.AddItem(new MenuItem("donteqwebtower", "Don't dash under tower")).SetValue(true);
             config.AddSubMenu(menuH);
             // LaneClear Settings
             Menu menuLC = new Menu("LaneClear ", "Lcsettings");
