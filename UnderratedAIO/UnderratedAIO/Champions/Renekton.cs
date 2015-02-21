@@ -22,6 +22,7 @@ namespace UnderratedAIO.Champions
         public static Spell Q, W, E, R;
         private static float lastE;
         private static Vector3 lastEpos;
+        private static Bool wChancel=false;
         public Renekton()
         {
             if (player.BaseSkinName != "Renekton") return;
@@ -30,9 +31,13 @@ namespace UnderratedAIO.Champions
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Renekton</font>");
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += beforeAttack;
+            Orbwalking.AfterAttack += afterAttack;
             Drawing.OnDraw += Game_OnDraw;
             Jungle.setSmiteSlot();
         }
+
+
+
 
         private void Game_OnGameUpdate(EventArgs args)
         {
@@ -86,6 +91,17 @@ namespace UnderratedAIO.Champions
             }
         }
 
+        private void afterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            if (unit.IsMe && target is Obj_AI_Hero && (orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed))
+            {
+                var time = Game.Time - W.Instance.CooldownExpires;
+                if (time < -9 || (!W.IsReady() && time<-1))
+                {
+                    ItemHandler.castHydra((Obj_AI_Hero)target);
+                }
+            }
+        }
 
         private void beforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
@@ -93,7 +109,14 @@ namespace UnderratedAIO.Champions
             {
                 if ((player.Mana > 40 && !fury ) || (Q.IsReady() && canBeOpWIthQ(player.Position))) return;
                 
-                W.Cast(config.Item("packets").GetValue<bool>());  
+                W.Cast(config.Item("packets").GetValue<bool>());
+                return;
+
+            }
+            if (args.Unit.IsMe && W.IsReady() && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed &&
+                config.Item("usewH").GetValue<bool>() && args.Target is Obj_AI_Hero)
+            {
+                W.Cast(config.Item("packets").GetValue<bool>());
             }
         }
         private static bool rene
@@ -114,7 +137,7 @@ namespace UnderratedAIO.Champions
         private void Combo()
         {
             Obj_AI_Hero target = TargetSelector.GetTarget(E.Range * 2, TargetSelector.DamageType.Physical);
-            if (config.Item("useItems").GetValue<bool>())ItemHandler.UseItems(target);
+           // if (config.Item("useItems").GetValue<bool>())ItemHandler.UseItems(target);
             if (target == null)return;
             bool hasIgnite = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerDot")) == SpellState.Ready;
             var FuryQ = Damage.GetSpellDamage(player, target, SpellSlot.Q) * 0.5;
@@ -329,6 +352,7 @@ namespace UnderratedAIO.Champions
             // Harass Settings
             Menu menuH = new Menu("Harass ", "Hsettings");
             menuH.AddItem(new MenuItem("useqH", "Use Q")).SetValue(true);
+            menuH.AddItem(new MenuItem("usewH", "Use W")).SetValue(true);
             menuH.AddItem(new MenuItem("eqweb", "E-furyQ-Eback if possible")).SetValue(true);
             config.AddSubMenu(menuH);
             // LaneClear Settings
