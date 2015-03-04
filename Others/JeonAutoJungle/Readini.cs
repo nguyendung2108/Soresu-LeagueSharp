@@ -74,10 +74,10 @@ namespace JeonJunglePlay
 
             for (var i = 0; i < 18;i++ )
             {
-                tree[i] = Convert.ToInt32(str[i]);
+                tree[i] = Convert.ToInt32(str[i])-1;
             }
-
             var myAutoLevel = new AutoLevel(tree);
+            AutoLevel.Enabled(true);
         }
 
         public static string GetItemTreetype(string path)

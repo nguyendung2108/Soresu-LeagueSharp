@@ -776,7 +776,7 @@ namespace JeonJunglePlay
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-
+            
             setSmiteSlot();
             if (Player.Spellbook.IsChanneling)
                 return;
@@ -934,12 +934,16 @@ namespace JeonJunglePlay
 
                     MonsterINFO target = MonsterList.First(t => t.order == now);
 
-                    if (Player.Position.Distance(target.Position) >= 300)
+                    if (Player.Position.Distance(target.Position) >= 300 )
                     {
                         if (!recall)
                         {
-                            Player.IssueOrder(GameObjectOrder.MoveTo, target.Position);
-                            afktime = 0;
+                            if (Player.ServerPosition.Distance(target.Position) > Player.AttackRange)
+                            {
+                                Player.IssueOrder(GameObjectOrder.MoveTo, target.Position);
+                                afktime = 0;
+                            }
+
                             DoCast_Hero();
 
                             if (Player.HealthPercentage() < JeonAutoJungleMenu.Item("hpper").GetValue<Slider>().Value && !Player.IsDead//hpper
@@ -967,6 +971,7 @@ namespace JeonJunglePlay
                         if (CheckMonster(target.name, target.Position, 500)) //해당지점에 몬스터가 있는지
                         {
                             DoCast();
+
                             Player.IssueOrder(GameObjectOrder.AttackUnit, GetNearest(Player.Position));
                             afktime = 0;
                             if (smite.Slot != SpellSlot.Unknown && smite.IsReady())
@@ -1113,6 +1118,7 @@ namespace JeonJunglePlay
             }
             #endregion
 
+
             #region 자동포션사용 - auto use potions
             if (Player.HealthPercentage() <= 60 && !Player.InShop())
             {
@@ -1134,7 +1140,7 @@ namespace JeonJunglePlay
 
             #endregion
 
-
+            AutoLevel.Enabled(true);
         }
 
         private static void OnCreate(GameObject sender, EventArgs args)
