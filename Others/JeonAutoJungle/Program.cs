@@ -10,43 +10,31 @@ using System.IO;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-
 namespace JeonJunglePlay
 {
     public class Program
     {
-
-
         public static Obj_AI_Hero Player = ObjectManager.Player;
         public static Spell Q, W, E, R;
         private static Vector3 spawn;
         private static Vector3 enemy_spawn;
         public static Menu JeonAutoJungleMenu;
-
-        public static float gamestart=0,pastTime=0,pastTimeAFK,afktime=0;
+        public static float gamestart = 0, pastTime = 0, pastTimeAFK, afktime = 0;
         public static List<MonsterINFO> MonsterList = new List<MonsterINFO>();
         public static int now = 1, max = 20, num = 0;
         public static float recallhp = 0;
-
         public static bool recall = false, IsOVER = false, IsAttackedByTurret = false, IsAttackStart = false,
-            IsCastW = false;
-
+        IsCastW = false;
         public static bool canBuyItems = true, IsBlueTeam, IsStart = true, IsFind = false;
-
-
         public static SpellSlot smiteSlot = SpellSlot.Unknown;
         public static Spell smite;
-
         public static SpellDataInst Qdata = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q);
         public static SpellDataInst Wdata = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W);
         public static SpellDataInst Edata = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E);
         public static SpellDataInst Rdata = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R);
-
-
         public static List<Spell> cast2mob = new List<Spell>();
         public static List<Spell> cast2hero = new List<Spell>();
         public static List<Spell> cast4laneclear = new List<Spell>();
-
         public class MonsterINFO
         {
             public Vector3 Position;
@@ -55,14 +43,11 @@ namespace JeonJunglePlay
             public int order;
             public int respawntime;
             public int Range = 1000;
-
             public MonsterINFO()
             {
                 MonsterList.Add(this);
             }
-
         }
-
         public class ItemToShop
         {
             public int Price, index;
@@ -73,7 +58,6 @@ namespace JeonJunglePlay
                 num += 1;
             }
         }
-
         #region 몬스터
         public static MonsterINFO Baron = new MonsterINFO
         {
@@ -121,7 +105,6 @@ namespace JeonJunglePlay
             respawntime = 180,
             Range = 3000
         };
-
         public static MonsterINFO bteam_Razorbeak = new MonsterINFO { ID = "bteam_Razorbeak", Position = new Vector3(6974f, 5460f, 54f), name = "SRU_Razorbeak" };
         public static MonsterINFO bteam_Red = new MonsterINFO
         {
@@ -140,7 +123,6 @@ namespace JeonJunglePlay
         };
         public static MonsterINFO bteam_Gromp = new MonsterINFO { ID = "bteam_Gromp", Position = new Vector3(2112f, 8372f, 51.7f), name = "SRU_Gromp" };
         public static MonsterINFO bteam_Wolf = new MonsterINFO { ID = "bteam_Wolf", Position = new Vector3(3844f, 6474f, 52.46f), name = "SRU_Murkwolf" };
-
         public static MonsterINFO pteam_Razorbeak = new MonsterINFO { ID = "pteam_Razorbeak", Position = new Vector3(7856f, 9492f, 52.33f), name = "SRU_Razorbeak" };
         public static MonsterINFO pteam_Red = new MonsterINFO
         {
@@ -159,447 +141,435 @@ namespace JeonJunglePlay
         };
         public static MonsterINFO pteam_Gromp = new MonsterINFO { ID = "pteam_Gromp", Position = new Vector3(12766f, 6464f, 51.66f), name = "SRU_Gromp" };
         public static MonsterINFO pteam_Wolf = new MonsterINFO { ID = "pteam_Wolf", Position = new Vector3(10958f, 8286f, 62.46f), name = "SRU_Murkwolf" };
-
-
-
         #endregion
-
-
         #region 아이템
         #region ap
         public static List<ItemToShop> buyThings_AP = new List<ItemToShop>
-        {
-            new ItemToShop()
-            {
-                Price = 450,
-                needItem = ItemId.Hunters_Machete,
-                item = ItemId.Rangers_Trailblazer,
-                index = 1
-            },
-            new ItemToShop()
-            {
-                Price = 450,
-                needItem = ItemId.Rangers_Trailblazer,
-                item = ItemId.Dagger,
-                index = 2
-            },
-            new ItemToShop()
-            {
-                Price = 1050,
-                needItem = ItemId.Dagger,
-                item = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
-                index = 3
-            },
-            new ItemToShop()
-            {
-                Price = 325,
-                needItem = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
-                item = ItemId.Boots_of_Speed,
-                index = 4
-            },
-            new ItemToShop()
-            {
-                Price = 775,
-                needItem = ItemId.Boots_of_Speed,
-                item = ItemId.Ionian_Boots_of_Lucidity,
-                index = 5
-            },
-            new ItemToShop()
-            {
-                Price = 400,
-                needItem = ItemId.Ionian_Boots_of_Lucidity,
-                item = ItemId.Sapphire_Crystal,
-                index = 6
-            },
-            new ItemToShop()
-            {
-                Price = 140+180,
-                needItem = ItemId.Sapphire_Crystal,
-                item = ItemId.Tear_of_the_Goddess,
-                index = 7
-            },
-            new ItemToShop()
-            {
-                Price = 435,
-                needItem = ItemId.Tear_of_the_Goddess,
-                item = ItemId.Amplifying_Tome,
-                index = 8
-            },
-            new ItemToShop()
-            {
-                Price = 300+465,
-                needItem = ItemId.Amplifying_Tome,
-                item = ItemId.Seekers_Armguard,
-                index = 9
-            },
-            new ItemToShop()
-            {
-                Price = 1600,
-                needItem = ItemId.Seekers_Armguard,
-                item = ItemId.Needlessly_Large_Rod,
-                index = 10
-            },
-            new ItemToShop()
-            {
-                Price = 500,
-                needItem = ItemId.Needlessly_Large_Rod,
-                item = ItemId.Zhonyas_Hourglass,
-                index = 11
-            },
-            new ItemToShop()
-            {
-                Price = 860,
-                needItem = ItemId.Zhonyas_Hourglass,
-                item = ItemId.Blasting_Wand,
-                index = 12
-            },
-            new ItemToShop()
-            {
-                Price = 1600,
-                needItem = ItemId.Blasting_Wand,
-                item = ItemId.Needlessly_Large_Rod,
-                index = 13
-            },
-            new ItemToShop()
-            {
-                Price = 840,
-                needItem = ItemId.Needlessly_Large_Rod,
-                item = ItemId.Rabadons_Deathcap,
-                index = 14
-            },
-            new ItemToShop()
-            {
-                Price = 860,
-                needItem = ItemId.Rabadons_Deathcap,
-                item = ItemId.Blasting_Wand,
-                index = 15
-            },
-            new ItemToShop()
-            {
-                Price = 860,
-                needItem = ItemId.Blasting_Wand,
-                item = ItemId.Archangels_Staff,
-                index = 16
-            },
-            new ItemToShop()
-            {
-                Price = 2295,
-                needItem = ItemId.Archangels_Staff,
-                item = ItemId.Void_Staff,
-                index = 17
-            }
-        };
+{
+new ItemToShop()
+{
+Price = 450,
+needItem = ItemId.Hunters_Machete,
+item = ItemId.Rangers_Trailblazer,
+index = 1
+},
+new ItemToShop()
+{
+Price = 450,
+needItem = ItemId.Rangers_Trailblazer,
+item = ItemId.Dagger,
+index = 2
+},
+new ItemToShop()
+{
+Price = 1050,
+needItem = ItemId.Dagger,
+item = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
+index = 3
+},
+new ItemToShop()
+{
+Price = 325,
+needItem = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
+item = ItemId.Boots_of_Speed,
+index = 4
+},
+new ItemToShop()
+{
+Price = 775,
+needItem = ItemId.Boots_of_Speed,
+item = ItemId.Ionian_Boots_of_Lucidity,
+index = 5
+},
+new ItemToShop()
+{
+Price = 400,
+needItem = ItemId.Ionian_Boots_of_Lucidity,
+item = ItemId.Sapphire_Crystal,
+index = 6
+},
+new ItemToShop()
+{
+Price = 140+180,
+needItem = ItemId.Sapphire_Crystal,
+item = ItemId.Tear_of_the_Goddess,
+index = 7
+},
+new ItemToShop()
+{
+Price = 435,
+needItem = ItemId.Tear_of_the_Goddess,
+item = ItemId.Amplifying_Tome,
+index = 8
+},
+new ItemToShop()
+{
+Price = 300+465,
+needItem = ItemId.Amplifying_Tome,
+item = ItemId.Seekers_Armguard,
+index = 9
+},
+new ItemToShop()
+{
+Price = 1600,
+needItem = ItemId.Seekers_Armguard,
+item = ItemId.Needlessly_Large_Rod,
+index = 10
+},
+new ItemToShop()
+{
+Price = 500,
+needItem = ItemId.Needlessly_Large_Rod,
+item = ItemId.Zhonyas_Hourglass,
+index = 11
+},
+new ItemToShop()
+{
+Price = 860,
+needItem = ItemId.Zhonyas_Hourglass,
+item = ItemId.Blasting_Wand,
+index = 12
+},
+new ItemToShop()
+{
+Price = 1600,
+needItem = ItemId.Blasting_Wand,
+item = ItemId.Needlessly_Large_Rod,
+index = 13
+},
+new ItemToShop()
+{
+Price = 840,
+needItem = ItemId.Needlessly_Large_Rod,
+item = ItemId.Rabadons_Deathcap,
+index = 14
+},
+new ItemToShop()
+{
+Price = 860,
+needItem = ItemId.Rabadons_Deathcap,
+item = ItemId.Blasting_Wand,
+index = 15
+},
+new ItemToShop()
+{
+Price = 860,
+needItem = ItemId.Blasting_Wand,
+item = ItemId.Archangels_Staff,
+index = 16
+},
+new ItemToShop()
+{
+Price = 2295,
+needItem = ItemId.Archangels_Staff,
+item = ItemId.Void_Staff,
+index = 17
+}
+};
         #endregion
         #region ad = default
         public static List<ItemToShop> buyThings = new List<ItemToShop>
-        {
-            new ItemToShop()
-            {
-                Price = 450,
-                needItem = ItemId.Hunters_Machete,
-                item = ItemId.Rangers_Trailblazer,
-                index = 1
-            },
-            new ItemToShop()
-            {
-                Price = 450,
-                needItem = ItemId.Rangers_Trailblazer,
-                item = ItemId.Dagger,
-                index = 2
-            },
-            new ItemToShop()
-            {
-                Price = 1050,
-                needItem = ItemId.Dagger,
-                item = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
-                index = 3
-            },
-            new ItemToShop()
-            {
-                Price = 325,
-                needItem = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
-                item = ItemId.Boots_of_Speed,
-                index = 4
-            },
-            new ItemToShop()
-            {
-                Price = 675,
-                needItem = ItemId.Boots_of_Speed,
-                item = ItemId.Berserkers_Greaves,
-                index = 5
-            },
-            new ItemToShop()
-            {
-                Price = 1400,
-                needItem = ItemId.Berserkers_Greaves,
-                item = ItemId.Bilgewater_Cutlass,
-                index = 6
-            },
-            new ItemToShop()
-            {
-                Price = 1800,
-                needItem = ItemId.Bilgewater_Cutlass,
-                item = ItemId.Blade_of_the_Ruined_King,
-                index = 7
-            },
-            new ItemToShop()
-            {
-                Price = 1100,
-                needItem = ItemId.Blade_of_the_Ruined_King,
-                item = ItemId.Zeal,
-                index = 8
-            },
-            new ItemToShop()
-            {
-                Price = 1700,
-                needItem = ItemId.Zeal,
-                item = ItemId.Phantom_Dancer,
-                index = 9
-            },
-            new ItemToShop()
-            {
-                Price = 1550,
-                needItem = ItemId.Phantom_Dancer,
-                item = ItemId.B_F_Sword,
-                index = 10
-            },
-            new ItemToShop()
-            {
-                Price = 2250,
-                needItem = ItemId.B_F_Sword,
-                item = ItemId.Infinity_Edge,
-                index = 11
-            },
-            new ItemToShop()
-            {
-                Price = 2900,
-                needItem = ItemId.Infinity_Edge,
-                item = ItemId.Last_Whisper,
-                index = 12
-            }
-        };
+{
+new ItemToShop()
+{
+Price = 450,
+needItem = ItemId.Hunters_Machete,
+item = ItemId.Rangers_Trailblazer,
+index = 1
+},
+new ItemToShop()
+{
+Price = 450,
+needItem = ItemId.Rangers_Trailblazer,
+item = ItemId.Dagger,
+index = 2
+},
+new ItemToShop()
+{
+Price = 1050,
+needItem = ItemId.Dagger,
+item = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
+index = 3
+},
+new ItemToShop()
+{
+Price = 325,
+needItem = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
+item = ItemId.Boots_of_Speed,
+index = 4
+},
+new ItemToShop()
+{
+Price = 675,
+needItem = ItemId.Boots_of_Speed,
+item = ItemId.Berserkers_Greaves,
+index = 5
+},
+new ItemToShop()
+{
+Price = 1400,
+needItem = ItemId.Berserkers_Greaves,
+item = ItemId.Bilgewater_Cutlass,
+index = 6
+},
+new ItemToShop()
+{
+Price = 1800,
+needItem = ItemId.Bilgewater_Cutlass,
+item = ItemId.Blade_of_the_Ruined_King,
+index = 7
+},
+new ItemToShop()
+{
+Price = 1100,
+needItem = ItemId.Blade_of_the_Ruined_King,
+item = ItemId.Zeal,
+index = 8
+},
+new ItemToShop()
+{
+Price = 1700,
+needItem = ItemId.Zeal,
+item = ItemId.Phantom_Dancer,
+index = 9
+},
+new ItemToShop()
+{
+Price = 1550,
+needItem = ItemId.Phantom_Dancer,
+item = ItemId.B_F_Sword,
+index = 10
+},
+new ItemToShop()
+{
+Price = 2250,
+needItem = ItemId.B_F_Sword,
+item = ItemId.Infinity_Edge,
+index = 11
+},
+new ItemToShop()
+{
+Price = 2900,
+needItem = ItemId.Infinity_Edge,
+item = ItemId.Last_Whisper,
+index = 12
+}
+};
         #endregion
         #region as
         public static List<ItemToShop> buyThings_AS = new List<ItemToShop>
-        {
-            new ItemToShop()
-            {
-                Price = 450,
-                needItem = ItemId.Hunters_Machete,
-                item = ItemId.Rangers_Trailblazer,
-                index = 1
-            },
-            new ItemToShop()
-            {
-                Price = 450,
-                needItem = ItemId.Rangers_Trailblazer,
-                item = ItemId.Dagger,
-                index = 2
-            },
-            new ItemToShop()
-            {
-                Price = 1050,
-                needItem = ItemId.Dagger,
-                item = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
-                index = 3
-            },
-            new ItemToShop()
-            {
-                Price = 325,
-                needItem = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
-                item = ItemId.Boots_of_Speed,
-                index = 4
-            },
-            new ItemToShop()
-            {
-                Price = 675,
-                needItem = ItemId.Boots_of_Speed,
-                item = ItemId.Boots_of_Swiftness,
-                index = 5
-            },
-            new ItemToShop()
-            {
-                Price = 1400,
-                needItem = ItemId.Boots_of_Swiftness,
-                item = ItemId.Bilgewater_Cutlass,
-                index = 6
-            },
-            new ItemToShop()
-            {
-                Price = 1800,
-                needItem = ItemId.Bilgewater_Cutlass,
-                item = ItemId.Blade_of_the_Ruined_King,
-                index = 7
-            },
-            new ItemToShop()
-            {
-                Price = 900,
-                needItem = ItemId.Blade_of_the_Ruined_King,
-                item = ItemId.Recurve_Bow,
-                index = 8
-            },
-            new ItemToShop()
-            {
-                Price = 500+750+450,
-                needItem = ItemId.Recurve_Bow,
-                item = ItemId.Wits_End,
-                index = 9
-            },
-            new ItemToShop()
-            {
-                Price = 1900,
-                needItem = ItemId.Wits_End,
-                item = ItemId.Tiamat_Melee_Only,
-                index = 10
-            },
-            new ItemToShop()
-            {
-                Price = 800+600,
-                needItem = ItemId.Tiamat_Melee_Only,
-                item = ItemId.Ravenous_Hydra_Melee_Only,
-                index = 11
-            },
-            new ItemToShop()
-            {
-                Price = 2900,
-                needItem = ItemId.Ravenous_Hydra_Melee_Only,
-                item = ItemId.Last_Whisper,
-                index = 12
-            }
-        };
+{
+new ItemToShop()
+{
+Price = 450,
+needItem = ItemId.Hunters_Machete,
+item = ItemId.Rangers_Trailblazer,
+index = 1
+},
+new ItemToShop()
+{
+Price = 450,
+needItem = ItemId.Rangers_Trailblazer,
+item = ItemId.Dagger,
+index = 2
+},
+new ItemToShop()
+{
+Price = 1050,
+needItem = ItemId.Dagger,
+item = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
+index = 3
+},
+new ItemToShop()
+{
+Price = 325,
+needItem = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
+item = ItemId.Boots_of_Speed,
+index = 4
+},
+new ItemToShop()
+{
+Price = 675,
+needItem = ItemId.Boots_of_Speed,
+item = ItemId.Boots_of_Swiftness,
+index = 5
+},
+new ItemToShop()
+{
+Price = 1400,
+needItem = ItemId.Boots_of_Swiftness,
+item = ItemId.Bilgewater_Cutlass,
+index = 6
+},
+new ItemToShop()
+{
+Price = 1800,
+needItem = ItemId.Bilgewater_Cutlass,
+item = ItemId.Blade_of_the_Ruined_King,
+index = 7
+},
+new ItemToShop()
+{
+Price = 900,
+needItem = ItemId.Blade_of_the_Ruined_King,
+item = ItemId.Recurve_Bow,
+index = 8
+},
+new ItemToShop()
+{
+Price = 500+750+450,
+needItem = ItemId.Recurve_Bow,
+item = ItemId.Wits_End,
+index = 9
+},
+new ItemToShop()
+{
+Price = 1900,
+needItem = ItemId.Wits_End,
+item = ItemId.Tiamat_Melee_Only,
+index = 10
+},
+new ItemToShop()
+{
+Price = 800+600,
+needItem = ItemId.Tiamat_Melee_Only,
+item = ItemId.Ravenous_Hydra_Melee_Only,
+index = 11
+},
+new ItemToShop()
+{
+Price = 2900,
+needItem = ItemId.Ravenous_Hydra_Melee_Only,
+item = ItemId.Last_Whisper,
+index = 12
+}
+};
         #endregion
         #region tanky
         public static List<ItemToShop> buyThings_TANK = new List<ItemToShop>
-        {
-            new ItemToShop()
-            {
-                Price = 450,
-                needItem = ItemId.Hunters_Machete,
-                item = ItemId.Rangers_Trailblazer,
-                index = 1
-            },
-            new ItemToShop()
-            {
-                Price = 450,
-                needItem = ItemId.Rangers_Trailblazer,
-                item = ItemId.Dagger,
-                index = 2
-            },
-            new ItemToShop()
-            {
-                Price = 1050,
-                needItem = ItemId.Dagger,
-                item = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
-                index = 3
-            },
-            new ItemToShop()
-            {
-                Price = 325,
-                needItem = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
-                item = ItemId.Boots_of_Speed,
-                index = 4
-            },
-            new ItemToShop()
-            {
-                Price = 675,
-                needItem = ItemId.Boots_of_Speed,
-                item = ItemId.Ionian_Boots_of_Lucidity,
-                index = 5
-            },
-            new ItemToShop()
-            {
-                Price = 400,
-                needItem = ItemId.Ionian_Boots_of_Lucidity,
-                item = ItemId.Ruby_Crystal,
-                index = 6
-            },
-            new ItemToShop()
-            {
-                Price = 500+180+820,
-                needItem = ItemId.Ruby_Crystal,
-                item = ItemId.Aegis_of_the_Legion,
-                index = 7
-            },
-            new ItemToShop()
-            {
-                Price = 900,
-                needItem = ItemId.Aegis_of_the_Legion,
-                item = ItemId.Locket_of_the_Iron_Solari,
-                index = 8
-            },
-            new ItemToShop()
-            {
-                Price = 950,
-                needItem = ItemId.Locket_of_the_Iron_Solari,
-                item = ItemId.Glacial_Shroud,
-                index = 9
-            },
-            new ItemToShop()
-            {
-                Price = 1050+450,
-                needItem = ItemId.Glacial_Shroud,
-                item = ItemId.Frozen_Heart,
-                index = 10
-            },
-            new ItemToShop()
-            {
-                Price = 500,
-                needItem = ItemId.Frozen_Heart,
-                item = ItemId.Null_Magic_Mantle,
-                index = 11
-            },
-            new ItemToShop()
-            {
-                Price = 400+1150,
-                needItem = ItemId.Null_Magic_Mantle,
-                item = ItemId.Banshees_Veil,
-                index = 12
-            },
-            new ItemToShop()
-            {
-                Price = 1200,
-                needItem = ItemId.Banshees_Veil,
-                item = ItemId.Sheen,
-                index = 13
-            },
-            new ItemToShop()
-            {
-                Price = 1325,
-                needItem = ItemId.Sheen,
-                item = ItemId.Phage,
-                index = 14
-            },
-            new ItemToShop()
-            {
-                Price = 1178,
-                needItem = ItemId.Phage,
-                item = ItemId.Trinity_Force,
-                index = 15
-            },
-        };
+{
+new ItemToShop()
+{
+Price = 450,
+needItem = ItemId.Hunters_Machete,
+item = ItemId.Rangers_Trailblazer,
+index = 1
+},
+new ItemToShop()
+{
+Price = 450,
+needItem = ItemId.Rangers_Trailblazer,
+item = ItemId.Dagger,
+index = 2
+},
+new ItemToShop()
+{
+Price = 1050,
+needItem = ItemId.Dagger,
+item = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
+index = 3
+},
+new ItemToShop()
+{
+Price = 325,
+needItem = ItemId.Rangers_Trailblazer_Enchantment_Devourer,
+item = ItemId.Boots_of_Speed,
+index = 4
+},
+new ItemToShop()
+{
+Price = 675,
+needItem = ItemId.Boots_of_Speed,
+item = ItemId.Ionian_Boots_of_Lucidity,
+index = 5
+},
+new ItemToShop()
+{
+Price = 400,
+needItem = ItemId.Ionian_Boots_of_Lucidity,
+item = ItemId.Ruby_Crystal,
+index = 6
+},
+new ItemToShop()
+{
+Price = 500+180+820,
+needItem = ItemId.Ruby_Crystal,
+item = ItemId.Aegis_of_the_Legion,
+index = 7
+},
+new ItemToShop()
+{
+Price = 900,
+needItem = ItemId.Aegis_of_the_Legion,
+item = ItemId.Locket_of_the_Iron_Solari,
+index = 8
+},
+new ItemToShop()
+{
+Price = 950,
+needItem = ItemId.Locket_of_the_Iron_Solari,
+item = ItemId.Glacial_Shroud,
+index = 9
+},
+new ItemToShop()
+{
+Price = 1050+450,
+needItem = ItemId.Glacial_Shroud,
+item = ItemId.Frozen_Heart,
+index = 10
+},
+new ItemToShop()
+{
+Price = 500,
+needItem = ItemId.Frozen_Heart,
+item = ItemId.Null_Magic_Mantle,
+index = 11
+},
+new ItemToShop()
+{
+Price = 400+1150,
+needItem = ItemId.Null_Magic_Mantle,
+item = ItemId.Banshees_Veil,
+index = 12
+},
+new ItemToShop()
+{
+Price = 1200,
+needItem = ItemId.Banshees_Veil,
+item = ItemId.Sheen,
+index = 13
+},
+new ItemToShop()
+{
+Price = 1325,
+needItem = ItemId.Sheen,
+item = ItemId.Phage,
+index = 14
+},
+new ItemToShop()
+{
+Price = 1178,
+needItem = ItemId.Phage,
+item = ItemId.Trinity_Force,
+index = 15
+},
+};
         #endregion
-
         #endregion
-
-
         private static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
-
         private static void Game_OnGameLoad(EventArgs args)
         {
             ////////////////////customizing//////////////////
-            
             var dir = new DirectoryInfo(Config.LeagueSharpDirectory.ToString() + @"\JeonAutoJungle");
             var setFile = new FileInfo(dir + "/" + Player.ChampionName + ".ini");
-
             #region File Stream
             try
             {
                 if (!dir.Exists)
                     dir.Create();
-
                 if (!setFile.Exists)
                 {
                     Readini.Setini(setFile.FullName);
@@ -608,11 +578,7 @@ namespace JeonJunglePlay
             catch
             { }
             #endregion
-
-            
             ////////////////////////////////////////////////
-
-
             JeonAutoJungleMenu = new Menu("JeonAutoJungle", "JeonAutoJungle", true);
             JeonAutoJungleMenu.AddItem(new MenuItem("isActive", "Activate")).SetValue(true);
             JeonAutoJungleMenu.AddItem(new MenuItem("maxstacks", "Max Stacks").SetValue(new Slider(30, 1, 150)));
@@ -622,19 +588,16 @@ namespace JeonJunglePlay
             JeonAutoJungleMenu.AddItem(new MenuItem("evading", "Detect TurretAttack")).SetValue(true);
             JeonAutoJungleMenu.AddItem(new MenuItem("Invade", "InvadeEnemyJungle?")).SetValue(true);
             JeonAutoJungleMenu.AddItem(new MenuItem("k_dragon", "Add Dragon to Route on Lv").SetValue(new Slider(10, 1, 18)));
-            if(Player.ChampionName == "MasterYi")
+            if (Player.ChampionName == "MasterYi")
                 JeonAutoJungleMenu.AddItem(new MenuItem("yi_W", "Cast MasterYi-W(%)").SetValue(new Slider(85, 0, 100)));
             JeonAutoJungleMenu.AddToMainMenu();
-
             setSmiteSlot();
-
             #region 스펠설정
             Q = new Spell(SpellSlot.Q, GetSpellRange(Qdata));
             W = new Spell(SpellSlot.W, GetSpellRange(Wdata));
             E = new Spell(SpellSlot.E, GetSpellRange(Edata));
             R = new Spell(SpellSlot.R, GetSpellRange(Rdata));
             #endregion
-
             #region 지점 설정
             if (Player.Team.ToString() == "Chaos")
             {
@@ -642,23 +605,18 @@ namespace JeonJunglePlay
                 enemy_spawn = new Vector3(415.33f, 453.38f, 182.66f);
                 Game.PrintChat("Set PurpleTeam Spawn");
                 IsBlueTeam = false;
-
                 MonsterList.First(temp => temp.ID == pteam_Gromp.ID).order = 1;
                 MonsterList.First(temp => temp.ID == pteam_Blue.ID).order = 2;
                 MonsterList.First(temp => temp.ID == pteam_Wolf.ID).order = 3;
                 MonsterList.First(temp => temp.ID == pteam_Razorbeak.ID).order = 4;
                 MonsterList.First(temp => temp.ID == pteam_Red.ID).order = 5;
                 MonsterList.First(temp => temp.ID == pteam_Krug.ID).order = 6;
-
                 MonsterList.First(temp => temp.ID == bteam_Gromp.ID).order = 7;
                 MonsterList.First(temp => temp.ID == bteam_Blue.ID).order = 8;
                 MonsterList.First(temp => temp.ID == bteam_Wolf.ID).order = 9;
-
-
                 MonsterList.First(temp => temp.ID == top_crab.ID).order = 10;
                 MonsterList.First(temp => temp.ID == PURPLE_MID.ID).order = 11;
                 MonsterList.First(temp => temp.ID == down_crab.ID).order = 12;
-
                 MonsterList.First(temp => temp.ID == bteam_Razorbeak.ID).order = 13;
                 MonsterList.First(temp => temp.ID == bteam_Red.ID).order = 14;
                 MonsterList.First(temp => temp.ID == bteam_Krug.ID).order = 15;
@@ -669,31 +627,24 @@ namespace JeonJunglePlay
                 enemy_spawn = new Vector3(14318f, 14354, 171.97f);
                 Game.PrintChat("Set BlueTeam Spawn");
                 IsBlueTeam = true;
-
                 MonsterList.First(temp => temp.ID == bteam_Gromp.ID).order = 6;
                 MonsterList.First(temp => temp.ID == bteam_Blue.ID).order = 5;
                 MonsterList.First(temp => temp.ID == bteam_Wolf.ID).order = 4;
                 MonsterList.First(temp => temp.ID == bteam_Razorbeak.ID).order = 3;
                 MonsterList.First(temp => temp.ID == bteam_Red.ID).order = 2;
                 MonsterList.First(temp => temp.ID == bteam_Krug.ID).order = 1;
-
                 MonsterList.First(temp => temp.ID == pteam_Razorbeak.ID).order = 7;
                 MonsterList.First(temp => temp.ID == pteam_Red.ID).order = 8;
                 MonsterList.First(temp => temp.ID == pteam_Krug.ID).order = 9;
-
-
                 MonsterList.First(temp => temp.ID == top_crab.ID).order = 10;
                 MonsterList.First(temp => temp.ID == BLUE_MID.ID).order = 11;
                 MonsterList.First(temp => temp.ID == down_crab.ID).order = 12;
-
                 MonsterList.First(temp => temp.ID == pteam_Gromp.ID).order = 13;
                 MonsterList.First(temp => temp.ID == pteam_Blue.ID).order = 14;
                 MonsterList.First(temp => temp.ID == pteam_Wolf.ID).order = 15;
             }
             max = MonsterList.OrderByDescending(h => h.order).First().order;
-
             #endregion
-
             #region 챔피언 설정
             if (Player.ChampionName.ToUpper() == "NUNU")
             {
@@ -738,81 +689,57 @@ namespace JeonJunglePlay
                 Readini.GetSpelltree(setFile.FullName);
                 GetItemTree(setFile);
                 Readini.GetSpells(setFile.FullName, ref cast2mob, ref cast2hero, ref cast4laneclear);
-
                 #endregion readini
             }
             #endregion
-
             #region 현재 아이템 단계 설정 - 도중 리로드시 필요
-
             if (buyThings.Any(h => Items.HasItem(Convert.ToInt32(h.needItem))))
             {
                 if (buyThings.First().needItem != buyThings.Last(h => Items.HasItem(Convert.ToInt32(h.needItem))).needItem)
                 {
                     var lastitem = buyThings.Last(h => Items.HasItem(Convert.ToInt32(h.needItem)));
-
                     Game.PrintChat("Find new ItemList");
-
                     List<ItemToShop> newlist = buyThings.Where(t => t.index >= lastitem.index).ToList();
-
                     buyThings.Clear();
                     buyThings = newlist;
                 }
             }
             #endregion
-
             gamestart = Game.Time; // 시작시간 설정
-
             Game.OnGameUpdate += Game_OnGameUpdate;
             GameObject.OnCreate += OnCreate;
             Obj_AI_Base.OnProcessSpellCast += OnSpell;
-
             if (smiteSlot == SpellSlot.Unknown)
                 Game.PrintChat("YOU ARE NOT JUNGLER(NO SMITE)");
-
         }
-
-
-
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            
             setSmiteSlot();
             if (Player.Spellbook.IsChanneling)
                 return;
-
-
             if (!JeonAutoJungleMenu.Item("isActive").GetValue<Boolean>() || smiteSlot == SpellSlot.Unknown)
                 return;
-
-
             #region detect afk
             if (Game.Time - pastTimeAFK >= 1 && !Player.IsDead && !Player.IsRecalling())
             {
                 afktime += 1;
                 if (afktime > 10) // 잠수 10초 경과
                 {
-                    if(Player.InShop())
-                    Player.IssueOrder(GameObjectOrder.AttackTo,
+                    if (Player.InShop())
+                        Player.IssueOrder(GameObjectOrder.AttackTo,
                         new Vector3(4910f, 10268f, -71.24f));
                     else
                         Player.Spellbook.CastSpell(SpellSlot.Recall);
-
                     afktime = 0;
                 }
-
                 pastTimeAFK = Game.Time;
             }
-
             #endregion
-
-            #region 0.5초마다 발동 //  오류 없애줌
+            #region 0.5초마다 발동 // 오류 없애줌
             if (Environment.TickCount - pastTime <= 500) return;
             pastTime = Environment.TickCount;
             #endregion
-
             #region InvadeEnemyJungle
-
             if (!IsBlueTeam)
             {
                 if (!JeonAutoJungleMenu.Item("Invade").GetValue<Boolean>())
@@ -820,11 +747,9 @@ namespace JeonJunglePlay
                     MonsterList.First(temp => temp.ID == bteam_Gromp.ID).order = 0;
                     MonsterList.First(temp => temp.ID == bteam_Blue.ID).order = 0;
                     MonsterList.First(temp => temp.ID == bteam_Wolf.ID).order = 0;
-
                     MonsterList.First(temp => temp.ID == top_crab.ID).order = 0;
                     MonsterList.First(temp => temp.ID == PURPLE_MID.ID).order = 0;
                     MonsterList.First(temp => temp.ID == down_crab.ID).order = 0;
-
                     MonsterList.First(temp => temp.ID == bteam_Razorbeak.ID).order = 0;
                     MonsterList.First(temp => temp.ID == bteam_Red.ID).order = 0;
                     MonsterList.First(temp => temp.ID == bteam_Krug.ID).order = 0;
@@ -834,11 +759,9 @@ namespace JeonJunglePlay
                     MonsterList.First(temp => temp.ID == bteam_Gromp.ID).order = 7;
                     MonsterList.First(temp => temp.ID == bteam_Blue.ID).order = 8;
                     MonsterList.First(temp => temp.ID == bteam_Wolf.ID).order = 9;
-
                     MonsterList.First(temp => temp.ID == top_crab.ID).order = 10;
                     MonsterList.First(temp => temp.ID == PURPLE_MID.ID).order = 11;
                     MonsterList.First(temp => temp.ID == down_crab.ID).order = 12;
-
                     MonsterList.First(temp => temp.ID == bteam_Razorbeak.ID).order = 13;
                     MonsterList.First(temp => temp.ID == bteam_Red.ID).order = 14;
                     MonsterList.First(temp => temp.ID == bteam_Krug.ID).order = 15;
@@ -851,11 +774,9 @@ namespace JeonJunglePlay
                     MonsterList.First(temp => temp.ID == pteam_Razorbeak.ID).order = 0;
                     MonsterList.First(temp => temp.ID == pteam_Red.ID).order = 0;
                     MonsterList.First(temp => temp.ID == pteam_Krug.ID).order = 0;
-
                     MonsterList.First(temp => temp.ID == top_crab.ID).order = 0;
                     MonsterList.First(temp => temp.ID == BLUE_MID.ID).order = 0;
                     MonsterList.First(temp => temp.ID == down_crab.ID).order = 0;
-
                     MonsterList.First(temp => temp.ID == pteam_Gromp.ID).order = 0;
                     MonsterList.First(temp => temp.ID == pteam_Blue.ID).order = 0;
                     MonsterList.First(temp => temp.ID == pteam_Wolf.ID).order = 0;
@@ -865,23 +786,16 @@ namespace JeonJunglePlay
                     MonsterList.First(temp => temp.ID == pteam_Razorbeak.ID).order = 7;
                     MonsterList.First(temp => temp.ID == pteam_Red.ID).order = 8;
                     MonsterList.First(temp => temp.ID == pteam_Krug.ID).order = 9;
-
-
                     MonsterList.First(temp => temp.ID == top_crab.ID).order = 10;
                     MonsterList.First(temp => temp.ID == BLUE_MID.ID).order = 11;
                     MonsterList.First(temp => temp.ID == down_crab.ID).order = 12;
-
                     MonsterList.First(temp => temp.ID == pteam_Gromp.ID).order = 13;
                     MonsterList.First(temp => temp.ID == pteam_Blue.ID).order = 14;
                     MonsterList.First(temp => temp.ID == pteam_Wolf.ID).order = 15;
                 }
             }
-
             max = MonsterList.OrderByDescending(h => h.order).First().order;
-
-
             #endregion
-
             #region detect reload
             if (IsStart && Player.Level > 1)
             {
@@ -889,7 +803,6 @@ namespace JeonJunglePlay
                 IsStart = false;
             }
             #endregion
-
             #region check somethings about dragon
             if (Player.Level > JeonAutoJungleMenu.Item("k_dragon").GetValue<Slider>().Value)
             {
@@ -900,12 +813,9 @@ namespace JeonJunglePlay
                 }
             }
             #endregion
-
             #region 오토 플레이 - auto play
-
             if (Player.IsMoving)
                 afktime = 0;
-
             if (!IsOVER)
             {
                 if (IsStart) // start
@@ -931,33 +841,28 @@ namespace JeonJunglePlay
                         now = 5;
                     if (Player.IsDead && now > 12)
                         now = 12;
-
                     MonsterINFO target = MonsterList.First(t => t.order == now);
-
-                    if (Player.Position.Distance(target.Position) >= 300 )
+                    if (Player.Position.Distance(target.Position) >= 300)
                     {
                         if (!recall)
                         {
-                            if (Player.ServerPosition.Distance(target.Position) > Player.AttackRange)
+                            if (Player.Position.Distance(target.Position) > Player.AttackRange)
                             {
                                 Player.IssueOrder(GameObjectOrder.MoveTo, target.Position);
                                 afktime = 0;
                             }
-
                             DoCast_Hero();
-
                             if (Player.HealthPercentage() < JeonAutoJungleMenu.Item("hpper").GetValue<Slider>().Value && !Player.IsDead//hpper
-                                && JeonAutoJungleMenu.Item("autorecallheal").GetValue<Boolean>()) // HP LESS THAN 25%
+                            && JeonAutoJungleMenu.Item("autorecallheal").GetValue<Boolean>()) // HP LESS THAN 25%
                             {
                                 Game.PrintChat("YOUR HP IS SO LOW. RECALL!");
                                 Player.Spellbook.CastSpell(SpellSlot.Recall);
                                 recall = true;
                                 recallhp = Player.Health;
                             }
-
                             else if (Player.Gold > buyThings.First().Price
-                                && JeonAutoJungleMenu.Item("autorecallitem").GetValue<Boolean>()
-                                && Player.InventoryItems.Length < 8) // HP LESS THAN 25%
+                            && JeonAutoJungleMenu.Item("autorecallitem").GetValue<Boolean>()
+                            && Player.InventoryItems.Length < 8) // HP LESS THAN 25%
                             {
                                 Game.PrintChat("CAN BUY " + buyThings.First().item.ToString() + ". RECALL!");
                                 Player.Spellbook.CastSpell(SpellSlot.Recall);
@@ -971,7 +876,6 @@ namespace JeonJunglePlay
                         if (CheckMonster(target.name, target.Position, 500)) //해당지점에 몬스터가 있는지
                         {
                             DoCast();
-
                             Player.IssueOrder(GameObjectOrder.AttackUnit, GetNearest(Player.Position));
                             afktime = 0;
                             if (smite.Slot != SpellSlot.Unknown && smite.IsReady())
@@ -980,7 +884,6 @@ namespace JeonJunglePlay
                         else
                         {
                             now += 1;
-
                             if (now > max)
                                 now = 1;
                         }
@@ -989,9 +892,7 @@ namespace JeonJunglePlay
                 if (Player.InShop())
                     recall = false;
             }
-
             #endregion
-
             #region 스택이 넘는지 체크 - check ur stacks
             foreach (var buff in Player.Buffs.Where(b => b.DisplayName == "Enchantment_Slayer_Stacks"))
             {
@@ -1009,9 +910,7 @@ namespace JeonJunglePlay
                 }
             }
             #endregion
-
             #region 공격 모드 - offensive mode
-
             if (IsOVER)
             {
                 if (!IsAttackStart)
@@ -1039,38 +938,41 @@ namespace JeonJunglePlay
                 else
                 {
                     var turret = ObjectManager.Get<Obj_AI_Turret>().OrderBy(t => t.Distance(Player.Position)).First(t => t.IsEnemy);
-
-                    if (IsOVER && !IsAttackedByTurret )
+                    if (IsOVER && !IsAttackedByTurret)
                     {
                         DoCast_Hero();
                         DoLaneClear();
                         if (turret.Distance(Player.Position) > 1200)
+                        {
                             Player.IssueOrder(GameObjectOrder.AttackTo, enemy_spawn);
-                        else if ( GetMinions(turret) > 2)
+                        }
+                            
+                        else if (GetMinions(turret) > 2)
+                        {
                             Player.IssueOrder(GameObjectOrder.AttackTo, enemy_spawn);
-                        else
-                            Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(spawn, 855));
+                        }
 
+                        else
+                        {
+                            Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(spawn, 855));
+                        }
+                            
                         afktime = 0;
                     }
-
                     if (turret.Distance(Player.Position) > 800)
                         IsAttackedByTurret = false;
-
                     if (Player.IsDead)
                         IsAttackedByTurret = false;
                 }
             }
-
             #endregion
-
             #region 상점이용가능할때 // when you are in shop range or dead
             #region 시작아이템 사기 // startup
             if (Utility.InShop(Player) || Player.IsDead)
             {
                 if (!(Items.HasItem(Convert.ToInt32(ItemId.Hunters_Machete)) ||
-                    Items.HasItem(Convert.ToInt32(ItemId.Rangers_Trailblazer)) ||
-                    Items.HasItem(Convert.ToInt32(ItemId.Rangers_Trailblazer_Enchantment_Devourer))))
+                Items.HasItem(Convert.ToInt32(ItemId.Rangers_Trailblazer)) ||
+                Items.HasItem(Convert.ToInt32(ItemId.Rangers_Trailblazer_Enchantment_Devourer))))
                 {
                     if (smiteSlot != SpellSlot.Unknown)
                     {
@@ -1079,12 +981,9 @@ namespace JeonJunglePlay
                     }
                 }
             #endregion
-
                 //Game.PrintChat("Gold:" + Player.Gold);
                 //Game.PrintChat("NeedItem:" + buyThings.First().needItem.ToString());
                 //Game.PrintChat("BuyItem:" + buyThings.First().item.ToString());
-
-
                 #region 아이템트리 올리기 // item build up
                 if (buyThings.Any(t => t.item != ItemId.Unknown))
                 {
@@ -1094,12 +993,10 @@ namespace JeonJunglePlay
                         {
                             Player.BuyItem(buyThings.First().item);
                             buyThings.Remove(buyThings.First());
-
                         }
                     }
                 }
                 #endregion
-
                 #region 포션 구매 - buy potions
                 if (Player.Gold > 35f && !IsOVER && !Player.InventoryItems.Any(t => t.Id == ItemId.Health_Potion) && Player.Level <= 6)
                     Player.BuyItem(ItemId.Health_Potion);
@@ -1107,57 +1004,42 @@ namespace JeonJunglePlay
                 {
                     if (Player.InventoryItems.First(t => t.Id == ItemId.Health_Potion).Stacks <= 2 && Player.Level <= 6)
                         Player.BuyItem(ItemId.Health_Potion);
-
                     if (Player.Level > 6)
                         Player.SellItem(Player.InventoryItems.First(t => t.Id == ItemId.Health_Potion).Slot);
                 }
-
                 if (Player.Level > 6 && Items.HasItem(2010))
                     Player.SellItem(Player.InventoryItems.First(t => Convert.ToInt32(t.Id) == 2010).Slot);
                 #endregion
             }
             #endregion
-
-
             #region 자동포션사용 - auto use potions
             if (Player.HealthPercentage() <= 60 && !Player.InShop())
             {
                 ItemId item = ItemId.Health_Potion;
-                if (Player.InventoryItems.Any(t=>Convert.ToInt32(t.Id) == 2010))
+                if (Player.InventoryItems.Any(t => Convert.ToInt32(t.Id) == 2010))
                     item = ItemId.Unknown;
-
                 if (Player.InventoryItems.Any(t => (t.Id == ItemId.Health_Potion || Convert.ToInt32(t.Id) == 2010)))
                 {
                     if (!Player.HasBuff("ItemMiniRegenPotion") && item == ItemId.Unknown)
                         Player.Spellbook.CastSpell(Player.InventoryItems.First(t => Convert.ToInt32(t.Id) == 2010).SpellSlot);
-
                     if (!Player.HasBuff("Health Potion") && item == ItemId.Health_Potion)
                         Player.Spellbook.CastSpell(Player.InventoryItems.First(t => t.Id == ItemId.Health_Potion).SpellSlot);
-
                 }
             }
-
-
             #endregion
-
             AutoLevel.Enabled(true);
         }
-
         private static void OnCreate(GameObject sender, EventArgs args)
         {
             if (sender.IsValid<Obj_SpellMissile>())
             {
                 var m = (Obj_SpellMissile)sender;
-
                 if (m.SpellCaster.IsValid<Obj_AI_Turret>() && m.SpellCaster.IsEnemy &&
-                    m.Target.IsValid<Obj_AI_Hero>() && m.Target.IsMe && JeonAutoJungleMenu.Item("evading").GetValue<Boolean>())
+                m.Target.IsValid<Obj_AI_Hero>() && m.Target.IsMe && JeonAutoJungleMenu.Item("evading").GetValue<Boolean>())
                 {
-
                     Player.IssueOrder(GameObjectOrder.MoveTo, spawn);
-
                     Game.PrintChat("OOPS YOU ARE ATTACKED BY TURRET!");
-                    Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(spawn,855));
-
+                    Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(spawn, 855));
                     IsAttackedByTurret = true;
                 }
             }
@@ -1169,95 +1051,76 @@ namespace JeonJunglePlay
                 if (spell.Target.IsMe && sender.IsEnemy)
                 {
                     string[] turrest =
-                {
-                    "Turret_T2_C_01_A",
-                    "Turret_T2_C_02_A",
-                    "Turret_T2_L_01_A",
-                    "Turret_T2_C_03_A",
-                    "Turret_T2_R_01_A",
-                    "Turret_T1_C_01_A",
-                    "Turret_T1_C_02_A",
-                    "Turret_T1_C_06_A",
-                    "Turret_T1_C_03_A",
-                    "Turret_T1_C_07_A"
-                };
-
+{
+"Turret_T2_C_01_A",
+"Turret_T2_C_02_A",
+"Turret_T2_L_01_A",
+"Turret_T2_C_03_A",
+"Turret_T2_R_01_A",
+"Turret_T1_C_01_A",
+"Turret_T1_C_02_A",
+"Turret_T1_C_06_A",
+"Turret_T1_C_03_A",
+"Turret_T1_C_07_A"
+};
                     if (turrest.Contains(sender.Name) && JeonAutoJungleMenu.Item("evading").GetValue<Boolean>())
                     {
-
                         Player.IssueOrder(GameObjectOrder.MoveTo, spawn);
-
                         Game.PrintChat("OOPS YOU ARE ATTACKED BY INHIBIT TURRET!");
                         Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(spawn, 855));
-
                         IsAttackedByTurret = true;
                     }
                 }
             }
         }
-
-
-
         #region getminions around turret
         public static int GetMinions(Obj_AI_Turret Turret)
         {
             int i = 0;
-            foreach(var minion in ObjectManager.Get<Obj_AI_Minion>().Where(t => t.Name.Contains("Minion") && t.Distance(Turret.Position) <= 855 && !t.IsEnemy))
+            foreach (var minion in ObjectManager.Get<Obj_AI_Minion>().Where(t => t.Name.Contains("Minion") && t.Distance(Turret.Position) <= 855 && !t.IsEnemy))
             {
                 i++;
             }
             return i;
         }
         #endregion
-
         #region spell methods
         public static void DoSmite()
         {
             var mob1 = GetNearest_big(Player.Position);
-            if(mob1.IsValid)
+            if (mob1.IsValid)
                 smite.CastOnUnit(mob1);
         }
         public static void DoLaneClear()
         {
             var mob1 = ObjectManager.Get<Obj_AI_Minion>().OrderBy(t => Player.Distance(t.Position)).First(t => t.IsEnemy & !t.IsDead);
-
             //if (Player.ChampionName.ToUpper() == "NUNU" && Q.IsReady()) // 누누 Q버그수정 - Fix nunu Q bug
             Player.IssueOrder(GameObjectOrder.MoveTo, mob1.ServerPosition.Extend(Player.ServerPosition, 10));
-
-
             if (ObjectManager.Get<Obj_AI_Minion>().Any(t => t.IsMinion && Player.Distance(t.Position) <= 700))
                 castspell_laneclear(mob1);
         }
-
         public static void DoCast()
         {
             var mob1 = ObjectManager.Get<Obj_AI_Minion>().OrderBy(t => Player.Distance(t.Position)).First(t => t.IsEnemy & !t.IsDead);
-
             //if (Player.ChampionName.ToUpper() == "NUNU" && Q.IsReady()) // 누누 Q버그수정 - Fix nunu Q bug
-                Player.IssueOrder(GameObjectOrder.MoveTo, mob1.ServerPosition.Extend(Player.ServerPosition, 10));
-
-
+            //Player.IssueOrder(GameObjectOrder.MoveTo, mob1.ServerPosition.Extend(Player.ServerPosition, 10));
             if (ObjectManager.Get<Obj_AI_Minion>().Any(t => !t.IsMinion && Player.Distance(t.Position) <= 700))
                 castspell(mob1);
         }
-
         public static void DoCast_Hero()
         {
             if (ObjectManager.Get<Obj_AI_Hero>().Any(t => t.IsEnemy & !t.IsDead && Player.Distance(t.Position) <= 700))
             {
                 var target = ObjectManager.Get<Obj_AI_Hero>().OrderBy(t => t.Distance(Player.Position)).
-                    Where(tar => tar.IsEnemy && !tar.IsMe && !tar.IsDead).First(); // 플레이어와 가장 가까운타겟
+                Where(tar => tar.IsEnemy && !tar.IsMe && !tar.IsDead).First(); // 플레이어와 가장 가까운타겟
                 var turret = ObjectManager.Get<Obj_AI_Turret>().OrderBy(t => t.Distance(target.Position)).
-                    Where(tur => tur.IsEnemy && !tur.IsDead).First(); // 타겟과 가장 가까운터렛
-
+                Where(tur => tur.IsEnemy && !tur.IsDead).First(); // 타겟과 가장 가까운터렛
                 if (turret.Distance(target.Position) > 755) // 터렛 사정거리 밖에있어야만 공격함.
                     castspell_hero(target);
-
             }
         }
         public static void castspell(Obj_AI_Base mob1)
         {
-
             if (Player.ChampionName.ToUpper() == "NUNU")
             {
                 if (Q.IsReady())
@@ -1314,17 +1177,14 @@ namespace JeonJunglePlay
                 if (E.IsReady())
                     E.Cast(mob1.Position);
             }
-
             else
             {
                 foreach (var spell in cast2mob)
                 {
                     if (spell.IsReady())
                         spell.CastOnUnit(mob1);
-
                     if (spell.IsReady())
                         spell.Cast();
-
                     if (spell.IsReady())
                         spell.Cast(mob1.Position);
                 }
@@ -1332,7 +1192,6 @@ namespace JeonJunglePlay
         }
         public static void castspell_hero(Obj_AI_Base mob1)
         {
-
             if (Player.ChampionName.ToUpper() == "NUNU")
             {
                 if (Q.IsReady())
@@ -1391,17 +1250,14 @@ namespace JeonJunglePlay
                 if (R.IsReady())
                     R.Cast();
             }
-
             else
             {
-                foreach(var spell in cast2hero)
+                foreach (var spell in cast2hero)
                 {
                     if (spell.IsReady())
                         spell.CastOnUnit(mob1);
-
                     if (spell.IsReady())
                         spell.Cast();
-
                     if (spell.IsReady())
                         spell.Cast(mob1.Position);
                 }
@@ -1409,7 +1265,6 @@ namespace JeonJunglePlay
         }
         public static void castspell_laneclear(Obj_AI_Base mob1)
         {
-
             if (Player.ChampionName.ToUpper() == "NUNU")
             {
                 if (Q.IsReady())
@@ -1462,10 +1317,8 @@ namespace JeonJunglePlay
                 {
                     if (spell.IsReady())
                         spell.CastOnUnit(mob1);
-
                     if (spell.IsReady())
                         spell.Cast();
-
                     if (spell.IsReady())
                         spell.Cast(mob1.Position);
                 }
@@ -1479,7 +1332,6 @@ namespace JeonJunglePlay
             else
                 return false;
         }
-
         public static float GetSpellRange(SpellDataInst targetSpell, bool IsChargedSkill = false)
         {
             if (targetSpell.SData.CastRangeDisplayOverride <= 0)
@@ -1487,40 +1339,36 @@ namespace JeonJunglePlay
                 if (targetSpell.SData.CastRange <= 0)
                 {
                     return
-                        targetSpell.SData.CastRadius;
+                    targetSpell.SData.CastRadius;
                 }
                 else
                 {
                     if (!IsChargedSkill)
                         return
-                            targetSpell.SData.CastRange;
+                        targetSpell.SData.CastRange;
                     else
                         return
-                            targetSpell.SData.CastRadius;
+                        targetSpell.SData.CastRadius;
                 }
             }
             else
                 return
-                    targetSpell.SData.CastRangeDisplayOverride;
+                targetSpell.SData.CastRangeDisplayOverride;
         }
         #endregion spell methods
-
         #region 스마이트함수 - Smite Function
-
         public static readonly int[] SmitePurple = { 3713, 3726, 3725, 3726, 3723 };
         public static readonly int[] SmiteGrey = { 3711, 3722, 3721, 3720, 3719 };
         public static readonly int[] SmiteRed = { 3715, 3718, 3717, 3716, 3714 };
         public static readonly int[] SmiteBlue = { 3706, 3710, 3709, 3708, 3707 };
         private static readonly string[] MinionNames =
-        {
-            "SRU_Blue", "SRU_Gromp", "SRU_Murkwolf", "SRU_Razorbeak", "SRU_Red", "SRU_Krug", "SRU_Dragon", "SRU_BaronSpawn"
-        };
-
+{
+"SRU_Blue", "SRU_Gromp", "SRU_Murkwolf", "SRU_Razorbeak", "SRU_Red", "SRU_Krug", "SRU_Dragon", "SRU_BaronSpawn"
+};
         public static void setSmiteSlot()
         {
             foreach (var spell in Player.Spellbook.Spells.Where(spell => String.Equals(spell.Name, smitetype(), StringComparison.CurrentCultureIgnoreCase)))
             {
-
                 smiteSlot = spell.Slot;
                 smite = new Spell(smiteSlot, 700);
                 return;
@@ -1546,26 +1394,24 @@ namespace JeonJunglePlay
             }
             return "summonersmite";
         }
-
         public static double setSmiteDamage()
         {
             int level = Player.Level;
             int[] damage =
-            {
-                20*level + 370,
-                30*level + 330,
-                40*level + 240,
-                50*level + 100
-            };
+{
+20*level + 370,
+30*level + 330,
+40*level + 240,
+50*level + 100
+};
             return damage.Max();
         }
-
         public static Obj_AI_Base GetNearest(Vector3 pos)
         {
             var minions =
-                ObjectManager.Get<Obj_AI_Minion>()
-                    .Where(minion => minion.IsValid && minion.IsEnemy && !minion.IsDead && MinionNames.Any(name => minion.Name.StartsWith(name)
-                        && Player.Distance(minion.Position) <= 1000));
+            ObjectManager.Get<Obj_AI_Minion>()
+            .Where(minion => minion.IsValid && minion.IsEnemy && !minion.IsDead && MinionNames.Any(name => minion.Name.StartsWith(name)
+            && Player.Distance(minion.Position) <= 1000));
             var objAiMinions = minions as Obj_AI_Minion[] ?? minions.ToArray();
             Obj_AI_Minion sMinion = objAiMinions.FirstOrDefault();
             double? nearest = null;
@@ -1580,13 +1426,12 @@ namespace JeonJunglePlay
             }
             return sMinion;
         }
-
         public static Obj_AI_Minion GetNearest_big(Vector3 pos)
         {
             var minions =
-                ObjectManager.Get<Obj_AI_Minion>()
-                    .Where(minion => minion.IsValid && minion.IsEnemy && !minion.IsDead && MinionNames.Any(name => minion.Name.StartsWith(name)) && !MinionNames.Any(name => minion.Name.Contains("Mini")
-                                                && Player.Distance(minion.Position) <= 1000));
+            ObjectManager.Get<Obj_AI_Minion>()
+            .Where(minion => minion.IsValid && minion.IsEnemy && !minion.IsDead && MinionNames.Any(name => minion.Name.StartsWith(name)) && !MinionNames.Any(name => minion.Name.Contains("Mini")
+            && Player.Distance(minion.Position) <= 1000));
             var objAiMinions = minions as Obj_AI_Minion[] ?? minions.ToArray();
             Obj_AI_Minion sMinion = objAiMinions.FirstOrDefault();
             double? nearest = null;
@@ -1601,13 +1446,11 @@ namespace JeonJunglePlay
             }
             return sMinion;
         }
-
         public static bool CheckMonster(String TargetName, Vector3 BasePosition, int Range = 500)
         {
             var minions = ObjectManager.Get<Obj_AI_Minion>()
-                .Where(minion => minion.IsValid && !minion.IsDead && minion.Name.StartsWith(TargetName));
+            .Where(minion => minion.IsValid && !minion.IsDead && minion.Name.StartsWith(TargetName));
             var objAiMinions = minions as Obj_AI_Minion[] ?? minions.ToArray();
-
             if (!objAiMinions.Any(m => m.Distance(BasePosition) < Range))
             {
                 return false;
@@ -1617,13 +1460,10 @@ namespace JeonJunglePlay
                 return true;
             }
         }
-
         #endregion
-
         #region GetItemTree
         public static void GetItemTree(FileInfo setFile)
         {
-
             if (Readini.GetItemTreetype(setFile.FullName) == "AP")
             {
                 buyThings.Clear();
