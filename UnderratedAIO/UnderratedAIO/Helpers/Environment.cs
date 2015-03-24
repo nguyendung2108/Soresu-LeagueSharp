@@ -29,7 +29,6 @@ namespace UnderratedAIO.Helpers
                 int hits = 0;
                 foreach (var minion in minions)
                 {
-
                     if (countMinionsInrange(minion.Position, spellWidth) > hits)
                     {
                         bestPos = minion.Position;

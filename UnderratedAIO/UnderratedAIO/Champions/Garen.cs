@@ -197,7 +197,7 @@ namespace UnderratedAIO.Champions
         {
             Q = new Spell(SpellSlot.Q, player.AttackRange);
             W = new Spell(SpellSlot.W);
-            E = new Spell(SpellSlot.E, 165);
+            E = new Spell(SpellSlot.E, 330);
             R = new Spell(SpellSlot.R, 400);
         }
 

@@ -28,6 +28,8 @@ namespace UnderratedAIO.Helpers
         public static Items.Item Qss = new Items.Item(3140, 0);
         public static Items.Item Mercurial = new Items.Item(3139, 0);
         public static Items.Item Dervish = new Items.Item(3137, 0);
+        public static Items.Item Zhonya = new Items.Item(3157, 0);
+        public static Items.Item Wooglet = new Items.Item(3090, 0);
 
         public static void UseItems(Obj_AI_Hero target)
         {

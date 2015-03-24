@@ -82,18 +82,12 @@ namespace UnderratedAIO.Helpers
 
         public static int SejuaniCountFrostHero(float p)
         {
-            var num = 0;
-            foreach (
-                var enemy in
-                    ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && player.Distance(i) < p))
-            {
-                foreach (BuffInstance buff in enemy.Buffs)
-                {
-                    if (buff.Name == "sejuanifrost")
-                        num++;
-                }
-            }
-            return num;
+            return ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && player.Distance(i) < p).SelectMany(enemy => enemy.Buffs).Count(buff => buff.Name == "sejuanifrost");
+        }
+
+        public static int KennenCountMarkHero(float p)
+        {
+            return ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && player.Distance(i) < p).SelectMany(enemy => enemy.Buffs).Count(buff => buff.Name == "KennenMarkOfStorm");
         }
 
         public static int SejuaniCountFrostMinion(float p)
