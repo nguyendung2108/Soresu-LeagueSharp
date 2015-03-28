@@ -38,8 +38,8 @@ namespace ChatTranslator
             Config.AddToMainMenu();
 			Echo("aaaa");
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- ChatTranslator</font>");
-            Game.OnGameInput += Game_GameInput;
-            Game.OnGameProcessPacket += Game_OnGameProcessPacket;
+            Game.OnInput += Game_GameInput;
+            Game.OnProcessPacket += Game_OnGameProcessPacket;
         }
 
         private static void Game_GameInput(GameInputEventArgs args)

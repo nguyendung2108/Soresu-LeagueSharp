@@ -69,7 +69,7 @@ namespace TeamStats
             timer.Elapsed += OnTimerTick;
             timer.Enabled = true;
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- TeamStats</font>");
         }
 
@@ -96,7 +96,7 @@ namespace TeamStats
             range = Config.Item("Range").GetValue<Slider>().Value;
             try
             {
-                if (Config.Item("Enabled").GetValue<bool>() && refresh && player.CountEnemysInRange(range) > 0 &&
+                if (Config.Item("Enabled").GetValue<bool>() && refresh && player.CountEnemiesInRange(range) > 0 &&
                     countAllies(range) > 0)
                 {
                     teams = new Teams();
@@ -282,6 +282,7 @@ namespace TeamStats
             Circle circle = Config.Item(menuItem).GetValue<Circle>();
             if (circle.Active) Utility.DrawCircle(player.Position, range, circle.Color);
         }
+
         private static Render.Text loadText(string text, ColorBGRA color)
         {
             var load = new Render.Text(new Vector2(0,0), text, 15, color,
