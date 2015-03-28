@@ -514,7 +514,7 @@ namespace UnderratedAIO.Helpers
                 _config.AddItem(
                     new MenuItem("Orbwalk", "Combo").SetShared().SetValue(new KeyBind(32, KeyBindType.Press)));
                 Player = ObjectManager.Player;
-                Game.OnGameUpdate += GameOnOnGameUpdate;
+                Game.OnUpdate += GameOnOnGameUpdate;
                 Drawing.OnDraw += DrawingOnOnDraw;
             }
 
