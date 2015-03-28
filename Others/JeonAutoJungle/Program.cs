@@ -706,7 +706,7 @@ index = 15
             }
             #endregion
             gamestart = Game.Time; // 시작시간 설정
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             GameObject.OnCreate += OnCreate;
             Obj_AI_Base.OnProcessSpellCast += OnSpell;
             if (smiteSlot == SpellSlot.Unknown)

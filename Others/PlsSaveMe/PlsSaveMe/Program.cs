@@ -27,7 +27,7 @@ namespace PlsSaveMe
         private static void Game_OnGameLoad(EventArgs args)
         {
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- PlsSaveMe</font>");
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             //Drawing.OnDraw += Game_OnDraw;
             LoadMenu();
         }
