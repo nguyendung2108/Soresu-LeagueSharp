@@ -26,7 +26,18 @@ namespace UnderratedAIO.Champions
             Drawing.OnDraw += Game_OnDraw;
             AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
             Interrupter2.OnInterruptableTarget += OnPossibleToInterrupt;
+            Orbwalking.AfterAttack += AfterAttack;
             Jungle.setSmiteSlot();
+        }
+
+        private void AfterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+
+            if (unit.IsMe && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && W.IsReady() && config.Item("usew").GetValue<bool>())
+            {
+                W.Cast(config.Item("packets").GetValue<bool>());
+               Orbwalking.ResetAutoAttackTimer();
+            }
         }
 
         private void OnPossibleToInterrupt(Obj_AI_Hero unit, Interrupter2.InterruptableTargetEventArgs args)
@@ -76,7 +87,7 @@ namespace UnderratedAIO.Champions
                 default:
                     break;
             }
-
+            
             if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
             {
                 Jungle.setSmiteSlot();
@@ -90,13 +101,14 @@ namespace UnderratedAIO.Champions
                     }
                 }
             }
-
             if (config.Item("manualR").GetValue<KeyBind>().Active && R.IsReady()) CastR();
+            
         }
 
         private static void CastR()
         {
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && me.Distance(i) < R.Range).OrderByDescending(l => Environment.Hero.countChampsAtrange(l.Position, 350f)))
+            me.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(i => i.IsEnemy && !i.IsDead && me.Distance(i) < R.Range).OrderByDescending(l =>l.CountEnemiesInRange(350f)))
             {
                 R.Cast(enemy, config.Item("packets").GetValue<bool>());
                 break;
@@ -177,11 +189,6 @@ namespace UnderratedAIO.Champions
 
             if (config.Item("useItems").GetValue<bool>()) ItemHandler.UseItems(target);
 
-            if (W.IsReady() && config.Item("usew").GetValue<bool>() && me.CountEnemiesInRange((int)me.AttackRange) > 0 && me.Spellbook.GetSpell(SpellSlot.W).ManaCost <= me.Mana)
-            {
-                W.Cast();
-            }
-
             var buffs = CombatHelper.SejuaniCountFrostHero(E.Range);
             if (E.IsReady() && me.Distance(target.Position) < E.Range && buffs > 0 && (
                 (buffs > minHit)
@@ -190,7 +197,7 @@ namespace UnderratedAIO.Champions
             {
                 if (!(Q.IsReady() && me.Mana - me.Spellbook.GetSpell(SpellSlot.Q).ManaCost < me.MaxMana * perc) || !(W.IsReady() && me.Mana - me.Spellbook.GetSpell(SpellSlot.W).ManaCost < me.MaxMana * perc)) E.Cast();
             }
-            if (Q.IsReady() && config.Item("useq").GetValue<bool>() && me.Spellbook.GetSpell(SpellSlot.Q).ManaCost <= me.Mana)
+            if (Q.IsReady() && config.Item("useq").GetValue<bool>())
             {
                 Q.Cast(target, config.Item("packets").GetValue<bool>());
             }
@@ -275,7 +282,7 @@ namespace UnderratedAIO.Champions
             menuC.AddItem(new MenuItem("usew", "Use W")).SetValue(true);
             menuC.AddItem(new MenuItem("useemin", "Use E min")).SetValue(new Slider(1, 1, 5));
             menuC.AddItem(new MenuItem("useEminr", "E minimum range")).SetValue(new Slider(250, 0, 900));
-            menuC.AddItem(new MenuItem("useRmin", "R only if more than")).SetValue(new Slider(1, 0, 5));
+            menuC.AddItem(new MenuItem("useRmin", "R minimum target")).SetValue(new Slider(1, 0, 5));
             menuC.AddItem(new MenuItem("useRminr", "Ulti minimum range")).SetValue(new Slider(0, 0, 350));
             menuC.AddItem(new MenuItem("manualR", "Cast R asap")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press));
             menuC.AddItem(new MenuItem("useItems", "Use items")).SetValue(true);
@@ -289,7 +296,7 @@ namespace UnderratedAIO.Champions
             menuJ.AddItem(new MenuItem("useeCmin", "Use E min")).SetValue(new Slider(1, 1, 5));
             menuJ.AddItem(new MenuItem("useiC", "Use Items")).SetValue(true);
             menuJ.AddItem(new MenuItem("minmana", "Keep X% mana")).SetValue(new Slider(1, 1, 100));
-            menuJ.AddItem(new MenuItem("useSmite", "Use smite")).SetValue(new Slider(1, 1, 100));
+            menuJ.AddItem(new MenuItem("useSmite", "Use smite")).SetValue(true);
             config.AddSubMenu(menuJ);
             // Misc Settings
             Menu menuU = new Menu("Misc ", "usettings");
