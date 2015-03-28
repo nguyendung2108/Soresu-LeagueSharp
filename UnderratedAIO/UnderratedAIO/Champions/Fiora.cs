@@ -5,7 +5,7 @@ using Color = System.Drawing.Color;
 
 using LeagueSharp;
 using LeagueSharp.Common;
-
+using SharpDX.Multimedia;
 using UnderratedAIO.Helpers;
 using Environment = UnderratedAIO.Helpers.Environment;
 using Orbwalking = UnderratedAIO.Helpers.Orbwalking;
@@ -75,10 +75,20 @@ namespace UnderratedAIO.Champions
         }
         private static void AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if (unit.IsMe && E.IsReady() && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && config.Item("usee").GetValue<bool>() && target.IsEnemy && target.Team != player.Team)
+            Obj_AI_Hero targ = (Obj_AI_Hero)target;
+            bool rapid = player.GetAutoAttackDamage(targ) * 6 + ComboDamage(targ) > targ.Health ||(player.Health<targ.Health && player.Health<player.MaxHealth/2);
+            if (unit.IsMe && E.IsReady() && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && (config.Item("usee").GetValue<bool>() || (unit.IsMe && config.Item("RapidAttack").GetValue<KeyBind>().Active || rapid)) && !Orbwalking.CanAttack())
             {
                 E.Cast(config.Item("packets").GetValue<bool>());
                 Orbwalking.ResetAutoAttackTimer();
+            }
+            if (unit.IsMe && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && (config.Item("RapidAttack").GetValue<KeyBind>().Active || rapid) && !Orbwalking.CanAttack())
+            {
+                if (Q.CanCast(targ))
+                {
+                        Q.CastOnUnit(targ, config.Item("packets").GetValue<bool>());
+                        Orbwalking.ResetAutoAttackTimer();
+                }
             }
         }
 
@@ -96,7 +106,7 @@ namespace UnderratedAIO.Champions
             if (config.Item("useq").GetValue<bool>() && Q.CanCast(target) && !lastQ.Equals(0))
             {
                 var time = System.Environment.TickCount - lastQ;
-                if (time > 3500f || player.Distance(target) > 350f || Q.GetDamage(target) > target.Health || config.Item("RapidAttack").GetValue<KeyBind>().Active)
+                if (time > 3500f || player.Distance(target) > 350f || Q.GetDamage(target) > target.Health)
                 {
                     Q.CastOnUnit(target, config.Item("packets").GetValue<bool>());
                     lastQ = 0;
@@ -135,13 +145,6 @@ namespace UnderratedAIO.Champions
             if (W.IsReady() && spellName.Contains("Attack") && config.Item("autoW").GetValue<bool>() && args.Target.IsMe && args.Start.CountEnemiesInRange(40f)>=1)
             {
                 W.Cast(config.Item("packets").GetValue<bool>());
-            }
-            if (false && hero.IsMe)
-            {
-                if (spellName == "FioraQ" || spellName == "FioraFlurry")
-                {
-                    Orbwalking.ResetAutoAttackTimer();
-                } 
             }
             if (!config.Item("dodgeWithR").GetValue<bool>()) return;
                 if (spellName == "CurseofTheSadMummy")
@@ -223,7 +226,7 @@ namespace UnderratedAIO.Champions
             Utility.HpBarDamageIndicator.Enabled = config.Item("drawcombo").GetValue<bool>();
         }
 
-        private float ComboDamage(Obj_AI_Hero hero)
+        private static float ComboDamage(Obj_AI_Hero hero)
         {
             double damage = 0;
             if (Q.IsReady())
@@ -247,14 +250,14 @@ namespace UnderratedAIO.Champions
             return (float)damage;
         }
 
-        private float fioraRSingle(Obj_AI_Hero target)
+        private static float fioraRSingle(Obj_AI_Hero target)
         {
             return (float)Damage.CalcDamage(
                 player, target, Damage.DamageType.Physical,
                 new float[3] { 125f, 255f, 385f }[R.Level - 1] + 0.9f * player.FlatPhysicalDamageMod);
         }
 
-        private double GetRDamage(Obj_AI_Hero target)
+        private static double GetRDamage(Obj_AI_Hero target)
         {
             float singleR = fioraRSingle(target);
               if (target.CountEnemiesInRange(400) == 1)
@@ -301,7 +304,7 @@ namespace UnderratedAIO.Champions
             menuC.AddItem(new MenuItem("usew", "Use W")).SetValue(true);
             menuC.AddItem(new MenuItem("usee", "Use E")).SetValue(true);
             menuC.AddItem(new MenuItem("user", "R if killable")).SetValue(true);
-            menuC.AddItem(new MenuItem("RapidAttack", "Fast AA Combo")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Toggle));
+            menuC.AddItem(new MenuItem("RapidAttack", "Fast AA Combo always")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Toggle));
             menuC.AddItem(new MenuItem("dodgeWithR", "Dodge ults with R")).SetValue(true);
             menuC.AddItem(new MenuItem("useItems", "Use Items")).SetValue(true);
             menuC.AddItem(new MenuItem("useIgnite", "Use Ignite")).SetValue(true);

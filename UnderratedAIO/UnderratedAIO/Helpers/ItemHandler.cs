@@ -81,7 +81,7 @@ namespace UnderratedAIO.Helpers
 
         public static void castHydra(Obj_AI_Hero target)
         {
-            if (player.Distance(target) < hydra.Range)
+            if (player.Distance(target) < hydra.Range && !LeagueSharp.Common.Orbwalking.CanAttack())
             {
                 if (Items.HasItem(tiamat.Id) && Items.CanUseItem(tiamat.Id))
                 {
