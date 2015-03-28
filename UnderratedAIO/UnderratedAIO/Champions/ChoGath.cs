@@ -29,12 +29,25 @@ namespace UnderratedAIO.Champions
             InitMenu();
             InitChoGath();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Cho'Gath</font>");
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
             AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
-            Interrupter.OnPossibleToInterrupt += OnPossibleToInterrupt;
+            Interrupter2.OnInterruptableTarget += OnPossibleToInterrupt;
             Helpers.Jungle.setSmiteSlot();
         }
+
+        private void OnPossibleToInterrupt(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (config.Item("useQint").GetValue<bool>())
+            {
+                if (sender.IsValidTarget(Q.Range) && Q.IsReady()) Q.Cast(sender, config.Item("packets").GetValue<bool>());
+            }
+            if (config.Item("useWint").GetValue<bool>())
+            {
+                if (sender.IsValidTarget(W.Range) && W.IsReady()) W.Cast(sender, config.Item("packets").GetValue<bool>());
+            }
+        }
+
         public static void Game_OnGameUpdate(EventArgs args)
         {
             
@@ -251,17 +264,6 @@ namespace UnderratedAIO.Champions
                 if (target.IsValidTarget(R.Range) && R.IsReady()) R.Cast(target, config.Item("packets").GetValue<bool>());
             }
             
-        }
-        private static void OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
-        {
-            if (config.Item("useQint").GetValue<bool>())
-            {
-                if (unit.IsValidTarget(Q.Range) && Q.IsReady()) Q.Cast(unit, config.Item("packets").GetValue<bool>());
-            }
-            if (config.Item("useWint").GetValue<bool>())
-            {
-                if (unit.IsValidTarget(W.Range) && W.IsReady()) W.Cast(unit, config.Item("packets").GetValue<bool>());
-            }
         }
 
         private static void OnEnemyGapcloser(ActiveGapcloser gapcloser)

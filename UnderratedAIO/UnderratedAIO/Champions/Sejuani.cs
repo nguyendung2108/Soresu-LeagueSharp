@@ -22,11 +22,23 @@ namespace UnderratedAIO.Champions
             InitMenu();
             InitSejuani();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Sejuani</font>");
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
             AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
-            Interrupter.OnPossibleToInterrupt += OnPossibleToInterrupt;
+            Interrupter2.OnInterruptableTarget += OnPossibleToInterrupt;
             Jungle.setSmiteSlot();
+        }
+
+        private void OnPossibleToInterrupt(Obj_AI_Hero unit, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (config.Item("useqint").GetValue<bool>())
+            {
+                if (unit.IsValidTarget(Q.Range) && Q.IsReady() && me.Distance(unit) < Q.Range) Q.Cast(unit.Position, config.Item("packets").GetValue<bool>());
+            }
+            if (config.Item("userint").GetValue<bool>())
+            {
+                if (unit.IsValidTarget(R.Range) && R.IsReady() && me.Distance(unit) < R.Range) R.Cast(unit.Position, config.Item("packets").GetValue<bool>());
+            }
         }
 
         private static void Game_OnDraw(EventArgs args)
@@ -90,6 +102,7 @@ namespace UnderratedAIO.Champions
                 break;
             }
         }
+
         private static void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             if (config.Item("useqgc").GetValue<bool>())
@@ -99,17 +112,6 @@ namespace UnderratedAIO.Champions
             if (config.Item("usergc").GetValue<bool>())
             {
                 if (gapcloser.Sender.IsValidTarget(R.Range) && R.IsReady() && me.Distance(gapcloser.End) < R.Range) R.Cast(gapcloser.End, config.Item("packets").GetValue<bool>());
-            }
-        }
-        private static void OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
-        {
-            if (config.Item("useqint").GetValue<bool>())
-            {
-                if (unit.IsValidTarget(Q.Range) && Q.IsReady() && me.Distance(unit) < Q.Range) Q.Cast(unit.Position, config.Item("packets").GetValue<bool>());
-            }
-            if (config.Item("userint").GetValue<bool>())
-            {
-                if (unit.IsValidTarget(R.Range) && R.IsReady() && me.Distance(unit) < R.Range) R.Cast(unit.Position, config.Item("packets").GetValue<bool>());
             }
         }
 
@@ -233,6 +235,7 @@ namespace UnderratedAIO.Champions
             damage += ItemHandler.GetItemsDamage(hero);
             return damage;
         }
+
         private static void InitSejuani()
         {
             Q = new Spell(SpellSlot.Q, 650);
@@ -242,6 +245,7 @@ namespace UnderratedAIO.Champions
             Q.SetSkillshot(Q.Instance.SData.SpellCastTime, Q.Instance.SData.LineWidth, Q.Instance.SData.MissileSpeed, true, SkillshotType.SkillshotLine);
             R.SetSkillshot(R.Instance.SData.SpellCastTime, R.Instance.SData.LineWidth, R.Instance.SData.MissileSpeed, true, SkillshotType.SkillshotLine);
         }
+
         private static void InitMenu()
         {
             config = new Menu("Sejuani", "Sejuani", true);

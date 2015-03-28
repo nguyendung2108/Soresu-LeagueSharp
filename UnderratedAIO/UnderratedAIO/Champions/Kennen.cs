@@ -28,7 +28,7 @@ namespace UnderratedAIO.Champions
             InitMenu();
             InitKennen();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Kennen</font>");
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
             Jungle.setSmiteSlot();
         }

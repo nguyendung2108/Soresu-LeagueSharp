@@ -26,7 +26,7 @@ namespace UnderratedAIO.Champions
             InitMenu();
             InitFiora();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Fiora</font>");
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
             Orbwalking.AfterAttack += AfterAttack;
             Obj_AI_Base.OnProcessSpellCast += Game_ProcessSpell;
@@ -70,9 +70,6 @@ namespace UnderratedAIO.Champions
                 case Orbwalking.OrbwalkingMode.LastHit:
                     break;
                 default:
-                    if (!minionBlock)
-                    {
-                    }
                     break;
             }
         }
@@ -99,7 +96,7 @@ namespace UnderratedAIO.Champions
             if (config.Item("useq").GetValue<bool>() && Q.CanCast(target) && !lastQ.Equals(0))
             {
                 var time = System.Environment.TickCount - lastQ;
-                if (time>3500f || player.Distance(target)>350f || Q.GetDamage(target)>target.Health)
+                if (time > 3500f || player.Distance(target) > 350f || Q.GetDamage(target) > target.Health || config.Item("RapidAttack").GetValue<KeyBind>().Active)
                 {
                     Q.CastOnUnit(target, config.Item("packets").GetValue<bool>());
                     lastQ = 0;
@@ -139,7 +136,13 @@ namespace UnderratedAIO.Champions
             {
                 W.Cast(config.Item("packets").GetValue<bool>());
             }
-
+            if (false && hero.IsMe)
+            {
+                if (spellName == "FioraQ" || spellName == "FioraFlurry")
+                {
+                    Orbwalking.ResetAutoAttackTimer();
+                } 
+            }
             if (!config.Item("dodgeWithR").GetValue<bool>()) return;
                 if (spellName == "CurseofTheSadMummy")
                 {
@@ -298,6 +301,7 @@ namespace UnderratedAIO.Champions
             menuC.AddItem(new MenuItem("usew", "Use W")).SetValue(true);
             menuC.AddItem(new MenuItem("usee", "Use E")).SetValue(true);
             menuC.AddItem(new MenuItem("user", "R if killable")).SetValue(true);
+            menuC.AddItem(new MenuItem("RapidAttack", "Fast AA Combo")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Toggle));
             menuC.AddItem(new MenuItem("dodgeWithR", "Dodge ults with R")).SetValue(true);
             menuC.AddItem(new MenuItem("useItems", "Use Items")).SetValue(true);
             menuC.AddItem(new MenuItem("useIgnite", "Use Ignite")).SetValue(true);
@@ -312,6 +316,7 @@ namespace UnderratedAIO.Champions
             Menu menuM = new Menu("Misc ", "Msettings");
             menuM.AddItem(new MenuItem("autoW", "Auto W AA")).SetValue(true);
             menuM.AddItem(new MenuItem("useSmite", "Use Smite")).SetValue(true);
+
 
             config.AddSubMenu(menuM);
             config.AddItem(new MenuItem("packets", "Use Packets")).SetValue(false);

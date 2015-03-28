@@ -25,12 +25,17 @@ namespace UnderratedAIO.Champions
             InitMenu();
             Initpoppy();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Poppy</font>");
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
             Orbwalking.AfterAttack += AfterAttack;
             AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
-            Interrupter.OnPossibleToInterrupt += OnPossibleToInterrupt;
+            Interrupter2.OnInterruptableTarget += OnInterruptableTarget;
             Jungle.setSmiteSlot();
+        }
+
+        private void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (config.Item("useEint").GetValue<bool>() && E.IsReady() && E.CanCast(sender)) E.CastOnUnit(sender, config.Item("packets").GetValue<bool>());
         }
 
         private static void AfterAttack(AttackableUnit unit, AttackableUnit target)
@@ -175,11 +180,6 @@ namespace UnderratedAIO.Champions
                     return true;
             }
             return false;
-        }
-
-        private static void OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
-        {
-            if (config.Item("useEint").GetValue<bool>() && E.IsReady() && E.CanCast(unit)) E.CastOnUnit(unit, config.Item("packets").GetValue<bool>());
         }
 
         public static float ComboDamage(Obj_AI_Hero hero)

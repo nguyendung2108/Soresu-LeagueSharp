@@ -33,13 +33,19 @@ namespace UnderratedAIO.Champions
             InitMenu();
             InitShen();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Shen</font>");
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
             Obj_AI_Base.OnCreate += OnCreate;
             AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
-            Interrupter.OnPossibleToInterrupt += OnPossibleToInterrupt;
+            Interrupter2.OnInterruptableTarget += OnPossibleToInterrupt;
             Jungle.setSmiteSlot();
 
+        }
+
+        private void OnPossibleToInterrupt(Obj_AI_Hero unit, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (!config.Item("useeint").GetValue<bool>()) return;
+            if (unit.IsValidTarget(E.Range) && E.IsReady()) E.Cast(unit, config.Item("packets").GetValue<bool>());
         }
 
 
@@ -170,19 +176,12 @@ namespace UnderratedAIO.Champions
             }         
         }
 
-        private static void OnProcessSpell(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs Spell)
-        {
-        }
         private static void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             if (!config.Item("useeagc").GetValue<bool>()) return;
             if (gapcloser.Sender.IsValidTarget(E.Range) && E.IsReady() && me.Distance(gapcloser.Sender.Position) < 400) E.Cast(gapcloser.End, config.Item("packets").GetValue<bool>());
         }
-        private static void OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
-        {
-            if (!config.Item("useeint").GetValue<bool>()) return;
-            if (unit.IsValidTarget(E.Range) && E.IsReady()) E.Cast(unit, config.Item("packets").GetValue<bool>());
-        }
+
         private static void Clear()
         {
             var minions = ObjectManager.Get<Obj_AI_Minion>().Where(m => m.IsValidTarget(400)).ToList();

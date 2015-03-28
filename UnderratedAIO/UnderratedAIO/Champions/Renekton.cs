@@ -29,7 +29,7 @@ namespace UnderratedAIO.Champions
             InitMenu();
             InitRenekton();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Renekton</font>");
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += beforeAttack;
             Orbwalking.AfterAttack += afterAttack;
             Drawing.OnDraw += Game_OnDraw;
