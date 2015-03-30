@@ -112,7 +112,7 @@ namespace UnderratedAIO.Champions
             {
                 W.Cast(config.Item("packets").GetValue<bool>());
             }
-            if (E.IsReady() && ((targetE != null && !player.HasBuff("KennenLightningRush")) || (player.HasBuff("KennenLightningRush") && targetE == null)))
+            if (config.Item("useeClear").GetValue<bool>() && E.IsReady() && ((targetE != null && !player.HasBuff("KennenLightningRush")) || (player.HasBuff("KennenLightningRush") && targetE == null)))
             {
                 E.Cast(config.Item("packets").GetValue<bool>());
             }
@@ -282,7 +282,7 @@ namespace UnderratedAIO.Champions
             // Clear Settings
             Menu menuClear = new Menu("Clear ", "Clearsettings");
             menuClear.AddItem(new MenuItem("useqClear", "Use Q")).SetValue(true);
-            menuClear.AddItem(new MenuItem("useClear", "Use E")).SetValue(true);
+            menuClear.AddItem(new MenuItem("useeClear", "Use E")).SetValue(true);
             menuClear.AddItem(new MenuItem("minw", "Min to W")).SetValue(new Slider(3, 1, 8));
             config.AddSubMenu(menuClear);
             // LastHit Settings
