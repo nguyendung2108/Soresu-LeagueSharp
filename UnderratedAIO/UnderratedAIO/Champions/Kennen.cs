@@ -101,20 +101,21 @@ namespace UnderratedAIO.Champions
 
         private void Clear()
         {
-            var targetQ = MinionManager.GetMinions(Q.Range).Where(m => m.IsEnemy && Q.CanCast(m)).OrderByDescending(m=> m.Health).FirstOrDefault();
-            var targetW = MinionManager.GetMinions(W.Range).Where(m => m.IsEnemy && m.HasBuff("KennenMarkOfStorm") && player.Distance(m) < W.Range);
-            var targetE = MinionManager.GetMinions(W.Range).Where(m => m.IsEnemy && !m.HasBuff("KennenMarkOfStorm") && player.Distance(m)<W.Range && !m.UnderTurret(true)).OrderBy(m => player.Distance(m)).FirstOrDefault();
+            var targetQ = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && Q.CanCast(m)).OrderByDescending(m => m.Health).FirstOrDefault();
+            var targetW = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && m.HasBuff("KennenMarkOfStorm") && player.Distance(m) < W.Range);
+            var targetE = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && !m.IsDead && !m.HasBuff("KennenMarkOfStorm") && player.Distance(m)<W.Range && !m.UnderTurret(true)).OrderBy(m => player.Distance(m)).FirstOrDefault();
+            if (config.Item("useeClear").GetValue<bool>() && E.IsReady() && ((targetE != null && !player.HasBuff("KennenLightningRush")) || (player.HasBuff("KennenLightningRush") && targetE == null)))
+            {
+                E.Cast(config.Item("packets").GetValue<bool>());
+                return;
+            }
             if (config.Item("useqClear").GetValue<bool>() && Q.CanCast(targetQ))
             {
                 Q.Cast(targetQ, config.Item("packets").GetValue<bool>());
             }
-            if (W.IsReady() && targetW.Count() > config.Item("minw").GetValue<Slider>().Value && !player.HasBuff("KennenLightningRush"))
+            if (W.IsReady() && targetW.Count() >= config.Item("minw").GetValue<Slider>().Value && !player.HasBuff("KennenLightningRush"))
             {
                 W.Cast(config.Item("packets").GetValue<bool>());
-            }
-            if (config.Item("useeClear").GetValue<bool>() && E.IsReady() && ((targetE != null && !player.HasBuff("KennenLightningRush")) || (player.HasBuff("KennenLightningRush") && targetE == null)))
-            {
-                E.Cast(config.Item("packets").GetValue<bool>());
             }
             if (player.HasBuff("KennenLightningRush"))
             {
@@ -183,8 +184,8 @@ namespace UnderratedAIO.Champions
             {
                 E.Cast(config.Item("packets").GetValue<bool>());
             }
-            
-            if (R.IsReady() && (config.Item("user").GetValue<Slider>().Value < player.CountEnemiesInRange(R.Range) || (config.Item("user").GetValue<Slider>().Value == 1 && combodamage > target.Health)))
+
+            if (R.IsReady() && target.Distance(player) < config.Item("userrange").GetValue<Slider>().Value && (config.Item("user").GetValue<Slider>().Value < player.CountEnemiesInRange(R.Range) || (config.Item("user").GetValue<Slider>().Value == 1 && combodamage > target.Health)))
             {
                 R.Cast(config.Item("packets").GetValue<bool>());
             }
@@ -197,6 +198,7 @@ namespace UnderratedAIO.Champions
             DrawHelper.DrawCircle(config.Item("drawee").GetValue<Circle>(), Q.Range);
             DrawHelper.DrawCircle(config.Item("drawee").GetValue<Circle>(), W.Range);
             DrawHelper.DrawCircle(config.Item("drawrr").GetValue<Circle>(), R.Range);
+            DrawHelper.DrawCircle(config.Item("drawrrr").GetValue<Circle>(), config.Item("userrange").GetValue<Slider>().Value);
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
             Utility.HpBarDamageIndicator.Enabled = config.Item("drawcombo").GetValue<bool>();
         }
@@ -262,6 +264,7 @@ namespace UnderratedAIO.Champions
             menuD.AddItem(new MenuItem("drawww", "Draw W range")).SetValue(new Circle(false, Color.FromArgb(180, 109, 111, 126)));
             menuD.AddItem(new MenuItem("drawee", "Draw E range")).SetValue(new Circle(false, Color.FromArgb(180, 109, 111, 126)));
             menuD.AddItem(new MenuItem("drawrr", "Draw R range")).SetValue(new Circle(false, Color.FromArgb(180, 109, 111, 126)));
+            menuD.AddItem(new MenuItem("drawrrr", "Draw R activate range")).SetValue(new Circle(false, Color.FromArgb(180, 109, 111, 126)));
             menuD.AddItem(new MenuItem("drawcombo", "Draw combo damage")).SetValue(true);
             config.AddSubMenu(menuD);
             // Combo Settings
@@ -271,6 +274,7 @@ namespace UnderratedAIO.Champions
             menuC.AddItem(new MenuItem("usee", "Use E")).SetValue(true);
             menuC.AddItem(new MenuItem("useemin", "Min healt to E")).SetValue(new Slider(50, 0, 100));
             menuC.AddItem(new MenuItem("user", "Use R min")).SetValue(new Slider(1, 1, 5));
+            menuC.AddItem(new MenuItem("userrange", "R activate range")).SetValue(new Slider(350, 0, 480));
             menuC.AddItem(new MenuItem("useItems", "Use Items")).SetValue(true);
             menuC.AddItem(new MenuItem("useIgnite", "Use Ignite")).SetValue(true);
             config.AddSubMenu(menuC);
