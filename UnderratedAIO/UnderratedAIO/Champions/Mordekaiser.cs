@@ -152,7 +152,7 @@ namespace UnderratedAIO.Champions
        private void Clear()
        {
           var bestpos = Environment.Minion.bestVectorToAoeFarm(player.Position,E.Range-20f,50f);
-           if (config.Item("useeLC").GetValue<bool>() && W.IsReady() && player.Distance(bestpos) <= W.Range && bestpos.IsValid())
+           if (config.Item("useeLC").GetValue<bool>() && E.IsReady() && player.Distance(bestpos) <= W.Range && bestpos.IsValid())
            {
                E.Cast(bestpos, config.Item("packets").GetValue<bool>());
            }
