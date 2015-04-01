@@ -67,6 +67,7 @@ namespace UnderratedAIO.Champions
             var bestpos = CombatHelper.bestVectorToPoppyFlash(targetf);
             if (config.Item("useeflashforced").GetValue<KeyBind>().Active)
             {
+                player.IssueOrder(GameObjectOrder.AttackUnit, Game.CursorPos);
                 bool hasFlash = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerFlash")) == SpellState.Ready;
                 if (E.IsReady() && hasFlash && !CheckWalls(player, targetf) && bestpos.IsValid())
                 {
