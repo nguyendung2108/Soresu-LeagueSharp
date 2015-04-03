@@ -38,21 +38,6 @@ namespace UnderratedAIO.Champions
                if (HealthPrediction.GetHealthPrediction(minion, 3000) <= Damage.GetAutoAttackDamage(player, minion, false))
                    minionBlock = true;
            }
-           if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
-           {
-
-               var target = Jungle.GetNearest(player.Position);
-               bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
-               if (target != null)
-               {
-                   Jungle.setSmiteSlot();
-                   if (Jungle.smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage() >= target.Health)
-                   {
-
-                       Jungle.CastSmite(target);
-                   }
-               }
-           }
            switch (orbwalker.ActiveMode)
            {
                case Orbwalking.OrbwalkingMode.Combo:
@@ -71,6 +56,21 @@ namespace UnderratedAIO.Champions
                    {
                    }
                    break;
+           }
+           if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
+           {
+
+               var target = Jungle.GetNearest(player.Position);
+               bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
+               if (target != null)
+               {
+                   Jungle.setSmiteSlot();
+                   if (Jungle.smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage() >= target.Health)
+                   {
+
+                       Jungle.CastSmite(target);
+                   }
+               }
            }
        }
 
@@ -118,14 +118,10 @@ namespace UnderratedAIO.Champions
 
         private bool checkSlows()
         {
-            foreach (var buff in player.Buffs)
-            {
-                if (buff.Name.ToLower().Contains("slow")) return true;
-            }
-            return false;
+            return player.Buffs.Any(buff => buff.Name.ToLower().Contains("slow"));
         }
 
-       private void Clear()
+        private void Clear()
        {
            float perc = (float)config.Item("minmana").GetValue<Slider>().Value / 100f;
            if (player.Mana < player.MaxMana * perc) return;
@@ -225,7 +221,7 @@ namespace UnderratedAIO.Champions
            // Combo Settings
            Menu menuC = new Menu("Combo ", "csettings");
            menuC.AddItem(new MenuItem("useq", "Use Q")).SetValue(true);
-           menuC.AddItem(new MenuItem("usew", "Use W")).SetValue(true);
+           menuC.AddItem(new MenuItem("usew", "Use W to remove slows")).SetValue(true);
            menuC.AddItem(new MenuItem("usee", "Use E")).SetValue(true);
            menuC.AddItem(new MenuItem("user", "Use R")).SetValue(true);
            menuC.AddItem(new MenuItem("useRmin", "R only if more than")).SetValue(new Slider(1, 1, 5));

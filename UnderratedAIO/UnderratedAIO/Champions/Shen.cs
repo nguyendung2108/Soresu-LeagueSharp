@@ -48,7 +48,6 @@ namespace UnderratedAIO.Champions
             if (unit.IsValidTarget(E.Range) && E.IsReady()) E.Cast(unit, config.Item("packets").GetValue<bool>());
         }
 
-
         private static void Game_OnDraw(EventArgs args)
         {
             DrawHelper.DrawCircle(config.Item("drawaa").GetValue<Circle>(), me.AttackRange);

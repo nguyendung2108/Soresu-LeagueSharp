@@ -70,6 +70,7 @@
     <Compile Include="Champions\Yorick.cs" />
     <Compile Include="Helpers\CombatHelper.cs" />
     <Compile Include="Helpers\DrawHelper.cs" />
+    <Compile Include="Helpers\DynamicInitializer.cs" />
     <Compile Include="Helpers\Environment.cs" />
     <Compile Include="Helpers\ItemHandler.cs" />
     <Compile Include="Helpers\Jungle.cs" />
