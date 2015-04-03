@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-
 using LeagueSharp;
 using LeagueSharp.Common;
 
@@ -12,22 +12,26 @@ namespace UnderratedAIO
     class Program
     {
         public static Obj_AI_Hero player = ObjectManager.Player;
-        public static float version = 1.1f;
+        public static string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += OnGameLoad;
         }
         private static void OnGameLoad(EventArgs args)
         {
-            try
-            {
-                if (Activator.CreateInstance(null, "UnderratedAIO.Champions." + player.ChampionName) != null)
-                {
-                }
-            }
-            catch
-            {
-            }
+          try
+          {
+              var type = Type.GetType("UnderratedAIO.Champions." + player.ChampionName);
+              if (type != null)
+              {
+                  Helpers.DynamicInitializer.NewInstance(type);
+              }
+          }
+          catch (Exception e)
+          {
+              Console.WriteLine(e);
+              Game.PrintChat(e.ToString().Substring(0,30));
+          }
         }
     }
 }
