@@ -66,16 +66,14 @@ namespace JeonJunglePlay
 
 
         }
-        public static void GetSpelltree(string path)
+        public static void GetSpelltree(int[] defTree)
         {
-            var str = GetSettingValue_String("SpellTree", "Value", path).Replace(" ","").Split(',');
-            int[] tree = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
-
-            for (var i = 0; i < 18;i++ )
+            int[] tree = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            for (var i = 0; i < 18; i++)
             {
-                tree[i] = Convert.ToInt32(str[i])-1;
+                tree[i] = Convert.ToInt32(defTree[i]) - 1;
             }
+
             var myAutoLevel = new AutoLevel(tree);
             AutoLevel.Enabled(true);
         }

@@ -562,22 +562,6 @@ index = 15
         }
         private static void Game_OnGameLoad(EventArgs args)
         {
-            ////////////////////customizing//////////////////
-            var dir = new DirectoryInfo(Config.LeagueSharpDirectory.ToString() + @"\JeonAutoJungle");
-            var setFile = new FileInfo(dir + "/" + Player.ChampionName + ".ini");
-            #region File Stream
-            try
-            {
-                if (!dir.Exists)
-                    dir.Create();
-                if (!setFile.Exists)
-                {
-                    Readini.Setini(setFile.FullName);
-                }
-            }
-            catch
-            { }
-            #endregion
             ////////////////////////////////////////////////
             JeonAutoJungleMenu = new Menu("JeonAutoJungle", "JeonAutoJungle", true);
             JeonAutoJungleMenu.AddItem(new MenuItem("isActive", "Activate")).SetValue(true);
@@ -648,49 +632,50 @@ index = 15
             #region 챔피언 설정
             if (Player.ChampionName.ToUpper() == "NUNU")
             {
-                GetItemTree(setFile);
+                GetItemTree("AP");
                 Game.PrintChat("NUNU BOT ACTIVE");
-                Readini.GetSpelltree(setFile.FullName);
+                Readini.GetSpelltree(new int[] { 1, 3, 2, 1, 1, 4, 1, 3, 1, 3, 4, 2, 2, 2, 2, 4, 3, 3 });
             }
             else if (Player.ChampionName.ToUpper() == "WARWICK")
             {
-                GetItemTree(setFile);
+                GetItemTree("AS");
                 Game.PrintChat("WARWICK BOT ACTIVE");
-                Readini.GetSpelltree(setFile.FullName);
+                Readini.GetSpelltree(new int[] { 1, 2, 3, 1, 1, 4, 1, 3, 1, 3, 4, 2, 2, 2, 2, 4, 3, 3 });
             }
             else if (Player.ChampionName.ToUpper() == "MASTERYI")
             {
-                GetItemTree(setFile);
+                GetItemTree("AD");
                 Game.PrintChat("MASTER YI BOT ACTIVE");
-                Readini.GetSpelltree(setFile.FullName);
+                Readini.GetSpelltree(new int[] { 1, 2, 3, 1, 1, 4, 1, 3, 1, 3, 4, 2, 2, 2, 2, 4, 3, 3 });
             }
             else if (Player.ChampionName.ToUpper() == "CHOGATH")
             {
-                GetItemTree(setFile);
+                GetItemTree("AP");
                 Game.PrintChat("CHOGATH BOT ACTIVE");
-                Readini.GetSpelltree(setFile.FullName);
+                Readini.GetSpelltree(new int[] { 3, 2, 1, 3, 3, 4, 3, 1, 3, 1, 4, 2, 2, 2, 2, 4, 1, 1 });
             }
             else if (Player.ChampionName.ToUpper() == "MAOKAI")
             {
-                GetItemTree(setFile);
+                GetItemTree("AP");
                 Game.PrintChat("MAOKAI BOT ACTIVE");
-                Readini.GetSpelltree(setFile.FullName);
+                Readini.GetSpelltree(new int[] { 1, 2, 3, 1, 1, 4, 1, 3, 1, 3, 4, 2, 2, 2, 2, 4, 3, 3 });
             }
             else if (Player.ChampionName.ToUpper() == "NASUS")
             {
-                GetItemTree(setFile);
+                GetItemTree("TANK");
                 Game.PrintChat("NASUS BOT ACTIVE");
-                Readini.GetSpelltree(setFile.FullName);
+                Readini.GetSpelltree(new int[] { 1, 3, 3, 2, 3, 4, 3, 1, 3, 1, 4, 1, 1, 2, 2, 4, 2, 2 });
             }
             else
             {
                 #region Read ini
                 Game.PrintChat("Read ini file");
-                Readini.GetSpelltree(setFile.FullName);
-                GetItemTree(setFile);
-                Readini.GetSpells(setFile.FullName, ref cast2mob, ref cast2hero, ref cast4laneclear);
+                Readini.GetSpelltree(new int[] { 1, 3, 2, 1, 1, 4, 1, 3, 1, 3, 4, 2, 2, 2, 2, 4, 3, 3 });
+                GetItemTree("AD");
+                //Readini.GetSpells(setFile.FullName, ref cast2mob, ref cast2hero, ref cast4laneclear);
                 #endregion readini
             }
+            
             #endregion
             #region 현재 아이템 단계 설정 - 도중 리로드시 필요
             if (buyThings.Any(h => Items.HasItem(Convert.ToInt32(h.needItem))))
@@ -1022,7 +1007,7 @@ index = 15
                 {
                     if (!Player.HasBuff("ItemMiniRegenPotion") && item == ItemId.Unknown)
                         Player.Spellbook.CastSpell(Player.InventoryItems.First(t => Convert.ToInt32(t.Id) == 2010).SpellSlot);
-                    if (!Player.HasBuff("Health Potion") && item == ItemId.Health_Potion)
+                    if (!Player.HasBuff("RegenerationPotion") && item == ItemId.Health_Potion)
                         Player.Spellbook.CastSpell(Player.InventoryItems.First(t => t.Id == ItemId.Health_Potion).SpellSlot);
                 }
             }
@@ -1462,27 +1447,27 @@ index = 15
         }
         #endregion
         #region GetItemTree
-        public static void GetItemTree(FileInfo setFile)
+        public static void GetItemTree(string type)
         {
-            if (Readini.GetItemTreetype(setFile.FullName) == "AP")
+            if (type == "AP")
             {
                 buyThings.Clear();
                 buyThings = buyThings_AP;
                 Game.PrintChat("Set ItemTree for AP - Finished");
             }
-            else if (Readini.GetItemTreetype(setFile.FullName) == "AS")
+            else if (type == "AS")
             {
                 buyThings.Clear();
                 buyThings = buyThings_AS;
                 Game.PrintChat("Set ItemTree for AS - Finished");
             }
-            else if (Readini.GetItemTreetype(setFile.FullName) == "TANK")
+            else if (type == "TANK")
             {
                 buyThings.Clear();
                 buyThings = buyThings_TANK;
                 Game.PrintChat("Set ItemTree for TANK - Finished");
             }
-            else if (Readini.GetItemTreetype(setFile.FullName) == "X")
+            else if (type == "X")
             {
                 Game.PrintChat("PLZ TYPE VALID VALUE, SET AD ITEMTREE - ERROR");
             }
