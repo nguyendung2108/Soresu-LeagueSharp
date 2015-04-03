@@ -700,6 +700,10 @@ index = 15
         private static void Game_OnGameUpdate(EventArgs args)
         {
             setSmiteSlot();
+            if (Player.InFountain() && (Player.Health < Player.MaxHealth - 50 || Player.Mana < Player.MaxMana - 50))
+            {
+                return;
+            }
             if (Player.Spellbook.IsChanneling)
                 return;
             if (!JeonAutoJungleMenu.Item("isActive").GetValue<Boolean>() || smiteSlot == SpellSlot.Unknown)
