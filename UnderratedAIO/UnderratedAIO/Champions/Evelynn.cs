@@ -22,8 +22,8 @@ namespace UnderratedAIO.Champions
         public Evelynn()
         {
             if (player.BaseSkinName != "Evelynn") return;
+            InitEvelynn(); 
             InitMenu();
-            InitEvelynn();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Evelynn</font>");
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
@@ -105,7 +105,7 @@ namespace UnderratedAIO.Champions
                E.CastOnUnit(target);
            }
            var Ultpos =Environment.Hero.bestVectorToAoeSpell(ObjectManager.Get<Obj_AI_Hero>().Where(i=>(i.IsEnemy && R.CanCast(i))),R.Range, 250f);
-           if (config.Item("user").GetValue<bool>() && R.IsReady() && config.Item("useRmin").GetValue<Slider>().Value < Ultpos.CountEnemiesInRange(250f) && R.Range > player.Distance(Ultpos))
+           if (config.Item("user").GetValue<bool>() && R.IsReady() && config.Item("useRmin").GetValue<Slider>().Value <= Ultpos.CountEnemiesInRange(250f) && R.Range > player.Distance(Ultpos))
            {
                R.Cast(Ultpos);
            }
@@ -224,7 +224,7 @@ namespace UnderratedAIO.Champions
            menuC.AddItem(new MenuItem("usew", "Use W to remove slows")).SetValue(true);
            menuC.AddItem(new MenuItem("usee", "Use E")).SetValue(true);
            menuC.AddItem(new MenuItem("user", "Use R")).SetValue(true);
-           menuC.AddItem(new MenuItem("useRmin", "R only if more than")).SetValue(new Slider(1, 1, 5));
+           menuC.AddItem(new MenuItem("useRmin", "R minimum target")).SetValue(new Slider(2, 1, 5));
            menuC.AddItem(new MenuItem("useItems", "Use Items")).SetValue(true);
            menuC.AddItem(new MenuItem("useIgnite", "Use Ignite")).SetValue(true);
            config.AddSubMenu(menuC);
