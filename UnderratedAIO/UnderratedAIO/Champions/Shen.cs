@@ -30,8 +30,8 @@ namespace UnderratedAIO.Champions
         public Shen()
         {
             if (me.BaseSkinName != "Shen") return;
-            InitMenu();
             InitShen();
+            InitMenu();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Shen</font>");
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
@@ -111,10 +111,9 @@ namespace UnderratedAIO.Champions
                     minionBlock = true;
             }
 			            if (config.Item("useeflash").GetValue<KeyBind>().Active && me.Spellbook.CanUseSpell(me.GetSpellSlot("SummonerFlash")) == SpellState.Ready)
-            {
-                //Game.PrintChat("flashCombo");
-                FlashCombo();
-            }
+			            {
+			                FlashCombo();
+			            }
             switch (orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
@@ -501,6 +500,7 @@ namespace UnderratedAIO.Champions
             menuU.AddItem(new MenuItem("useeflash", "Flash+E")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press));
             menuU.AddItem(new MenuItem("user", "Use R")).SetValue(true);
             menuU.AddItem(new MenuItem("atpercent", "Friend under")).SetValue(new Slider(20, 0, 100));
+            menuU.AddItem(new MenuItem("useSmite", "Use smite")).SetValue(true);
             config.AddSubMenu(menuU);
             var sulti = new Menu("Don't ult on ", "dontult");
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly))
