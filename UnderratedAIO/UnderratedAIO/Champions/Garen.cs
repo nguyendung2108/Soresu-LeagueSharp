@@ -139,7 +139,6 @@ namespace UnderratedAIO.Champions
             {
                 E.Cast(config.Item("packets").GetValue<bool>());
             }
-            if (config.Item("user").GetValue<bool>() && R.IsReady() && Damage.GetSpellDamage(player, target, SpellSlot.R) > target.Health + 20)
             {
                 if (GarenE)
                 {
@@ -239,6 +238,12 @@ namespace UnderratedAIO.Champions
             menuM.AddItem(new MenuItem("useSmite", "Use Smite")).SetValue(true);
             menuM.AddItem(new MenuItem("useqAAA", "Use Q after AA")).SetValue(true);
             config.AddSubMenu(menuM);
+            var sulti = new Menu("TeamFight Ult block", "dontult");
+            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsEnemy))
+            {
+                sulti.AddItem(new MenuItem("ult" + hero.SkinName, hero.SkinName)).SetValue(false);
+            }
+            config.AddSubMenu(sulti);
             config.AddItem(new MenuItem("packets", "Use Packets")).SetValue(false);
             config.AddToMainMenu();
         }
