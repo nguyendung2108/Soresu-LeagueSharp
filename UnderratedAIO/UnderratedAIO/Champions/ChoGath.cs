@@ -26,8 +26,8 @@ namespace UnderratedAIO.Champions
         public Chogath()
         {
             if (player.BaseSkinName != "Chogath") return;
-            InitMenu();
             InitChoGath();
+            InitMenu();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Cho'Gath</font>");
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
@@ -50,12 +50,8 @@ namespace UnderratedAIO.Champions
 
         public static void Game_OnGameUpdate(EventArgs args)
         {
-            
-            vSpikes = false;
-            foreach (var buff in player.Buffs)
-            {
-                if (buff.Name == "VorpalSpikes") vSpikes = true;
-            }
+
+            vSpikes = VorpalSpikes;
             if (Environment.Turret.countTurretsInRange(player) > 0 && vSpikes && E.GetHitCount() > 0)
             {
                 E.Cast();
@@ -93,7 +89,11 @@ namespace UnderratedAIO.Champions
                     break;
             }
         }
-
+        private static bool VorpalSpikes
+        {
+            get
+            { return player.Buffs.Any(buff => buff.Name == "VorpalSpikes"); }
+        }
         private static void Jungle()
         {
             var target = UnderratedAIO.Helpers.Jungle.GetNearest(player.Position);

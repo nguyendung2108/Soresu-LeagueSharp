@@ -24,8 +24,8 @@ namespace UnderratedAIO.Champions
         public Garen()
         {
             if (player.BaseSkinName != "Garen") return;
-            InitMenu();
             InitGaren();
+            InitMenu();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Garen</font>");
             Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.AfterAttack += AfterAttack;
@@ -139,6 +139,7 @@ namespace UnderratedAIO.Champions
             {
                 E.Cast(config.Item("packets").GetValue<bool>());
             }
+            if (config.Item("user").GetValue<bool>() && R.IsReady() && (!config.Item("ult" + target.SkinName).GetValue<bool>() || player.CountEnemiesInRange(1500)==1 ) && Damage.GetSpellDamage(player, target, SpellSlot.R) > target.Health + 20)
             {
                 if (GarenE)
                 {
