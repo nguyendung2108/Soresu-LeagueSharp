@@ -99,7 +99,7 @@ namespace UnderratedAIO.Champions
             var target = UnderratedAIO.Helpers.Jungle.GetNearest(player.Position);
             bool hasFlash = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerFlash")) == SpellState.Ready;
             bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Helpers.Jungle.smiteSlot) == SpellState.Ready;
-            if (target != null && target.Distance(player)<1500)
+            if (target != null)
             {
                 if (target.CountEnemiesInRange(760f) > 0)
                 {

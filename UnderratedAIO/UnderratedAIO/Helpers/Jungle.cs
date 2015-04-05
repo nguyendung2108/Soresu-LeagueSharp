@@ -16,7 +16,7 @@ namespace UnderratedAIO.Helpers
         {
             var minions =
             ObjectManager.Get<Obj_AI_Minion>()
-            .Where(minion => minion.IsValid && jungleMonsters.Any(name => minion.Name.StartsWith(name)) && !jungleMonsters.Any(name => minion.Name.Contains("Mini")) && !jungleMonsters.Any(name => minion.Name.Contains("Spawn")));
+            .Where(minion => minion.IsValid && minion.Distance(player)<1500 && jungleMonsters.Any(name => minion.Name.StartsWith(name)) && !jungleMonsters.Any(name => minion.Name.Contains("Mini")) && !jungleMonsters.Any(name => minion.Name.Contains("Spawn")));
             var objAiMinions = minions as Obj_AI_Minion[] ?? minions.ToArray();
             Obj_AI_Minion sMinion = objAiMinions.FirstOrDefault();
             double? nearest = null;
