@@ -23,8 +23,8 @@ namespace UnderratedAIO.Champions
         public Fiora()
         {
             if (player.BaseSkinName != "Fiora") return;
-            InitMenu();
             InitFiora();
+            InitMenu();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Fiora</font>");
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
@@ -142,9 +142,15 @@ namespace UnderratedAIO.Champions
         public static void Game_ProcessSpell(Obj_AI_Base hero, GameObjectProcessSpellCastEventArgs args)
         {
             String spellName = args.SData.Name;
-            if (W.IsReady() && spellName.Contains("Attack") && config.Item("autoW").GetValue<bool>() && args.Target.IsMe && args.Start.CountEnemiesInRange(40f)>=1)
+            if (W.IsReady() && args.Target.IsMe && Orbwalking.IsAutoAttack(spellName) && config.Item("autoW").GetValue<bool>() && !(hero is Obj_AI_Turret) && player.Distance(hero)<500 && ((hero is Obj_AI_Hero && player.CountEnemiesInRange(2000) > 0) || player.CountEnemiesInRange(2000) == 0))
             {
-                W.Cast(config.Item("packets").GetValue<bool>());
+                float perc = (float)config.Item("minmanaP").GetValue<Slider>().Value / 100f;
+                if (player.Mana > player.MaxMana * perc && hero.TotalAttackDamage>50 && (!(player.UnderTurret(true) && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo) || !player.UnderTurret(true)))
+                {
+
+                    W.Cast(config.Item("packets").GetValue<bool>());
+                } 
+                
             }
             if (!config.Item("dodgeWithR").GetValue<bool>()) return;
                 if (spellName == "CurseofTheSadMummy")
@@ -318,8 +324,8 @@ namespace UnderratedAIO.Champions
             // Misc Settings
             Menu menuM = new Menu("Misc ", "Msettings");
             menuM.AddItem(new MenuItem("autoW", "Auto W AA")).SetValue(true);
+            menuM.AddItem(new MenuItem("minmanaP", "Min mana percent")).SetValue(new Slider(1, 1, 100));
             menuM.AddItem(new MenuItem("useSmite", "Use Smite")).SetValue(true);
-
 
             config.AddSubMenu(menuM);
             config.AddItem(new MenuItem("packets", "Use Packets")).SetValue(false);
