@@ -179,23 +179,25 @@ namespace UnderratedAIO.Champions
 
         private static void Combo()
         {
-            Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(1000, TargetSelector.DamageType.Magical);
+            if (config.Item("useItems").GetValue<bool>()) ItemHandler.UseItems(target);
+            if (config.Item("usee").GetValue<bool>() && !vSpikes && E.GetHitCount() > 0 && (Environment.Turret.countTurretsInRange(player) < 1 || target.Health < 150))
+            {
+                E.Cast();
+            }
+            if (target == null) return;
             var combodmg = ComboDamage(target);
             bool hasFlash = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerFlash")) == SpellState.Ready;
             bool hasIgnite = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerDot")) == SpellState.Ready;
             var ignitedmg=(float)player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
-            if (ignitedmg > target.Health && hasIgnite && !R.CanCast(target) && !W.CanCast(target) && !Q.CanCast(target))
+            if (hasIgnite && ignitedmg > target.Health && !R.CanCast(target) && !W.CanCast(target) && !Q.CanCast(target))
             {
                 player.Spellbook.CastSpell(player.GetSpellSlot("SummonerDot"), target);
             }
-            if (combodmg > target.Health && hasIgnite && (R.IsReady() && R.CanCast(target) && (float)Damage.GetSpellDamage(player, target, SpellSlot.R) < target.Health))
+            if (hasIgnite && combodmg > target.Health &&  R.CanCast(target) && (float)Damage.GetSpellDamage(player, target, SpellSlot.R) < target.Health)
             {
                 player.Spellbook.CastSpell(player.GetSpellSlot("SummonerDot"), target);
             }
-            if (config.Item("useItems").GetValue<bool>()) ItemHandler.UseItems(target);
-                //VorpalSpikes
-                //rupturelaunch
-                //Silence
             if (hasIgnite)
             {
                 flashRblock = true;
@@ -241,27 +243,18 @@ namespace UnderratedAIO.Champions
                     Q.CastIfHitchanceEquals(target, hitC, config.Item("packets").GetValue<bool>());
                 }
             }
-            if (config.Item("usew").GetValue<bool>())
+            if (config.Item("usew").GetValue<bool>() && W.CanCast(target))
             {
-                if (W.CanCast(target) && W.IsReady())
-                {
                     W.Cast(target, config.Item("packets").GetValue<bool>());
-                }
-            }
-
-            if (config.Item("usee").GetValue<bool>() && !vSpikes && E.GetHitCount() > 0 && (Environment.Turret.countTurretsInRange(player) < 1 || target.Health < 150))
-            {
-                
-                E.Cast();
             }
             if (config.Item("UseFlashC").GetValue<bool>() && !flashRblock && R.IsReady() && hasFlash && !CombatHelper.CheckCriticalBuffs(target) && player.GetSpell(SpellSlot.R).ManaCost <= player.Mana && player.Distance(target.Position) >= 400 && player.GetSpellDamage(target, SpellSlot.R) > target.Health && !Q.IsReady() && !W.IsReady() && player.Distance(target.Position) <= RFlash.Range && !player.Position.Extend(target.Position, 400).IsWall())
             {
                 player.Spellbook.CastSpell(player.GetSpellSlot("SummonerFlash"), player.Position.Extend(target.Position, 400));
                 Utility.DelayAction.Add(50, () => R.Cast(target, config.Item("packets").GetValue<bool>()));
             }
-            if (config.Item("user").GetValue<bool>() && player.GetSpellDamage(target, SpellSlot.R)>target.Health)
+            if (config.Item("user").GetValue<bool>() && R.IsReady() && player.GetSpellDamage(target, SpellSlot.R) > target.Health)
             {
-                if (target.IsValidTarget(R.Range) && R.IsReady()) R.Cast(target, config.Item("packets").GetValue<bool>());
+                R.Cast(target, config.Item("packets").GetValue<bool>());
             }
             
         }
