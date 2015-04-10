@@ -25,8 +25,8 @@ namespace UnderratedAIO.Champions
         public Kennen()
         {
             if (player.BaseSkinName != "Kennen") return;
-            InitMenu();
             InitKennen();
+            InitMenu();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Kennen</font>");
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
@@ -101,10 +101,10 @@ namespace UnderratedAIO.Champions
 
         private void Clear()
         {
-            var targetQ = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && Q.CanCast(m)).OrderByDescending(m => m.Health).FirstOrDefault();
-            var targetW = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && m.HasBuff("KennenMarkOfStorm") && player.Distance(m) < W.Range);
-            var targetE = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && !m.IsDead && !m.HasBuff("KennenMarkOfStorm") && player.Distance(m)<W.Range && !m.UnderTurret(true)).OrderBy(m => player.Distance(m)).FirstOrDefault();
-            if (config.Item("useeClear").GetValue<bool>() && E.IsReady() && ((targetE != null && !player.HasBuff("KennenLightningRush")) || (player.HasBuff("KennenLightningRush") && targetE == null)))
+            var targetQ = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && Q.CanCast(m) && !(m is Obj_AI_Turret)).OrderByDescending(m => m.Health).FirstOrDefault();
+            var targetW = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && player.Distance(m) < W.Range && m.HasBuff("KennenMarkOfStorm"));
+            var targetE = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && player.Distance(m) < W.Range && Environment.Hero.countChampsAtrange(m.Position, 600f) < 1 && !m.IsDead && !(m is Obj_AI_Turret) && !m.HasBuff("KennenMarkOfStorm") && !m.UnderTurret(true)).OrderBy(m => player.Distance(m));
+            if (config.Item("useeClear").GetValue<bool>() && E.IsReady() && ((targetE.FirstOrDefault() != null && !player.HasBuff("KennenLightningRush") && targetE.Count() > 1) || (player.HasBuff("KennenLightningRush") && targetE.FirstOrDefault() == null)))
             {
                 E.Cast(config.Item("packets").GetValue<bool>());
                 return;
@@ -119,7 +119,7 @@ namespace UnderratedAIO.Champions
             }
             if (player.HasBuff("KennenLightningRush"))
             {
-                player.IssueOrder(GameObjectOrder.MoveTo, targetE);
+                player.IssueOrder(GameObjectOrder.MoveTo, targetE.FirstOrDefault());
             }
         }
 
@@ -185,7 +185,7 @@ namespace UnderratedAIO.Champions
                 E.Cast(config.Item("packets").GetValue<bool>());
             }
 
-            if (R.IsReady() && target.Distance(player) < config.Item("userrange").GetValue<Slider>().Value && (config.Item("user").GetValue<Slider>().Value < player.CountEnemiesInRange(R.Range) || (config.Item("user").GetValue<Slider>().Value == 1 && combodamage > target.Health)))
+            if (R.IsReady() && target.Distance(player) < config.Item("userrange").GetValue<Slider>().Value && (config.Item("user").GetValue<Slider>().Value < player.CountEnemiesInRange(R.Range) || (config.Item("user").GetValue<Slider>().Value == 1 && combodamage > target.Health && !Q.CanCast(target))))
             {
                 R.Cast(config.Item("packets").GetValue<bool>());
             }
@@ -286,8 +286,8 @@ namespace UnderratedAIO.Champions
             // Clear Settings
             Menu menuClear = new Menu("Clear ", "Clearsettings");
             menuClear.AddItem(new MenuItem("useqClear", "Use Q")).SetValue(true);
-            menuClear.AddItem(new MenuItem("useeClear", "Use E")).SetValue(true);
             menuClear.AddItem(new MenuItem("minw", "Min to W")).SetValue(new Slider(3, 1, 8));
+            menuClear.AddItem(new MenuItem("useeClear", "Use E")).SetValue(true);
             config.AddSubMenu(menuClear);
             // LastHit Settings
             Menu menuLH = new Menu("LastHit ", "Lcsettings");
