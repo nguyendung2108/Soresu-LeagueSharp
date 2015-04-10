@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 
@@ -19,6 +19,7 @@ namespace UnderratedAIO.Helpers
         public static Items.Item hexgun = new Items.Item(3146, 700);
         public static Items.Item Dfg = new Items.Item(3128, 750);
         public static Items.Item Bft = new Items.Item(3188, 750);
+        public static Items.Item Ludens = new Items.Item(3188, 750);
         public static Items.Item sheen = new Items.Item(3057, player.AttackRange);
         public static Items.Item gaunlet = new Items.Item(3025, player.AttackRange);
         public static Items.Item trinity = new Items.Item(3078, player.AttackRange);
@@ -104,6 +105,11 @@ namespace UnderratedAIO.Helpers
             if (Items.HasItem(hexgun.Id) && Items.CanUseItem(hexgun.Id))
             {
                 damage += Damage.GetItemDamage(player, target, Damage.DamageItems.Hexgun);
+            }
+            var ludenStacks = player.Buffs.FirstOrDefault(buff => buff.Name == "itemmagicshankcharge");
+            if (ludenStacks != null && (Items.HasItem(Ludens.Id) && ludenStacks.Count==100))
+            {
+                damage += player.CalcDamage(target, Damage.DamageType.Magical, Damage.CalcDamage(player, target, Damage.DamageType.Magical, 100 + player.FlatMagicDamageMod * 0.15));
             }
             if (Items.HasItem(lich.Id) && Items.CanUseItem(lich.Id))
             {
