@@ -28,8 +28,8 @@ namespace UnderratedAIO.Champions
             InitChoGath();
             InitMenu();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Cho'Gath</font>");
-            Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
+            Game.OnUpdate += Game_OnGameUpdate;
             AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
             Interrupter2.OnInterruptableTarget += OnPossibleToInterrupt;
             Helpers.Jungle.setSmiteSlot();
@@ -86,7 +86,8 @@ namespace UnderratedAIO.Champions
                     {
                     }
                     break;
-            }
+
+            } 
         }
         private static bool VorpalSpikes
         {
@@ -277,12 +278,13 @@ namespace UnderratedAIO.Champions
 
         private static void Game_OnDraw(EventArgs args)
         {
-            DrawHelper.DrawCircle(config.Item("drawaa").GetValue<Circle>(), player.AttackRange);
-            DrawHelper.DrawCircle(config.Item("drawqq").GetValue<Circle>(), Q.Range);
-            DrawHelper.DrawCircle(config.Item("drawww").GetValue<Circle>(), W.Range);
+            DrawHelper.DrawCircle(config.Item("drawaa", true).GetValue<Circle>(), player.AttackRange);
+            DrawHelper.DrawCircle(config.Item("drawqq", true).GetValue<Circle>(), Q.Range);
+            DrawHelper.DrawCircle(config.Item("drawww", true).GetValue<Circle>(), W.Range);
+            DrawHelper.DrawCircle(config.Item("drawee", true).GetValue<Circle>(), W.Range);
             DrawHelper.DrawCircle(config.Item("drawrrflash").GetValue<Circle>(), RFlash.Range);
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
-            Utility.HpBarDamageIndicator.Enabled = config.Item("drawcombo").GetValue<bool>();
+            Utility.HpBarDamageIndicator.Enabled = config.Item("drawcombo", true).GetValue<bool>();
         }
         public static float ComboDamage(Obj_AI_Hero hero)
         {
@@ -338,12 +340,12 @@ namespace UnderratedAIO.Champions
 
             // Draw settings
             Menu menuD = new Menu("Drawings ", "dsettings");
-            menuD.AddItem(new MenuItem("drawaa", "Draw AA range",true)).SetValue(new Circle(false, Color.FromArgb(180, 200, 46, 66)));
+            menuD.AddItem(new MenuItem("drawaa", "Draw AA range", true)).SetValue(new Circle(false, Color.FromArgb(180, 200, 46, 66)));
             menuD.AddItem(new MenuItem("drawqq", "Draw Q range", true)).SetValue(new Circle(false, Color.FromArgb(180, 200, 46, 66)));
             menuD.AddItem(new MenuItem("drawww", "Draw W range", true)).SetValue(new Circle(false, Color.FromArgb(180, 200, 46, 66)));
             menuD.AddItem(new MenuItem("drawee", "Draw E range", true)).SetValue(new Circle(false, Color.FromArgb(180, 200, 46, 66)));
-            menuD.AddItem(new MenuItem("drawrrflash", "Draw R+flash range", true)).SetValue(new Circle(true, Color.FromArgb(150, 250, 248, 110)));
-            menuD.AddItem(new MenuItem("drawcombo", "Draw combo damage", true)).SetValue(true);
+            menuD.AddItem(new MenuItem("drawrrflash", "Draw R+flash range")).SetValue(new Circle(true, Color.FromArgb(150, 250, 248, 110)));
+            menuD.AddItem(new MenuItem("drawcombo", "Draw combo damage")).SetValue(true);
             config.AddSubMenu(menuD);
             // Combo Settings
             Menu menuC = new Menu("Combo ", "csettings");
