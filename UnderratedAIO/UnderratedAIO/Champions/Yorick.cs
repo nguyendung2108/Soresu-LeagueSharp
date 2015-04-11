@@ -25,8 +25,8 @@ namespace UnderratedAIO.Champions
        public Yorick()
         {
             if (player.BaseSkinName != "Yorick") return;
-            InitMenu();
             InitYorick();
+            InitMenu();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Yorick</font>");
             Jungle.setSmiteSlot();
             Game.OnUpdate += Game_OnGameUpdate;
@@ -51,7 +51,7 @@ namespace UnderratedAIO.Champions
                if (target != null)
                {
                    Jungle.setSmiteSlot();
-                   if (Jungle.smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage() >= target.Health)
+                   if (Jungle.smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage(target) >= target.Health)
                    {
 
                        Jungle.CastSmite(target);

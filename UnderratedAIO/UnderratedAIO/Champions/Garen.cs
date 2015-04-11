@@ -51,7 +51,7 @@ namespace UnderratedAIO.Champions
                 {
                     Jungle.setSmiteSlot();
                     if (Jungle.smite.CanCast(target) && smiteReady &&
-                        player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage() >= target.Health)
+                        player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage(target) >= target.Health)
                     {
 
                         Jungle.CastSmite(target);

@@ -22,8 +22,8 @@ namespace UnderratedAIO.Champions
         public Poppy()
         {
             if (player.BaseSkinName != "Poppy") return;
-            InitMenu();
             Initpoppy();
+            InitMenu();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Poppy</font>");
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
@@ -56,7 +56,7 @@ namespace UnderratedAIO.Champions
                 if (target != null)
                 {
                     Jungle.setSmiteSlot();
-                    if (Jungle.smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage() >= target.Health)
+                    if (Jungle.smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage(target) >= target.Health)
                     {
 
                         Jungle.CastSmite(target);

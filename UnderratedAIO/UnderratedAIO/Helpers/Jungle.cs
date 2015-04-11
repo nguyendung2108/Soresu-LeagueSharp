@@ -31,17 +31,10 @@ namespace UnderratedAIO.Helpers
             }
             return sMinion;
         }
-        public static double smiteDamage()
+        public static double smiteDamage(Obj_AI_Base target)
         {
-            int level = ObjectManager.Player.Level;
-            int[] damage =
-                {
-                20*level + 370,
-                30*level + 330,
-                40*level + 240,
-                50*level + 100
-                };
-            return damage.Max();
+            return player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Smite);
+
         }
         //Kurisu
         public static readonly int[] SmitePurple = { 3713, 3726, 3725, 3726, 3723 };

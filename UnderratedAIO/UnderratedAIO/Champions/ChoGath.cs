@@ -21,7 +21,6 @@ namespace UnderratedAIO.Champions
         public static List<int> silence = new List<int>(new int[] { 1500, 1750, 2000, 2250, 2500});
         public static int knockUp = 1000;
         public static bool flashRblock = false; 
-        public static bool vSpikes=false;
 
         public Chogath()
         {
@@ -40,22 +39,22 @@ namespace UnderratedAIO.Champions
         {
             if (config.Item("useQint").GetValue<bool>())
             {
-                if (sender.IsValidTarget(Q.Range) && Q.IsReady()) Q.Cast(sender, config.Item("packets").GetValue<bool>());
+                if (Q.CanCast(sender)) Q.Cast(sender, config.Item("packets").GetValue<bool>());
             }
             if (config.Item("useWint").GetValue<bool>())
             {
-                if (sender.IsValidTarget(W.Range) && W.IsReady()) W.Cast(sender, config.Item("packets").GetValue<bool>());
+                if (W.CanCast(sender)) W.Cast(sender, config.Item("packets").GetValue<bool>());
             }
         }
 
         public static void Game_OnGameUpdate(EventArgs args)
         {
-
+            /*
             vSpikes = VorpalSpikes;
             if (Environment.Turret.countTurretsInRange(player) > 0 && vSpikes && E.GetHitCount() > 0)
             {
                 E.Cast();
-            }
+            }*/
             bool minionBlock = false;
             foreach (Obj_AI_Minion minion in MinionManager.GetMinions(player.Position, player.AttackRange, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None))
             {
@@ -96,13 +95,13 @@ namespace UnderratedAIO.Champions
         }
         private static void Jungle()
         {
-            var target = UnderratedAIO.Helpers.Jungle.GetNearest(player.Position);
-            bool hasFlash = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerFlash")) == SpellState.Ready;
+            var target = Helpers.Jungle.GetNearest(player.Position);
             bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Helpers.Jungle.smiteSlot) == SpellState.Ready;
             if (target != null)
             {
                 if (target.CountEnemiesInRange(760f) > 0)
                 {
+                    bool hasFlash = player.Spellbook.CanUseSpell(player.GetSpellSlot("SummonerFlash")) == SpellState.Ready;
                     if (config.Item("useRJ").GetValue<bool>() && config.Item("useFlashJ").GetValue<bool>() && R.IsReady() && hasFlash && 1000+player.FlatMagicDamageMod*0.7f >= target.Health &&  player.GetSpell(SpellSlot.R).ManaCost <= player.Mana &&
                         player.Distance(target.Position) > 400 && player.Distance(target.Position) <= RFlash.Range &&
                         !player.Position.Extend(target.Position, 400).IsWall())
@@ -111,14 +110,17 @@ namespace UnderratedAIO.Champions
                         //Utility.DelayAction.Add(50, () => R.Cast(target, config.Item("packets").GetValue<bool>()));
                     }
                 }
-                if (config.Item("useRJ").GetValue<bool>() && R.CanCast(target) && !(config.Item("priorizeSmite").GetValue<bool>() && smiteReady) && player.GetSpell(SpellSlot.R).ManaCost <= player.Mana && 1000 + player.FlatMagicDamageMod*0.7 >= target.Health)
+                if (config.Item("useRJ").GetValue<bool>() && R.CanCast(target) && !(config.Item("priorizeSmite").GetValue<bool>() && smiteReady) && player.GetSpell(SpellSlot.R).ManaCost <= player.Mana && 1000f + player.FlatMagicDamageMod*0.7f >= target.Health)
                 {
                     R.Cast(target, config.Item("packets").GetValue<bool>());
                 }
-                Helpers.Jungle.setSmiteSlot();
-                if (config.Item("useSmite").GetValue<bool>() && Helpers.Jungle.smiteSlot != SpellSlot.Unknown && Helpers.Jungle.smite.CanCast(target) && smiteReady && player.Distance(target) <= Helpers.Jungle.smite.Range && Helpers.Jungle.smiteDamage() >= target.Health)
+                if (Helpers.Jungle.smiteSlot == SpellSlot.Unknown)
                 {
-                    
+                return;    
+                }
+                Helpers.Jungle.setSmiteSlot();
+                if (config.Item("useSmite").GetValue<bool>() && Helpers.Jungle.smite.CanCast(target) && smiteReady && Helpers.Jungle.smiteSlot != SpellSlot.Unknown && player.Distance(target) <= Helpers.Jungle.smite.Range && Helpers.Jungle.smiteDamage(target) >= target.Health)
+                {
                     Helpers.Jungle.CastSmite(target);
                 }
             }
@@ -135,6 +137,7 @@ namespace UnderratedAIO.Champions
                 if (Items.HasItem(3074) && Items.CanUseItem(3074))
                     Items.UseItem(3074);
             }
+            
             float perc = (float)config.Item("minmana").GetValue<Slider>().Value / 100f;
             if (player.Mana < player.MaxMana * perc) return;
             if (config.Item("usewLC").GetValue<bool>() && W.IsReady() && player.Spellbook.GetSpell(SpellSlot.W).ManaCost <= player.Mana)
@@ -142,7 +145,7 @@ namespace UnderratedAIO.Champions
                 var minionsForW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range, MinionTypes.All, MinionTeam.NotAlly);
                 MinionManager.FarmLocation bestPositionW = W.GetLineFarmLocation(minionsForW);
                 if (bestPositionW.Position.IsValid())
-                    if (bestPositionW.MinionsHit >= 2)
+                    if (bestPositionW.MinionsHit > config.Item("whitLC").GetValue<Slider>().Value)
                         W.Cast(bestPositionW.Position, config.Item("packets").GetValue<bool>());
             }
 
@@ -154,7 +157,7 @@ namespace UnderratedAIO.Champions
                         .OrderByDescending(i => CF.countMinionsInrange(i, 170f))
                         .FirstOrDefault();
                 */
-                var minionsForQ =Environment.Minion.bestVectorToAoeFarm(player.Position, Q.Range, 170f);
+                var minionsForQ = Environment.Minion.bestVectorToAoeFarm(player.Position, Q.Range, 170f, config.Item("qhitLC").GetValue<Slider>().Value);
                 
                 if (minionsForQ.IsValid())Q.Cast(minionsForQ, config.Item("packets").GetValue<bool>());
             }
@@ -171,7 +174,7 @@ namespace UnderratedAIO.Champions
             {
                 if (target.IsValidTarget(W.Range) && W.IsReady()) W.Cast(target, config.Item("packets").GetValue<bool>());
             }
-            if (config.Item("useeH").GetValue<bool>() && !vSpikes && E.GetHitCount() > 0)
+            if (config.Item("useeH").GetValue<bool>() && !VorpalSpikes && E.GetHitCount() > 0)
             {
                 E.Cast();
             }
@@ -181,7 +184,7 @@ namespace UnderratedAIO.Champions
         {
             Obj_AI_Hero target = TargetSelector.GetTarget(1000, TargetSelector.DamageType.Magical);
             if (config.Item("useItems").GetValue<bool>()) ItemHandler.UseItems(target);
-            if (config.Item("usee").GetValue<bool>() && !vSpikes && E.GetHitCount() > 0 && (Environment.Turret.countTurretsInRange(player) < 1 || target.Health < 150))
+            if (config.Item("usee").GetValue<bool>() && !VorpalSpikes && E.GetHitCount() > 0 && (Environment.Turret.countTurretsInRange(player) < 1 || target.Health < 150))
             {
                 E.Cast();
             }
@@ -252,7 +255,7 @@ namespace UnderratedAIO.Champions
                 player.Spellbook.CastSpell(player.GetSpellSlot("SummonerFlash"), player.Position.Extend(target.Position, 400));
                 Utility.DelayAction.Add(50, () => R.Cast(target, config.Item("packets").GetValue<bool>()));
             }
-            if (config.Item("user").GetValue<bool>() && R.IsReady() && player.GetSpellDamage(target, SpellSlot.R) > target.Health)
+            if (config.Item("user").GetValue<bool>() && R.CanCast(target) && player.GetSpellDamage(target, SpellSlot.R) > target.Health)
             {
                 R.Cast(target, config.Item("packets").GetValue<bool>());
             }
@@ -335,12 +338,12 @@ namespace UnderratedAIO.Champions
 
             // Draw settings
             Menu menuD = new Menu("Drawings ", "dsettings");
-            menuD.AddItem(new MenuItem("drawaa", "Draw AA range")).SetValue(new Circle(false, Color.FromArgb(180, 200, 46, 66)));
-            menuD.AddItem(new MenuItem("drawqq", "Draw Q range")).SetValue(new Circle(false, Color.FromArgb(180, 200, 46, 66)));
-            menuD.AddItem(new MenuItem("drawww", "Draw W range")).SetValue(new Circle(false, Color.FromArgb(180, 200, 46, 66)));
-            menuD.AddItem(new MenuItem("drawee", "Draw E range")).SetValue(new Circle(false, Color.FromArgb(180, 200, 46, 66)));
-            menuD.AddItem(new MenuItem("drawrrflash", "Draw R+flash range")).SetValue(new Circle(true, Color.FromArgb(150, 250, 248, 110)));
-            menuD.AddItem(new MenuItem("drawcombo", "Draw combo damage")).SetValue(true);
+            menuD.AddItem(new MenuItem("drawaa", "Draw AA range",true)).SetValue(new Circle(false, Color.FromArgb(180, 200, 46, 66)));
+            menuD.AddItem(new MenuItem("drawqq", "Draw Q range", true)).SetValue(new Circle(false, Color.FromArgb(180, 200, 46, 66)));
+            menuD.AddItem(new MenuItem("drawww", "Draw W range", true)).SetValue(new Circle(false, Color.FromArgb(180, 200, 46, 66)));
+            menuD.AddItem(new MenuItem("drawee", "Draw E range", true)).SetValue(new Circle(false, Color.FromArgb(180, 200, 46, 66)));
+            menuD.AddItem(new MenuItem("drawrrflash", "Draw R+flash range", true)).SetValue(new Circle(true, Color.FromArgb(150, 250, 248, 110)));
+            menuD.AddItem(new MenuItem("drawcombo", "Draw combo damage", true)).SetValue(true);
             config.AddSubMenu(menuD);
             // Combo Settings
             Menu menuC = new Menu("Combo ", "csettings");
@@ -363,13 +366,15 @@ namespace UnderratedAIO.Champions
             // LaneClear Settings
             Menu menuLC = new Menu("LaneClear ", "Lcsettings");
             menuLC.AddItem(new MenuItem("useqLC", "Use Q")).SetValue(true);
+            menuLC.AddItem(new MenuItem("qhitLC", "More than x minion").SetValue(new Slider(2, 1, 10)));
             menuLC.AddItem(new MenuItem("usewLC", "Use W")).SetValue(true);
+            menuLC.AddItem(new MenuItem("whitLC", "More than x minion").SetValue(new Slider(2, 1, 10)));
             menuLC.AddItem(new MenuItem("minmana", "Keep X% mana")).SetValue(new Slider(1, 1, 100));
             config.AddSubMenu(menuLC);
             // Jungle Settings
             Menu menuJ = new Menu("Jungle ", "Jsettings");
-            menuJ.AddItem(new MenuItem("useSmite", "Use Smite")).SetValue(true);
-            menuJ.AddItem(new MenuItem("useRJ", "Use R")).SetValue(true);
+            menuJ.AddItem(new MenuItem("useSmite", "Use Smite")).SetValue(false);
+            menuJ.AddItem(new MenuItem("useRJ", "Use R")).SetValue(false);
             menuJ.AddItem(new MenuItem("priorizeSmite", "Use smite if possible")).SetValue(false);
             menuJ.AddItem(new MenuItem("useFlashJ", "Use Flash to steal")).SetValue(true);
             config.AddSubMenu(menuJ);

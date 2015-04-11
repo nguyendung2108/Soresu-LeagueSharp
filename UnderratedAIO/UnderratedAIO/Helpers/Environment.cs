@@ -22,11 +22,11 @@ namespace UnderratedAIO.Helpers
             {
                 return ObjectManager.Get<Obj_AI_Minion>().Count(i => !i.IsDead && i.IsEnemy && i.Distance(l) < p);
             }
-            public static Vector3 bestVectorToAoeFarm(Vector3 center, float spellrange, float spellWidth)
+            public static Vector3 bestVectorToAoeFarm(Vector3 center, float spellrange, float spellWidth, int hit=0)
             {
                 var minions = MinionManager.GetMinions(center, spellrange, MinionTypes.All, MinionTeam.NotAlly);
                 Vector3 bestPos = new Vector3();
-                int hits = 0;
+                int hits = hit;
                 foreach (var minion in minions)
                 {
                     if (countMinionsInrange(minion.Position, spellWidth) > hits)

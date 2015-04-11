@@ -85,7 +85,7 @@ namespace UnderratedAIO.Champions
             }
             if (config.Item("autoq").GetValue<bool>())
             {
-                if (Q.CanCast(target) && (MarkOfStorm(target) > 1 || (MarkOfStorm(target) > 0 && player.Distance(target) < W.Range)))
+                if (Q.CanCast(target) && !target.IsDashing() && (MarkOfStorm(target) > 1 || (MarkOfStorm(target) > 0 && player.Distance(target) < W.Range)))
                 {
                     Q.Cast(target, config.Item("packets").GetValue<bool>());
                 }
@@ -109,7 +109,7 @@ namespace UnderratedAIO.Champions
                 E.Cast(config.Item("packets").GetValue<bool>());
                 return;
             }
-            if (config.Item("useqClear").GetValue<bool>() && Q.CanCast(targetQ))
+            if (config.Item("useqClear").GetValue<bool>() && Q.CanCast(targetQ) && !targetQ.IsDashing())
             {
                 Q.Cast(targetQ, config.Item("packets").GetValue<bool>());
             }
@@ -142,7 +142,7 @@ namespace UnderratedAIO.Champions
             LastHit();
             Obj_AI_Hero target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target == null) return;
-            if (config.Item("useqLC").GetValue<bool>() && Q.CanCast(target))
+            if (config.Item("useqLC").GetValue<bool>() && Q.CanCast(target) && !target.IsDashing())
             {
                 Q.Cast(target, config.Item("packets").GetValue<bool>());
             }
@@ -168,9 +168,9 @@ namespace UnderratedAIO.Champions
             if (config.Item("useIgnite").GetValue<bool>() && combodamage > target.Health && hasIgnite && !Q.CanCast(target) && !W.IsReady())
             {
                 player.Spellbook.CastSpell(player.GetSpellSlot("SummonerDot"), target);
-            } 
-            
-            if (config.Item("useq").GetValue<bool>() && Q.CanCast(target))
+            }
+
+            if (config.Item("useq").GetValue<bool>() && Q.CanCast(target) && !target.IsDashing())
             {
                 Q.Cast(target, config.Item("packets").GetValue<bool>());
             } 

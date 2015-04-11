@@ -26,8 +26,8 @@ namespace UnderratedAIO.Champions
         public Renekton()
         {
             if (player.BaseSkinName != "Renekton") return;
-            InitMenu();
             InitRenekton();
+            InitMenu();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Renekton</font>");
             Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += beforeAttack;
@@ -60,7 +60,7 @@ namespace UnderratedAIO.Champions
                 {
                     Jungle.setSmiteSlot();
                     if (Jungle.smite.CanCast(target) && smiteReady &&
-                        player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage() >= target.Health)
+                        player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage(target) >= target.Health)
                     {
 
                         Jungle.CastSmite(target);

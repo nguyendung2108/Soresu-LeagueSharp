@@ -19,8 +19,8 @@ namespace UnderratedAIO.Champions
         public Sejuani()
         {
             if (me.BaseSkinName != "Sejuani") return;
-            InitMenu();
             InitSejuani();
+            InitMenu();
             Game.PrintChat("<font color='#9933FF'>Soresu </font><font color='#FFFFFF'>- Sejuani</font>");
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
@@ -95,7 +95,7 @@ namespace UnderratedAIO.Champions
                 bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
                 if (target != null)
                 {
-                    if (Jungle.smite.CanCast(target) && smiteReady && me.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage() >= target.Health)
+                    if (Jungle.smite.CanCast(target) && smiteReady && me.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage(target) >= target.Health)
                     {
                         Jungle.CastSmite(target);
                     }
@@ -296,7 +296,6 @@ namespace UnderratedAIO.Champions
             menuJ.AddItem(new MenuItem("useeCmin", "Use E min")).SetValue(new Slider(1, 1, 5));
             menuJ.AddItem(new MenuItem("useiC", "Use Items")).SetValue(true);
             menuJ.AddItem(new MenuItem("minmana", "Keep X% mana")).SetValue(new Slider(1, 1, 100));
-            menuJ.AddItem(new MenuItem("useSmite", "Use smite")).SetValue(true);
             config.AddSubMenu(menuJ);
             // Misc Settings
             Menu menuU = new Menu("Misc ", "usettings");
@@ -304,6 +303,7 @@ namespace UnderratedAIO.Champions
             menuU.AddItem(new MenuItem("useqint", "Use Q to interrupt")).SetValue(true);
             menuU.AddItem(new MenuItem("usergc", "Use R to anti gap closer")).SetValue(false);
             menuU.AddItem(new MenuItem("userint", "Use R to interrupt")).SetValue(false);
+            menuU.AddItem(new MenuItem("useSmite", "Use smite")).SetValue(true);
             config.AddSubMenu(menuU);
             var sulti = new Menu("Don't ult on ", "dontult");
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsEnemy))
