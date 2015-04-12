@@ -103,8 +103,8 @@ namespace UnderratedAIO.Champions
         {
             var targetQ = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && Q.CanCast(m) && !(m is Obj_AI_Turret)).OrderByDescending(m => m.Health).FirstOrDefault();
             var targetW = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && player.Distance(m) < W.Range && m.HasBuff("KennenMarkOfStorm"));
-            var targetE = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && player.Distance(m) < W.Range && Environment.Hero.countChampsAtrange(m.Position, 600f) < 1 && !m.IsDead && !(m is Obj_AI_Turret) && !m.HasBuff("KennenMarkOfStorm") && !m.UnderTurret(true)).OrderBy(m => player.Distance(m));
-            if (config.Item("useeClear").GetValue<bool>() && E.IsReady() && ((targetE.FirstOrDefault() != null && !player.HasBuff("KennenLightningRush") && targetE.Count() > 1) || (player.HasBuff("KennenLightningRush") && targetE.FirstOrDefault() == null)))
+            var targetE = ObjectManager.Get<Obj_AI_Base>().Where(m => m.IsEnemy && player.Distance(m) < W.Range && Environment.Hero.countChampsAtrange(m.Position, 1000f) < 1 && !m.IsDead && !(m is Obj_AI_Turret) && !m.HasBuff("KennenMarkOfStorm") && !m.UnderTurret(true)).OrderBy(m => player.Distance(m));
+            if (config.Item("useeClear").GetValue<bool>() && E.IsReady() && ((targetE.FirstOrDefault() != null && Environment.Hero.countChampsAtrange(player.Position, 1200f)<1 && !player.HasBuff("KennenLightningRush") && targetE.Count() > 1) || (player.HasBuff("KennenLightningRush") && targetE.FirstOrDefault() == null)))
             {
                 E.Cast(config.Item("packets").GetValue<bool>());
                 return;
@@ -215,7 +215,7 @@ namespace UnderratedAIO.Champions
             {
                 damage += Damage.GetSpellDamage(player, hero, SpellSlot.Q);
             }
-            if (W.IsReady() && MarkOfStorm(hero)>0)
+            if (W.IsReady())
             {
                 damage += Damage.GetSpellDamage(player, hero, SpellSlot.W, 1);
             }
