@@ -49,20 +49,6 @@ namespace UnderratedAIO.Champions
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
-            {
-                var target = Jungle.GetNearest(player.Position);
-                bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
-                if (target != null)
-                {
-                    Jungle.setSmiteSlot();
-                    if (Jungle.smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage(target) >= target.Health)
-                    {
-
-                        Jungle.CastSmite(target);
-                    }
-                }
-            }
             Obj_AI_Hero targetf = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
             var bestpos = CombatHelper.bestVectorToPoppyFlash(targetf);
             if (config.Item("useeflashforced").GetValue<KeyBind>().Active)
@@ -88,6 +74,20 @@ namespace UnderratedAIO.Champions
                     break;
                 default:
                     break;
+            }
+            if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
+            {
+                var target = Jungle.GetNearest(player.Position);
+                bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
+                if (target != null)
+                {
+
+                    if (Jungle.smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage(target) >= target.Health)
+                    {
+                        Jungle.setSmiteSlot();
+                        Jungle.CastSmite(target);
+                    }
+                }
             }
         }
 

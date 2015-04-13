@@ -64,10 +64,10 @@ namespace UnderratedAIO.Champions
                bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
                if (target != null)
                {
-                   Jungle.setSmiteSlot();
+                   
                    if (Jungle.smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage(target) >= target.Health)
                    {
-
+                       Jungle.setSmiteSlot();
                        Jungle.CastSmite(target);
                    }
                }

@@ -42,21 +42,6 @@ namespace UnderratedAIO.Champions
                 if (HealthPrediction.GetHealthPrediction(minion, 3000) <= Damage.GetAutoAttackDamage(player, minion, false))
                     minionBlock = true;
             }
-            if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
-            {
-
-                var target = Jungle.GetNearest(player.Position);
-                bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
-                if (target != null)
-                {
-                    Jungle.setSmiteSlot();
-                    if (Jungle.smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage(target) >= target.Health)
-                    {
-
-                        Jungle.CastSmite(target);
-                    }
-                }
-            }
             switch (orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
@@ -71,6 +56,21 @@ namespace UnderratedAIO.Champions
                     break;
                 default:
                     break;
+            }
+            if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
+            {
+
+                var target = Jungle.GetNearest(player.Position);
+                bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
+                if (target != null)
+                {
+
+                    if (Jungle.smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage(target) >= target.Health)
+                    {
+                        Jungle.setSmiteSlot();
+                        Jungle.CastSmite(target);
+                    }
+                }
             }
         }
         private static void AfterAttack(AttackableUnit unit, AttackableUnit target)

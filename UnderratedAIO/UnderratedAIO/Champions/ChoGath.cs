@@ -61,10 +61,6 @@ namespace UnderratedAIO.Champions
                 if (HealthPrediction.GetHealthPrediction(minion, 3000) <= Damage.GetAutoAttackDamage(player, minion, false))
                     minionBlock = true;
             }
-            if (config.Item("useRJ").GetValue<bool>() || config.Item("useSmite").GetValue<bool>())
-            {
-                Jungle();
-            }
             switch (orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
@@ -86,8 +82,11 @@ namespace UnderratedAIO.Champions
                     {
                     }
                     break;
-
-            } 
+            }
+            if (config.Item("useRJ").GetValue<bool>() || config.Item("useSmite").GetValue<bool>())
+            {
+                Jungle();
+            }
         }
         private static bool VorpalSpikes
         {
@@ -119,9 +118,9 @@ namespace UnderratedAIO.Champions
                 {
                 return;    
                 }
-                Helpers.Jungle.setSmiteSlot();
                 if (config.Item("useSmite").GetValue<bool>() && Helpers.Jungle.smite.CanCast(target) && smiteReady && Helpers.Jungle.smiteSlot != SpellSlot.Unknown && player.Distance(target) <= Helpers.Jungle.smite.Range && Helpers.Jungle.smiteDamage(target) >= target.Health)
                 {
+                    Helpers.Jungle.setSmiteSlot();
                     Helpers.Jungle.CastSmite(target);
                 }
             }

@@ -143,14 +143,14 @@ namespace UnderratedAIO.Champions
                 if (getEnemiesAtMyTurret(me).IsValid && E.CanCast(enemy)) E.Cast(enemy, config.Item("packets").GetValue<bool>()); 
             }
             if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
-            {
-                Jungle.setSmiteSlot();
+            { 
                 var target = Jungle.GetNearest(me.Position);
                 bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
                 if (target != null)
                 {
                     if (Jungle.smite.CanCast(target) && smiteReady && me.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage(target) >= target.Health)
                     {
+                        Jungle.setSmiteSlot();
                         Jungle.CastSmite(target);
                     }
                 }

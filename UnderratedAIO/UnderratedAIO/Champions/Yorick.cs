@@ -43,21 +43,6 @@ namespace UnderratedAIO.Champions
                if (HealthPrediction.GetHealthPrediction(minion, 3000) <= Damage.GetAutoAttackDamage(player, minion, false))
                    minionBlock = true;
            }
-           if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
-           {
-               var target = Jungle.GetNearest(player.Position);
-               bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
-   
-               if (target != null)
-               {
-                   Jungle.setSmiteSlot();
-                   if (Jungle.smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage(target) >= target.Health)
-                   {
-
-                       Jungle.CastSmite(target);
-                   }
-               }
-           }
            switch (orbwalker.ActiveMode)
            {
                case Orbwalking.OrbwalkingMode.Combo:
@@ -79,6 +64,21 @@ namespace UnderratedAIO.Champions
                    {
                    }
                    break;
+           }
+           if (config.Item("useSmite").GetValue<bool>() && Jungle.smiteSlot != SpellSlot.Unknown)
+           {
+               var target = Jungle.GetNearest(player.Position);
+               bool smiteReady = ObjectManager.Player.Spellbook.CanUseSpell(Jungle.smiteSlot) == SpellState.Ready;
+
+               if (target != null)
+               {
+
+                   if (Jungle.smite.CanCast(target) && smiteReady && player.Distance(target.Position) <= Jungle.smite.Range && Jungle.smiteDamage(target) >= target.Health)
+                   {
+                       Jungle.setSmiteSlot();
+                       Jungle.CastSmite(target);
+                   }
+               }
            }
        }
 
@@ -258,7 +258,7 @@ namespace UnderratedAIO.Champions
             W = new Spell(SpellSlot.W, 600);
             W.SetSkillshot(W.Instance.SData.SpellCastTime, W.Instance.SData.LineWidth, W.Speed, false, SkillshotType.SkillshotCircle);
             E = new Spell(SpellSlot.E, 550);
-            R = new Spell(SpellSlot.R, 900);
+            R = new Spell(SpellSlot.R, 850);
         }
 
         private void InitMenu()
