@@ -31,7 +31,6 @@ namespace Rekt_Sai
             // Smite that actually does damage
             ItemData.Stalkers_Blade.GetItem(),
             ItemData.Stalkers_Blade_Enchantment_Devourer.GetItem(),
-            ItemData.Stalkers_Blade_Enchantment_Juggernaut.GetItem(),
             ItemData.Stalkers_Blade_Enchantment_Magus.GetItem(),
             ItemData.Stalkers_Blade_Enchantment_Warrior.GetItem()
         };
@@ -40,7 +39,6 @@ namespace Rekt_Sai
             // Smite that does damage on the next auto attacks
             ItemData.Skirmishers_Sabre.GetItem(),
             ItemData.Skirmishers_Sabre_Enchantment_Devourer.GetItem(),
-            ItemData.Skirmishers_Sabre_Enchantment_Juggernaut.GetItem(),
             ItemData.Skirmishers_Sabre_Enchantment_Magus.GetItem(),
             ItemData.Skirmishers_Sabre_Enchantment_Warrior.GetItem()
         };
